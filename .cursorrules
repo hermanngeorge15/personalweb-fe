@@ -1,0 +1,106 @@
+# Cursor Rules for writewave-fe
+
+#
+
+# This file defines the standards and best practices for this repository.
+
+# All contributors must follow these rules to ensure code quality, consistency, and maintainability.
+
+## Project Overview
+
+This is the frontend for WriteWave, a modern web application. The goal is to deliver a clean, maintainable, and accessible user experience using the latest React and TypeScript best practices.
+
+## Technologies & Stack
+
+- **Frontend**: React 19, TypeScript, Vite
+- **UI Library**: @heroui/react (primary), Tailwind CSS
+- **State & Data**: TanStack Query, TanStack Router
+- **Package Manager**: pnpm
+- **Version Control**: Git
+
+## Code Style & Formatting
+
+- All code must follow `.editorconfig` (2 spaces, LF, UTF-8, trim trailing whitespace, final newline).
+- All code must be formatted with Prettier using `.prettierrc.json5` (2 spaces, single quotes, no semicolons, trailing commas, 80 print width, etc).
+- All code must pass ESLint with the current configuration (Flat config, React, React Hooks, TypeScript, Prettier integration).
+- Use meaningful variable and function names. Code should be self-documenting.
+- Keep functions and components small and focused (single responsibility).
+- Use consistent import organization:
+  1. React and external libraries
+  2. Internal utilities and hooks
+  3. Components (general to specific)
+  4. Types and interfaces
+- File naming:
+  - Use kebab-case for files: `user-profile.tsx`
+  - Use PascalCase for components: `UserProfile.tsx`
+  - Use camelCase for utilities: `formatDate.ts`
+  - Use UPPER_CASE for constants: `API_ENDPOINTS.ts`
+
+## Component Usage
+
+- Always use components from `@heroui/react` as the first choice for UI elements.
+- Only create custom components if requirements are not met by HeroUI.
+- Extend HeroUI components using props and composition before building from scratch.
+- Use Tailwind utility classes for styling. Avoid custom CSS unless absolutely necessary.
+
+## React & TypeScript Best Practices (2025)
+
+- Use function components and React hooks. Do not use class components.
+- Follow the Rules of Hooks: only call hooks at the top level of React functions.
+- Use strict TypeScript typing. Avoid `any`; use `unknown` only when necessary, and prefer type inference.
+- All interactive elements must be accessible (aria-\*, keyboard navigation, etc).
+- All source code must be under `src/`. Use a feature-based or domain-driven structure.
+- Use the `@` alias for imports from `src/`.
+- Implement proper error and loading states for all async operations.
+- Use constants or enums for magic strings and numbers.
+- Refactor duplicate logic into reusable functions or components.
+
+## What NOT TO DO (Anti-patterns)
+
+- ❌ Do not use inline styles except for dynamic values that cannot be expressed with Tailwind.
+- ❌ Do not use implicit `any` in TypeScript.
+- ❌ Do not create components larger than about 200 lines or with more than one responsibility.
+- ❌ Do not perform side effects in render. Use `useEffect` or `useLayoutEffect` for side effects.
+- ❌ Never mutate state directly. Always use `setState` or equivalent.
+- ❌ Do not use deprecated React APIs.
+- ❌ Do not ignore accessibility requirements.
+- ❌ Do not commit files ignored by `.gitignore`.
+- ❌ Do not use external libraries for features already provided by the stack (e.g., routing, state, UI components).
+
+## Code Example: Component Structure
+
+```tsx
+import { Button } from '@heroui/react'
+
+export function UserProfile({ user }) {
+  return (
+    <div className="p-4 rounded bg-white shadow">
+      <h2 className="text-lg font-bold">{user.name}</h2>
+      <p className="text-gray-600">{user.email}</p>
+      <Button onClick={() => alert('Message sent!')}>Send Message</Button>
+    </div>
+  )
+}
+```
+
+## Development Workflow
+
+1. Create feature branches from `main`.
+2. Write tests before implementing features (TDD when possible).
+3. Use conventional commits for commit messages.
+4. Run linting and tests before committing.
+5. Create pull requests for code review.
+6. Deploy to staging before production.
+
+## Tools & Extensions
+
+- Use Prettier and ESLint integrations in your editor.
+- Use lint-staged for pre-commit checks.
+- TypeScript strict mode must be enabled.
+- Use the `@` alias for clean imports.
+- Leverage Vite and HeroUI DevTools for development and debugging.
+
+## Other Important Stuff
+
+- Code should be readable, maintainable, and performant. When in doubt, favor clarity over cleverness.
+- Only make changes when you are at least 95% sure they are correct and improve the final product. Otherwise, ask first.

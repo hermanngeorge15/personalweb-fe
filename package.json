@@ -1,0 +1,74 @@
+{
+  "name": "writewave-fe",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "engines": {
+    "node": ">=24",
+    "pnpm": ">=10"
+  },
+  "scripts": {
+    "dev": "vite",
+    "dev:mock": "vite --mode mock",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "lint": "eslint \"src/**/*.{ts,tsx}\"",
+    "typecheck": "tsc --noEmit",
+    "prettier": "prettier --write . --ignore-path .prettierignore"
+  },
+  "dependencies": {
+    "@heroui/react": "2.7.10",
+    "@hookform/resolvers": "5.1.1",
+    "react-markdown": "9.0.3",
+    "@mdxeditor/editor": "3.35.1",
+    "@tanstack/react-query": "5.80.7",
+    "@tanstack/react-router": "1.121.2",
+    "@tanstack/react-router-devtools": "1.121.8",
+    "clsx": "2.1.1",
+    "framer-motion": "12.18.0",
+    "highlight.js": "11.11.1",
+    "keycloak-js": "26.2.0",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "react-hook-form": "7.57.0",
+    "react-icons": "5.5.0",
+    "react-quill": "2.0.0",
+    "rehype-highlight": "7.0.2",
+    "remark-gfm": "4.0.1",
+    "tailwind-merge": "3.3.1",
+    "zod": "3.25.64"
+  },
+  "devDependencies": {
+    "@nabla/vite-plugin-eslint": "2.0.5",
+    "@tailwindcss/typography": "0.5.16",
+    "@tanstack/eslint-plugin-query": "5.78.0",
+    "@tanstack/router-devtools": "1.121.8",
+    "@tanstack/router-plugin": "1.121.7",
+    "@types/node": "24.0.1",
+    "@types/react": "19.1.8",
+    "@types/react-dom": "19.1.6",
+    "@typescript-eslint/eslint-plugin": "8.34.0",
+    "@typescript-eslint/parser": "8.34.0",
+    "@vitejs/plugin-react-swc": "3.10.2",
+    "autoprefixer": "10.4.21",
+    "eslint": "9.28.0",
+    "eslint-config-prettier": "10.1.5",
+    "eslint-plugin-import": "2.31.0",
+    "eslint-plugin-prettier": "5.4.1",
+    "eslint-plugin-react": "7.37.5",
+    "eslint-plugin-react-hooks": "5.2.0",
+    "eslint-plugin-react-refresh": "0.4.20",
+    "msw": "2.10.2",
+    "postcss": "8.5.5",
+    "prettier": "3.5.3",
+    "prettier-plugin-tailwindcss": "0.6.12",
+    "tailwindcss": "3.4.14",
+    "typescript": "5.8.3",
+    "vite": "6.3.5"
+  },
+  "msw": {
+    "workerDirectory": [
+      "public"
+    ]
+  }
+}

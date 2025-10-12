@@ -1,0 +1,78 @@
+import { useParams } from '@tanstack/react-router'
+import { ensureKeycloakAuth } from '@/lib/keycloak'
+import AppShell from '@/components/AppShell'
+import { usePost, useUpdatePost } from '@/lib/queries'
+
+function AdminPostEdit() {
+  const { id } = useParams({ from: '/admin/posts/$id' })
+  const { data, isLoading, isError } = usePost(id)
+  const updatePost = useUpdatePost()
+  return (
+    <AppShell path="Admin / Posts / Edit">
+      <section className="grid gap-6 md:gap-8">
+        <h1 className="text-2xl font-semibold tracking-tight">Edit Post</h1>
+        {isLoading && <div>Loading…</div>}
+        {isError && <div>Failed to load post.</div>}
+        {data && (
+          <form
+            className="grid gap-3"
+            onSubmit={async (e) => {
+              e.preventDefault()
+              const form = e.currentTarget as HTMLFormElement
+              const fd = new FormData(form)
+              const title = String(fd.get('title') ?? data.title)
+              const mdx = String(fd.get('mdx') ?? data.mdx)
+              await updatePost.mutateAsync({ slug: data.slug, title, mdx })
+            }}
+          >
+            <label className="grid gap-1">
+              <span className="text-muted-foreground text-sm">Slug</span>
+              <input
+                className="w-full rounded border p-2"
+                value={data.slug}
+                readOnly
+              />
+            </label>
+            <label className="grid gap-1">
+              <span className="text-muted-foreground text-sm">Title</span>
+              <input
+                name="title"
+                className="w-full rounded border p-2"
+                defaultValue={data.title}
+              />
+            </label>
+            <label className="grid gap-1">
+              <span className="text-muted-foreground text-sm">
+                Content (MDX)
+              </span>
+              <textarea
+                name="mdx"
+                className="min-h-[300px] w-full rounded border p-2"
+                defaultValue={data.mdx}
+              />
+            </label>
+            <div>
+              <button
+                type="submit"
+                className="rounded bg-blue-600 px-4 py-2 text-white disabled:opacity-50"
+                disabled={updatePost.isPending}
+              >
+                {updatePost.isPending ? 'Saving…' : 'Save'}
+              </button>
+            </div>
+          </form>
+        )}
+      </section>
+    </AppShell>
+  )
+}
+
+export const Route = createFileRoute({
+  beforeLoad: async () => {
+    await ensureKeycloakAuth()
+    return null
+  },
+  component: AdminPostEdit,
+})
+
+
