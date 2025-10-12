@@ -7,7 +7,7 @@ import { Skeleton } from '@heroui/react'
 import { MotionSection } from '@/components/MotionSection'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
 import { H1 } from '@/components/ui/Typography'
-import { formatDate, calculateReadingTime } from '@/lib/blog-utils'
+import { formatDate } from '@/lib/blog-utils'
 
 function BlogList() {
   const { data, isLoading, isError } = usePosts({ limit: 20 })

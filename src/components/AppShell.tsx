@@ -5,7 +5,7 @@ import Footer from './Footer'
 
 export default function AppShell({
   children,
-  path,
+  path: _path,
 }: PropsWithChildren<{ path: string }>) {
   return (
     <div className="flex min-h-dvh flex-col">

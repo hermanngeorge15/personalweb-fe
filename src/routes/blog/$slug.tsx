@@ -1,5 +1,5 @@
 import AppShell from '@/components/AppShell'
-import { useParams, Link, useNavigate } from '@tanstack/react-router'
+import { useParams, Link } from '@tanstack/react-router'
 import { usePost } from '@/lib/queries'
 import MDXContent from '@/components/MDXContent'
 import { useEffect, useState } from 'react'
@@ -17,7 +17,6 @@ import {
 function BlogPost() {
   const { slug } = useParams({ from: '/blog/$slug' })
   const { data, isLoading, isError } = usePost(slug)
-  const navigate = useNavigate()
   const [copied, setCopied] = useState(false)
   useEffect(() => {
     if (data?.title) {

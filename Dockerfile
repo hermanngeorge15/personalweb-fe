@@ -1,11 +1,12 @@
 # ---- Build ----
     FROM node:24-alpine AS build
+    ARG VITE_API_URL=https://app.jirihermann.com
+    ENV VITE_API_URL=${VITE_API_URL}
     WORKDIR /app
     RUN corepack enable && corepack prepare pnpm@10.0.0 --activate
     COPY package.json pnpm-lock.yaml ./
     RUN pnpm install --frozen-lockfile
     COPY . .
-    # Ensure FE uses relative URLs (fetch('/api/...'), EventSource('/api/sse'))
     RUN pnpm build
     
     # ---- Runtime ----
