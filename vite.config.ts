@@ -33,12 +33,12 @@ export default defineConfig({
       // BFF session & SSE endpoints (proxy to BE so we avoid CORS and keep HttpOnly cookies)
       '/session': {
         target:
-          process.env.VITE_PROXY_TARGET ?? 'http://localhost:8080',
+          process.env.VITE_PROXY_TARGET ?? 'http://localhost:8891',
         changeOrigin: true,
       },
       '/sse': {
         target:
-          process.env.VITE_PROXY_TARGET ?? 'http://localhost:8080',
+          process.env.VITE_PROXY_TARGET ?? 'http://localhost:8891',
         changeOrigin: true,
       },
     },
