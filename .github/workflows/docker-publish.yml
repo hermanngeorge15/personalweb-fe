@@ -11,7 +11,7 @@ permissions:
   packages: write
 
 env:
-  IMAGE_NAME: ghcr.io/YOUR_GH_USER_OR_ORG/your-frontend-repo
+  IMAGE_NAME: ghcr.io/hermanngeorge15/personalweb-fe
 
 jobs:
   docker:
@@ -46,8 +46,6 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          build-args: |
-            VITE_API_URL=https://app.jirihermann.com
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -66,6 +64,6 @@ jobs:
           script: |
             set -e
             cd /opt/jiri-site
-            docker compose pull
-            docker compose up -d
+            docker compose pull frontend
+            docker compose up  frontend -d
             docker image prune -f
