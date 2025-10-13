@@ -1,5 +1,6 @@
 import { keycloak } from './keycloak'
-import { Configuration } from '@/generated/runtime'
+import { createTraceparent } from './trace'
+import { Configuration, Middleware, RequestContext } from '@/generated/runtime'
 import { PostControllerApi } from '@/generated/apis/PostControllerApi'
 
 // Production-safe API base URL configuration
@@ -11,6 +12,17 @@ function getBasePath() {
   return base && String(base).length > 0 ? String(base) : 'http://localhost:8891'
 }
 
+// Middleware to add X-Trace-Id header to every request
+const traceMiddleware: Middleware = {
+  pre: async (context: RequestContext) => {
+    const traceId = createTraceparent()
+    context.init.headers = {
+      ...context.init.headers,
+      'X-Trace-Id': traceId,
+    }
+  },
+}
+
 export function createApiConfig() {
   return new Configuration({
     basePath: getBasePath(),
@@ -18,6 +30,7 @@ export function createApiConfig() {
     headers: {
       'Content-Type': 'application/json',
     },
+    middleware: [traceMiddleware],
     accessToken: async () => keycloak.token ?? '',
   })
 }
