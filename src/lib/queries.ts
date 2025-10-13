@@ -4,7 +4,7 @@ import {
   useMutation,
   useQueryClient,
 } from '@tanstack/react-query'
-import { api } from './api'
+import { api, apiAuth } from './api'
 import { authHeader } from './keycloak'
 import { getPostApi } from './client'
 
@@ -270,20 +270,10 @@ export function useCreateProject() {
       name: string
       description: string
     }) => {
-      const res = await fetch(
-        (import.meta.env.VITE_API_URL ?? import.meta.env.VITE_API_BASE ?? '') +
-          `/api/projects`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(await authHeader()),
-          },
-          body: JSON.stringify(input),
-        },
-      )
-      if (!res.ok) throw new Error('Failed to create project')
-      return (await res.json()) as Project
+      return apiAuth<Project>('/projects', await authHeader(), {
+        method: 'POST',
+        body: JSON.stringify(input),
+      })
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['projects'] })
@@ -299,23 +289,13 @@ export function useUpdateProject() {
       name: string
       description: string
     }) => {
-      const res = await fetch(
-        (import.meta.env.VITE_API_URL ?? import.meta.env.VITE_API_BASE ?? '') +
-          `/api/projects/${input.id}`,
-        {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(await authHeader()),
-          },
-          body: JSON.stringify({
-            name: input.name,
-            description: input.description,
-          }),
-        },
-      )
-      if (!res.ok) throw new Error('Failed to update project')
-      return (await res.json()) as Project
+      return apiAuth<Project>(`/projects/${input.id}`, await authHeader(), {
+        method: 'PUT',
+        body: JSON.stringify({
+          name: input.name,
+          description: input.description,
+        }),
+      })
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['projects'] })
@@ -327,17 +307,9 @@ export function useDeleteProject() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: async (input: { id: string }) => {
-      const res = await fetch(
-        (import.meta.env.VITE_API_URL ?? import.meta.env.VITE_API_BASE ?? '') +
-          `/api/projects/${input.id}`,
-        {
-          method: 'DELETE',
-          headers: {
-            ...(await authHeader()),
-          },
-        },
-      )
-      if (!res.ok) throw new Error('Failed to delete project')
+      await apiAuth(`/projects/${input.id}`, await authHeader(), {
+        method: 'DELETE',
+      })
       return input.id
     },
     onSuccess: () => {
@@ -364,20 +336,10 @@ export function useCreateTestimonial() {
       avatar_url?: string
       order?: number
     }) => {
-      const res = await fetch(
-        (import.meta.env.VITE_API_URL ?? import.meta.env.VITE_API_BASE ?? '') +
-          `/api/testimonials`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(await authHeader()),
-          },
-          body: JSON.stringify(input),
-        },
-      )
-      if (!res.ok) throw new Error('Failed to create testimonial')
-      return (await res.json()) as Testimonial
+      return apiAuth<Testimonial>('/testimonials', await authHeader(), {
+        method: 'POST',
+        body: JSON.stringify(input),
+      })
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['testimonials'] })
@@ -396,15 +358,11 @@ export function useUpdateTestimonial() {
       avatar_url?: string
       order?: number
     }) => {
-      const res = await fetch(
-        (import.meta.env.VITE_API_URL ?? import.meta.env.VITE_API_BASE ?? '') +
-          `/api/testimonials/${input.id}`,
+      return apiAuth<Testimonial>(
+        `/testimonials/${input.id}`,
+        await authHeader(),
         {
           method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(await authHeader()),
-          },
           body: JSON.stringify({
             author: input.author,
             quote: input.quote,
@@ -414,8 +372,6 @@ export function useUpdateTestimonial() {
           }),
         },
       )
-      if (!res.ok) throw new Error('Failed to update testimonial')
-      return (await res.json()) as Testimonial
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['testimonials'] })
@@ -427,17 +383,9 @@ export function useDeleteTestimonial() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: async (input: { id: string }) => {
-      const res = await fetch(
-        (import.meta.env.VITE_API_URL ?? import.meta.env.VITE_API_BASE ?? '') +
-          `/api/testimonials/${input.id}`,
-        {
-          method: 'DELETE',
-          headers: {
-            ...(await authHeader()),
-          },
-        },
-      )
-      if (!res.ok) throw new Error('Failed to delete testimonial')
+      await apiAuth(`/testimonials/${input.id}`, await authHeader(), {
+        method: 'DELETE',
+      })
       return input.id
     },
     onSuccess: () => {
@@ -494,20 +442,10 @@ export function useCreateResumeProject() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: async (input: Omit<ResumeProject, 'id'> & { id?: string }) => {
-      const res = await fetch(
-        (import.meta.env.VITE_API_URL ?? import.meta.env.VITE_API_BASE ?? '') +
-          `/api/resume/projects`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(await authHeader()),
-          },
-          body: JSON.stringify(input),
-        },
-      )
-      if (!res.ok) throw new Error('Failed to create resume project')
-      return (await res.json()) as string
+      return apiAuth<string>('/resume/projects', await authHeader(), {
+        method: 'POST',
+        body: JSON.stringify(input),
+      })
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['resume', 'projects'] })
@@ -520,29 +458,20 @@ export function useUpdateResumeProject() {
   return useMutation({
     mutationFn: async (input: ResumeProject) => {
       if (!input.id) throw new Error('id is required')
-      const res = await fetch(
-        (import.meta.env.VITE_API_URL ?? import.meta.env.VITE_API_BASE ?? '') +
-          `/api/resume/projects/${input.id}`,
-        {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(await authHeader()),
-          },
-          body: JSON.stringify({
-            company: input.company,
-            projectName: input.projectName,
-            from: input.from,
-            until: input.until,
-            description: input.description,
-            responsibilities: input.responsibilities,
-            techStack: input.techStack,
-            repoUrl: input.repoUrl,
-            demoUrl: input.demoUrl,
-          }),
-        },
-      )
-      if (!res.ok) throw new Error('Failed to update resume project')
+      await apiAuth(`/resume/projects/${input.id}`, await authHeader(), {
+        method: 'PUT',
+        body: JSON.stringify({
+          company: input.company,
+          projectName: input.projectName,
+          from: input.from,
+          until: input.until,
+          description: input.description,
+          responsibilities: input.responsibilities,
+          techStack: input.techStack,
+          repoUrl: input.repoUrl,
+          demoUrl: input.demoUrl,
+        }),
+      })
       return input.id
     },
     onSuccess: () => {
@@ -555,17 +484,9 @@ export function useDeleteResumeProject() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: async (input: { id: string }) => {
-      const res = await fetch(
-        (import.meta.env.VITE_API_URL ?? import.meta.env.VITE_API_BASE ?? '') +
-          `/api/resume/projects/${input.id}`,
-        {
-          method: 'DELETE',
-          headers: {
-            ...(await authHeader()),
-          },
-        },
-      )
-      if (!res.ok) throw new Error('Failed to delete resume project')
+      await apiAuth(`/resume/projects/${input.id}`, await authHeader(), {
+        method: 'DELETE',
+      })
       return input.id
     },
     onSuccess: () => {
@@ -578,20 +499,10 @@ export function useCreateResumeLanguage() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: async (input: Omit<ResumeLanguage, 'id'>) => {
-      const res = await fetch(
-        (import.meta.env.VITE_API_URL ?? import.meta.env.VITE_API_BASE ?? '') +
-          `/api/resume/languages`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(await authHeader()),
-          },
-          body: JSON.stringify(input),
-        },
-      )
-      if (!res.ok) throw new Error('Failed to create language')
-      return (await res.json()) as string
+      return apiAuth<string>('/resume/languages', await authHeader(), {
+        method: 'POST',
+        body: JSON.stringify(input),
+      })
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['resume', 'languages'] })
@@ -604,19 +515,10 @@ export function useUpdateResumeLanguage() {
   return useMutation({
     mutationFn: async (input: ResumeLanguage) => {
       if (!input.id) throw new Error('id is required')
-      const res = await fetch(
-        (import.meta.env.VITE_API_URL ?? import.meta.env.VITE_API_BASE ?? '') +
-          `/api/resume/languages/${input.id}`,
-        {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(await authHeader()),
-          },
-          body: JSON.stringify({ name: input.name, level: input.level }),
-        },
-      )
-      if (!res.ok) throw new Error('Failed to update language')
+      await apiAuth(`/resume/languages/${input.id}`, await authHeader(), {
+        method: 'PUT',
+        body: JSON.stringify({ name: input.name, level: input.level }),
+      })
       return input.id
     },
     onSuccess: () => {
@@ -629,17 +531,9 @@ export function useDeleteResumeLanguage() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: async (input: { id: string }) => {
-      const res = await fetch(
-        (import.meta.env.VITE_API_URL ?? import.meta.env.VITE_API_BASE ?? '') +
-          `/api/resume/languages/${input.id}`,
-        {
-          method: 'DELETE',
-          headers: {
-            ...(await authHeader()),
-          },
-        },
-      )
-      if (!res.ok) throw new Error('Failed to delete language')
+      await apiAuth(`/resume/languages/${input.id}`, await authHeader(), {
+        method: 'DELETE',
+      })
       return input.id
     },
     onSuccess: () => {
@@ -652,20 +546,10 @@ export function useCreateResumeEducation() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: async (input: Omit<ResumeEducation, 'id'>) => {
-      const res = await fetch(
-        (import.meta.env.VITE_API_URL ?? import.meta.env.VITE_API_BASE ?? '') +
-          `/api/resume/education`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(await authHeader()),
-          },
-          body: JSON.stringify(input),
-        },
-      )
-      if (!res.ok) throw new Error('Failed to create education')
-      return (await res.json()) as string
+      return apiAuth<string>('/resume/education', await authHeader(), {
+        method: 'POST',
+        body: JSON.stringify(input),
+      })
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['resume', 'education'] })
@@ -678,28 +562,19 @@ export function useUpdateResumeEducation() {
   return useMutation({
     mutationFn: async (input: ResumeEducation) => {
       if (!input.id) throw new Error('id is required')
-      const res = await fetch(
-        (import.meta.env.VITE_API_URL ?? import.meta.env.VITE_API_BASE ?? '') +
-          `/api/resume/education/${input.id}`,
-        {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(await authHeader()),
-          },
-          body: JSON.stringify({
-            institution: input.institution,
-            field: input.field,
-            degree: input.degree,
-            since: input.since,
-            expectedUntil: input.expectedUntil,
-            thesisTitle: input.thesisTitle,
-            thesisDescription: input.thesisDescription,
-            status: input.status,
-          }),
-        },
-      )
-      if (!res.ok) throw new Error('Failed to update education')
+      await apiAuth(`/resume/education/${input.id}`, await authHeader(), {
+        method: 'PUT',
+        body: JSON.stringify({
+          institution: input.institution,
+          field: input.field,
+          degree: input.degree,
+          since: input.since,
+          expectedUntil: input.expectedUntil,
+          thesisTitle: input.thesisTitle,
+          thesisDescription: input.thesisDescription,
+          status: input.status,
+        }),
+      })
       return input.id
     },
     onSuccess: () => {
@@ -712,17 +587,9 @@ export function useDeleteResumeEducation() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: async (input: { id: string }) => {
-      const res = await fetch(
-        (import.meta.env.VITE_API_URL ?? import.meta.env.VITE_API_BASE ?? '') +
-          `/api/resume/education/${input.id}`,
-        {
-          method: 'DELETE',
-          headers: {
-            ...(await authHeader()),
-          },
-        },
-      )
-      if (!res.ok) throw new Error('Failed to delete education')
+      await apiAuth(`/resume/education/${input.id}`, await authHeader(), {
+        method: 'DELETE',
+      })
       return input.id
     },
     onSuccess: () => {
@@ -735,20 +602,10 @@ export function useCreateResumeCertificate() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: async (input: Omit<ResumeCertificate, 'id'>) => {
-      const res = await fetch(
-        (import.meta.env.VITE_API_URL ?? import.meta.env.VITE_API_BASE ?? '') +
-          `/api/resume/certificates`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(await authHeader()),
-          },
-          body: JSON.stringify(input),
-        },
-      )
-      if (!res.ok) throw new Error('Failed to create certificate')
-      return (await res.json()) as string
+      return apiAuth<string>('/resume/certificates', await authHeader(), {
+        method: 'POST',
+        body: JSON.stringify(input),
+      })
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['resume', 'certificates'] })
@@ -761,27 +618,18 @@ export function useUpdateResumeCertificate() {
   return useMutation({
     mutationFn: async (input: ResumeCertificate) => {
       if (!input.id) throw new Error('id is required')
-      const res = await fetch(
-        (import.meta.env.VITE_API_URL ?? import.meta.env.VITE_API_BASE ?? '') +
-          `/api/resume/certificates/${input.id}`,
-        {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(await authHeader()),
-          },
-          body: JSON.stringify({
-            name: input.name,
-            issuer: input.issuer,
-            from: input.from,
-            to: input.to,
-            description: input.description,
-            certificateId: input.certificateId,
-            url: input.url,
-          }),
-        },
-      )
-      if (!res.ok) throw new Error('Failed to update certificate')
+      await apiAuth(`/resume/certificates/${input.id}`, await authHeader(), {
+        method: 'PUT',
+        body: JSON.stringify({
+          name: input.name,
+          issuer: input.issuer,
+          from: input.from,
+          to: input.to,
+          description: input.description,
+          certificateId: input.certificateId,
+          url: input.url,
+        }),
+      })
       return input.id
     },
     onSuccess: () => {
@@ -794,17 +642,9 @@ export function useDeleteResumeCertificate() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: async (input: { id: string }) => {
-      const res = await fetch(
-        (import.meta.env.VITE_API_URL ?? import.meta.env.VITE_API_BASE ?? '') +
-          `/api/resume/certificates/${input.id}`,
-        {
-          method: 'DELETE',
-          headers: {
-            ...(await authHeader()),
-          },
-        },
-      )
-      if (!res.ok) throw new Error('Failed to delete certificate')
+      await apiAuth(`/resume/certificates/${input.id}`, await authHeader(), {
+        method: 'DELETE',
+      })
       return input.id
     },
     onSuccess: () => {
@@ -817,20 +657,10 @@ export function useUpsertResumeHobbies() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: async (input: { sports?: string[]; others?: string[] }) => {
-      const res = await fetch(
-        (import.meta.env.VITE_API_URL ?? import.meta.env.VITE_API_BASE ?? '') +
-          `/api/resume/hobbies`,
-        {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(await authHeader()),
-          },
-          body: JSON.stringify(input),
-        },
-      )
-      if (!res.ok) throw new Error('Failed to upsert hobbies')
-      return (await res.json()) as string
+      return apiAuth<string>('/resume/hobbies', await authHeader(), {
+        method: 'PUT',
+        body: JSON.stringify(input),
+      })
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['resume', 'hobbies'] })

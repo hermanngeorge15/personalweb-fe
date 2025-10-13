@@ -2,17 +2,16 @@
     FROM node:24-alpine AS build
     
     # Build args for environment variables
-    ARG VITE_API_URL
-    ARG VITE_KEYCLOAK_URL
-    ARG VITE_KEYCLOAK_REALM
-    ARG VITE_KEYCLOAK_CLIENT_ID
+    # Note: VITE_API_BASE_URL not needed for production (uses /api via Nginx)
+    ARG VITE_KEYCLOAK_URL=https://keycloak.kotlinserversquad.com
+    ARG VITE_KEYCLOAK_REALM=personalblog
+    ARG VITE_KEYCLOAK_CLIENT_ID=personalweb-fe-prod
     ARG VITE_KEYCLOAK_CHECK_SSO=true
     
     # Set as environment variables for build
-    ENV VITE_API_URL=localhost:8891
-    ENV VITE_KEYCLOAK_URL=https://keycloak.kotlinserversquad.com
-    ENV VITE_KEYCLOAK_REALM=personalblog
-    ENV VITE_KEYCLOAK_CLIENT_ID=personalblog-fe
+    ENV VITE_KEYCLOAK_URL=${VITE_KEYCLOAK_URL}
+    ENV VITE_KEYCLOAK_REALM=${VITE_KEYCLOAK_REALM}
+    ENV VITE_KEYCLOAK_CLIENT_ID=${VITE_KEYCLOAK_CLIENT_ID}
     ENV VITE_KEYCLOAK_CHECK_SSO=${VITE_KEYCLOAK_CHECK_SSO}
 
     WORKDIR /app

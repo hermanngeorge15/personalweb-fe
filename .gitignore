@@ -193,4 +193,9 @@ sketch
 ### idea ###
 .idea
 
+# Production setup documentation (local reference only)
+KEYCLOAK_PRODUCTION_SETUP.md
+PRODUCTION_READY_SUMMARY.md
+docs/same_origin_fe↔be_via_nginx_option_a_setup_guide.md
+
 # End of https://www.toptal.com/developers/gitignore/api/react,node,yarn,visualstudiocode

@@ -2,6 +2,7 @@ import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Input, Textarea, Button } from '@heroui/react'
+import { api } from '@/lib/api'
 
 const schema = z.object({
   name: z.string().min(2),
@@ -22,11 +23,8 @@ export function ContactForm() {
   return (
     <form
       onSubmit={handleSubmit(async (data) => {
-        const base =
-          import.meta.env.VITE_API_URL ?? import.meta.env.VITE_API_BASE ?? ''
-        await fetch(base + '/api/contact', {
+        await api('/contact', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ ...data, website: '' }),
         })
         reset()
