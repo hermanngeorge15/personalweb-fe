@@ -1,6 +1,6 @@
 // Production-safe API base URL configuration
 const API_BASE = import.meta.env.PROD
-  ? '/api' // production: relative path → goes via Nginx
+  ? '' // production: empty base, paths already have /api/ prefix
   : import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8891' // dev only
 
 export async function api<T>(path: string, init?: RequestInit): Promise<T> {
