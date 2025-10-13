@@ -72,6 +72,8 @@ export function ContactForm() {
     <form onSubmit={handleSubmit(onSubmit)} className="grid max-w-xl gap-4">
       <Input
         label="Name"
+        labelPlacement="outside"
+        placeholder="Enter your name"
         {...register('name')}
         isInvalid={!!errors.name}
         errorMessage={errors.name?.message}
@@ -79,12 +81,16 @@ export function ContactForm() {
       <Input
         label="Email"
         type="email"
+        labelPlacement="outside"
+        placeholder="Enter your email"
         {...register('email')}
         isInvalid={!!errors.email}
         errorMessage={errors.email?.message}
       />
       <Textarea
         label="Message"
+        labelPlacement="outside"
+        placeholder="Enter your message"
         minRows={5}
         {...register('message')}
         isInvalid={!!errors.message}
