@@ -18,7 +18,7 @@ export default defineConfig({
     eslintPlugin(),
   ],
   server: {
-    port: 3000,
+    port: 3333,
     proxy: {
       '/actuator': {
         target:
@@ -44,7 +44,7 @@ export default defineConfig({
     },
   },
   preview: {
-    port: 3333,
+    port: 3000,
   },
   resolve: {
     alias: {

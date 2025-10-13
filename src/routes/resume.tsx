@@ -6,10 +6,10 @@ import {
   useResumeCertificates,
   useResumeHobbies,
 } from '@/lib/queries'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { SEO_DEFAULTS, setHead } from '@/lib/seo'
 import { Button } from '@heroui/react'
-import { Link } from '@tanstack/react-router'
+import { downloadCV } from '@/lib/download'
 
 function ResumePage() {
   const projects = useResumeProjects()
@@ -17,6 +17,20 @@ function ResumePage() {
   const education = useResumeEducation()
   const certificates = useResumeCertificates()
   const hobbies = useResumeHobbies()
+  const [isDownloading, setIsDownloading] = useState(false)
+
+  const handleDownloadPDF = async () => {
+    setIsDownloading(true)
+    try {
+      await downloadCV('jirihermann', 'eng')
+    } catch (error) {
+      console.error('Download failed:', error)
+      alert('Failed to download PDF. Please try again.')
+    } finally {
+      setIsDownloading(false)
+    }
+  }
+
   useEffect(() => {
     setHead({
       title: `Resume — ${SEO_DEFAULTS.siteName}`,
@@ -41,9 +55,15 @@ function ResumePage() {
       <section className="grid gap-6 md:gap-8">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-semibold tracking-tight">Resume</h1>
-          <Link to="/resume/print">
-            <Button size="sm" variant="bordered">Download PDF</Button>
-          </Link>
+          <Button
+            size="sm"
+            variant="bordered"
+            onPress={handleDownloadPDF}
+            isLoading={isDownloading}
+            isDisabled={isDownloading}
+          >
+            {isDownloading ? 'Downloading...' : 'Download PDF'}
+          </Button>
         </div>
         {(projects.isLoading || languages.isLoading || education.isLoading || certificates.isLoading || hobbies.isLoading) && (
           <div>Loading…</div>

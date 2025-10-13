@@ -34,4 +34,8 @@ body {
   background-color: var(--wv-color-layout-content-background);
 }
 
+/* Hide reCAPTCHA badge (only when showing required text notice) */
+.grecaptcha-badge {
+  visibility: hidden;
+}
 

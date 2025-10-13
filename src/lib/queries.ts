@@ -251,14 +251,14 @@ export function useDeletePost() {
 export function useMeta() {
   return useQuery({
     queryKey: ['meta'],
-    queryFn: () => api<Meta>('/meta'),
+    queryFn: () => api<Meta>('/api/meta'),
   })
 }
 
 export function useProjects() {
   return useQuery({
     queryKey: ['projects'],
-    queryFn: () => api<Project[]>('/projects'),
+    queryFn: () => api<Project[]>('/api/projects'),
   })
 }
 
@@ -270,7 +270,7 @@ export function useCreateProject() {
       name: string
       description: string
     }) => {
-      return apiAuth<Project>('/projects', await authHeader(), {
+      return apiAuth<Project>('/api/projects', await authHeader(), {
         method: 'POST',
         body: JSON.stringify(input),
       })
@@ -307,7 +307,7 @@ export function useDeleteProject() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: async (input: { id: string }) => {
-      await apiAuth(`/projects/${input.id}`, await authHeader(), {
+      await apiAuth(`/api/projects/${input.id}`, await authHeader(), {
         method: 'DELETE',
       })
       return input.id
@@ -321,7 +321,7 @@ export function useDeleteProject() {
 export function useTestimonials() {
   return useQuery({
     queryKey: ['testimonials'],
-    queryFn: () => api<Testimonial[]>('/testimonials'),
+    queryFn: () => api<Testimonial[]>('/api/testimonials'),
   })
 }
 
@@ -336,7 +336,7 @@ export function useCreateTestimonial() {
       avatar_url?: string
       order?: number
     }) => {
-      return apiAuth<Testimonial>('/testimonials', await authHeader(), {
+      return apiAuth<Testimonial>('/api/testimonials', await authHeader(), {
         method: 'POST',
         body: JSON.stringify(input),
       })
@@ -383,7 +383,7 @@ export function useDeleteTestimonial() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: async (input: { id: string }) => {
-      await apiAuth(`/testimonials/${input.id}`, await authHeader(), {
+      await apiAuth(`/api/testimonials/${input.id}`, await authHeader(), {
         method: 'DELETE',
       })
       return input.id
@@ -397,7 +397,7 @@ export function useDeleteTestimonial() {
 export function useResume() {
   return useQuery({
     queryKey: ['resume'],
-    queryFn: () => api<Resume>('/resume'),
+    queryFn: () => api<Resume>('/api/resume'),
   })
 }
 
@@ -405,35 +405,35 @@ export function useResume() {
 export function useResumeProjects() {
   return useQuery({
     queryKey: ['resume', 'projects'],
-    queryFn: () => api<ResumeProject[]>('/resume/projects'),
+    queryFn: () => api<ResumeProject[]>('/api/resume/projects'),
   })
 }
 
 export function useResumeLanguages() {
   return useQuery({
     queryKey: ['resume', 'languages'],
-    queryFn: () => api<ResumeLanguage[]>('/resume/languages'),
+    queryFn: () => api<ResumeLanguage[]>('/api/resume/languages'),
   })
 }
 
 export function useResumeEducation() {
   return useQuery({
     queryKey: ['resume', 'education'],
-    queryFn: () => api<ResumeEducation[]>('/resume/education'),
+    queryFn: () => api<ResumeEducation[]>('/api/resume/education'),
   })
 }
 
 export function useResumeCertificates() {
   return useQuery({
     queryKey: ['resume', 'certificates'],
-    queryFn: () => api<ResumeCertificate[]>('/resume/certificates'),
+    queryFn: () => api<ResumeCertificate[]>('/api/resume/certificates'),
   })
 }
 
 export function useResumeHobbies() {
   return useQuery({
     queryKey: ['resume', 'hobbies'],
-    queryFn: () => api<ResumeHobbies>('/resume/hobbies'),
+    queryFn: () => api<ResumeHobbies>('/api/resume/hobbies'),
   })
 }
 
@@ -442,7 +442,7 @@ export function useCreateResumeProject() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: async (input: Omit<ResumeProject, 'id'> & { id?: string }) => {
-      return apiAuth<string>('/resume/projects', await authHeader(), {
+      return apiAuth<string>('/api/resume/projects', await authHeader(), {
         method: 'POST',
         body: JSON.stringify(input),
       })
@@ -484,7 +484,7 @@ export function useDeleteResumeProject() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: async (input: { id: string }) => {
-      await apiAuth(`/resume/projects/${input.id}`, await authHeader(), {
+      await apiAuth(`/api/resume/projects/${input.id}`, await authHeader(), {
         method: 'DELETE',
       })
       return input.id
@@ -499,7 +499,7 @@ export function useCreateResumeLanguage() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: async (input: Omit<ResumeLanguage, 'id'>) => {
-      return apiAuth<string>('/resume/languages', await authHeader(), {
+      return apiAuth<string>('/api/resume/languages', await authHeader(), {
         method: 'POST',
         body: JSON.stringify(input),
       })
@@ -531,7 +531,7 @@ export function useDeleteResumeLanguage() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: async (input: { id: string }) => {
-      await apiAuth(`/resume/languages/${input.id}`, await authHeader(), {
+      await apiAuth(`/api/resume/languages/${input.id}`, await authHeader(), {
         method: 'DELETE',
       })
       return input.id
@@ -546,7 +546,7 @@ export function useCreateResumeEducation() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: async (input: Omit<ResumeEducation, 'id'>) => {
-      return apiAuth<string>('/resume/education', await authHeader(), {
+      return apiAuth<string>('/api/resume/education', await authHeader(), {
         method: 'POST',
         body: JSON.stringify(input),
       })
@@ -587,7 +587,7 @@ export function useDeleteResumeEducation() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: async (input: { id: string }) => {
-      await apiAuth(`/resume/education/${input.id}`, await authHeader(), {
+      await apiAuth(`/api/resume/education/${input.id}`, await authHeader(), {
         method: 'DELETE',
       })
       return input.id
@@ -602,7 +602,7 @@ export function useCreateResumeCertificate() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: async (input: Omit<ResumeCertificate, 'id'>) => {
-      return apiAuth<string>('/resume/certificates', await authHeader(), {
+      return apiAuth<string>('/api/resume/certificates', await authHeader(), {
         method: 'POST',
         body: JSON.stringify(input),
       })
@@ -642,7 +642,7 @@ export function useDeleteResumeCertificate() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: async (input: { id: string }) => {
-      await apiAuth(`/resume/certificates/${input.id}`, await authHeader(), {
+      await apiAuth(`/api/resume/certificates/${input.id}`, await authHeader(), {
         method: 'DELETE',
       })
       return input.id
@@ -657,7 +657,7 @@ export function useUpsertResumeHobbies() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: async (input: { sports?: string[]; others?: string[] }) => {
-      return apiAuth<string>('/resume/hobbies', await authHeader(), {
+      return apiAuth<string>('/api/resume/hobbies', await authHeader(), {
         method: 'PUT',
         body: JSON.stringify(input),
       })
