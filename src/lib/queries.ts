@@ -251,14 +251,14 @@ export function useDeletePost() {
 export function useMeta() {
   return useQuery({
     queryKey: ['meta'],
-    queryFn: () => api<Meta>('/api/meta'),
+    queryFn: () => api<Meta>('/meta'),
   })
 }
 
 export function useProjects() {
   return useQuery({
     queryKey: ['projects'],
-    queryFn: () => api<Project[]>('/api/projects'),
+    queryFn: () => api<Project[]>('/projects'),
   })
 }
 
@@ -321,7 +321,7 @@ export function useDeleteProject() {
 export function useTestimonials() {
   return useQuery({
     queryKey: ['testimonials'],
-    queryFn: () => api<Testimonial[]>('/api/testimonials'),
+    queryFn: () => api<Testimonial[]>('/testimonials'),
   })
 }
 
@@ -397,7 +397,7 @@ export function useDeleteTestimonial() {
 export function useResume() {
   return useQuery({
     queryKey: ['resume'],
-    queryFn: () => api<Resume>('/api/resume'),
+    queryFn: () => api<Resume>('/resume'),
   })
 }
 
@@ -405,35 +405,35 @@ export function useResume() {
 export function useResumeProjects() {
   return useQuery({
     queryKey: ['resume', 'projects'],
-    queryFn: () => api<ResumeProject[]>('/api/resume/projects'),
+    queryFn: () => api<ResumeProject[]>('/resume/projects'),
   })
 }
 
 export function useResumeLanguages() {
   return useQuery({
     queryKey: ['resume', 'languages'],
-    queryFn: () => api<ResumeLanguage[]>('/api/resume/languages'),
+    queryFn: () => api<ResumeLanguage[]>('/resume/languages'),
   })
 }
 
 export function useResumeEducation() {
   return useQuery({
     queryKey: ['resume', 'education'],
-    queryFn: () => api<ResumeEducation[]>('/api/resume/education'),
+    queryFn: () => api<ResumeEducation[]>('/resume/education'),
   })
 }
 
 export function useResumeCertificates() {
   return useQuery({
     queryKey: ['resume', 'certificates'],
-    queryFn: () => api<ResumeCertificate[]>('/api/resume/certificates'),
+    queryFn: () => api<ResumeCertificate[]>('/resume/certificates'),
   })
 }
 
 export function useResumeHobbies() {
   return useQuery({
     queryKey: ['resume', 'hobbies'],
-    queryFn: () => api<ResumeHobbies>('/api/resume/hobbies'),
+    queryFn: () => api<ResumeHobbies>('/resume/hobbies'),
   })
 }
 

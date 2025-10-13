@@ -5,7 +5,7 @@ import { PostControllerApi } from '@/generated/apis/PostControllerApi'
 // Production-safe API base URL configuration
 function getBasePath() {
   if (import.meta.env.PROD) {
-    return '/api' // production: relative path → goes via Nginx
+    return '' // production: empty base, paths already have /api/ prefix
   }
   const base = import.meta.env.VITE_API_BASE_URL
   return base && String(base).length > 0 ? String(base) : 'http://localhost:8891'
