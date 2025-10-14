@@ -75,18 +75,18 @@ export const handlers = [
   }),
   http.get(api + '/api/resume', () => {
     return HttpResponse.json({
-      name: 'Jiri Hermann',
-      headline: 'Senior Full-Stack Engineer',
+      name: 'Jiří Hermann',
+      headline: 'Backend Software Engineer',
       summary:
-        'Building resilient web apps with React, TypeScript, and modern tooling.',
+        'Specializing in Kotlin, Java, Spring Boot, and building scalable backend systems. Founder of Kotlin Server Squad community.',
       sections: [
         {
           title: 'Experience',
-          items: ['Company A — Staff Engineer', 'Company B — Senior Developer'],
+          items: ['Company A — Senior Backend Engineer', 'Company B — Backend Developer'],
         },
         {
           title: 'Skills',
-          items: ['React', 'TypeScript', 'Node', 'Vite', 'TanStack'],
+          items: ['Kotlin', 'Java', 'Spring Boot', 'PostgreSQL', 'Kubernetes'],
         },
       ],
     })

@@ -213,8 +213,8 @@ function BlogPost() {
                 <div className="flex-1">
                   <h3 className="text-xl font-bold">About the Author</h3>
                   <p className="mt-2 text-muted-foreground leading-relaxed">
-                    Jiri Hermann is a product-focused full-stack engineer specializing in frontend and user experience. 
-                    Building performant, accessible interfaces and robust systems that scale.
+                    Jiří Hermann is a Backend Software Engineer specializing in Kotlin, Java, Spring Boot, and scalable systems. 
+                    Founder of Kotlin Server Squad community, building clean and reliable backend solutions.
                   </p>
                   <div className="mt-4 flex gap-3">
                     <a href="https://www.linkedin.com/in/your-handle" target="_blank" rel="noreferrer" className="text-blue-600 hover:underline text-sm font-medium">

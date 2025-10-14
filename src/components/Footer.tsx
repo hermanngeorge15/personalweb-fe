@@ -35,8 +35,8 @@ export default function Footer() {
                 </span>
               </Link>
               <p className="mt-4 max-w-md text-sm leading-relaxed text-muted-foreground">
-                Product-focused full-stack engineer specializing in frontend and user experience.
-                Building performant, accessible interfaces and robust systems that scale.
+                Backend Software Engineer specializing in Kotlin, Java, Spring Boot, and scalable systems.
+                Founder of Kotlin Server Squad community. Building clean, reliable backend solutions.
               </p>
               <div className="mt-6 flex items-center gap-3">
                 <a
