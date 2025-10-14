@@ -11,6 +11,7 @@ import './styles/globals.css'
 import { routeTree } from './routeTree.gen'
 import { initAuth } from './lib/keycloak'
 import { RECAPTCHA_SITE_KEY } from './lib/recaptcha'
+import { BuildVersion } from './components/BuildVersion'
 
 const router = createRouter({ routeTree })
 const queryClient = new QueryClient()
@@ -47,6 +48,7 @@ async function bootstrap() {
       >
         <HeroUIProvider>
           <QueryClientProvider client={queryClient}>
+            <BuildVersion />
             <RouterProvider router={router} />
           </QueryClientProvider>
         </HeroUIProvider>

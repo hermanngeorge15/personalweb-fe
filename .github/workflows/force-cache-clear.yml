@@ -1,10 +1,13 @@
-name: fe-docker-publish
+name: Force Cache Clear & Rebuild
 
 on:
-  push:
-    branches: ['main']
-    tags: ['v*']
-  pull_request:
+  workflow_dispatch:
+    inputs:
+      clear_all_caches:
+        description: 'Clear all Docker caches on server'
+        required: true
+        type: boolean
+        default: true
 
 permissions:
   contents: read
@@ -14,7 +17,7 @@ env:
   IMAGE_NAME: ghcr.io/hermanngeorge15/personalweb-fe
 
 jobs:
-  docker:
+  force-rebuild:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -35,11 +38,11 @@ jobs:
         with:
           images: ${{ env.IMAGE_NAME }}
           tags: |
-            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=latest
             type=sha
-            type=ref,event=tag
+            type=raw,value=forced-${{ github.run_number }}
 
-      - name: Build & Push
+      - name: Build & Push (NO CACHE)
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -52,20 +55,15 @@ jobs:
             VITE_KEYCLOAK_CLIENT_ID=${{ secrets.VITE_KEYCLOAK_CLIENT_ID }}
             VITE_KEYCLOAK_CHECK_SSO=true
             VITE_RECAPTCHA_SITE_KEY=${{ secrets.VITE_RECAPTCHA_SITE_KEY }}
-            BUILD_DATE=${{ github.run_number }}
-            GITHUB_RUN_NUMBER=${{ github.run_number }}
-            GITHUB_SHA=${{ github.sha }}
-            GITHUB_REF_NAME=${{ github.ref_name }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          no-cache: ${{ github.event_name == 'push' && contains(github.event.head_commit.message, '[rebuild]') }}
+            BUILD_DATE=${{ github.run_number }}-forced
+          no-cache: true
+          pull: true
 
-  deploy:
-    if: github.ref == 'refs/heads/main'
-    needs: [docker]
+  force-deploy:
+    needs: [force-rebuild]
     runs-on: ubuntu-latest
     steps:
-      - name: SSH redeploy on server
+      - name: SSH force redeploy with cache clear
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -75,14 +73,26 @@ jobs:
           script: |
             set -e
             cd /opt/jiri-site
-            # Stop and remove container
+            
+            echo "🛑 Stopping frontend..."
             docker compose stop frontend
+            
+            echo "🗑️ Removing old container..."
             docker compose rm -f frontend
-            # Clear all caches
-            docker builder prune -af
-            docker system prune -af --volumes
-            # Pull fresh image and start
-            docker compose pull frontend
-            docker compose up frontend -d
-            # Final cleanup
+            
+            echo "🔥 Clearing ALL Docker caches..."
+            docker builder prune -af || true
+            docker system prune -af --volumes || true
+            
+            echo "⬇️ Pulling FRESH image..."
+            docker compose pull frontend --no-cache
+            
+            echo "🚀 Starting with completely fresh image..."
+            docker compose up frontend -d --force-recreate --renew-anon-volumes
+            
+            echo "♻️ Final cleanup..."
             docker image prune -af
+            
+            echo "✅ Force deployment complete!"
+            echo "📊 Current containers:"
+            docker compose ps
