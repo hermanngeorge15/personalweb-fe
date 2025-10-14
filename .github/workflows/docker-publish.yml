@@ -9,6 +9,7 @@ on:
 permissions:
   contents: read
   packages: write
+  actions: write  # Required to delete cache
 
 env:
   IMAGE_NAME: ghcr.io/hermanngeorge15/personalweb-fe
@@ -28,6 +29,16 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Clear GitHub Actions cache if [rebuild] is in commit message
+      - name: Clear build cache
+        if: github.event_name == 'push' && contains(github.event.head_commit.message, '[rebuild]')
+        run: |
+          gh extension install actions/gh-actions-cache
+          echo "Clearing all build caches..."
+          gh actions-cache delete --all --confirm || true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Extract metadata (tags, labels)
         id: meta
@@ -78,11 +89,8 @@ jobs:
             # Stop and remove container
             docker compose stop frontend
             docker compose rm -f frontend
-            # Clear all caches
-            docker builder prune -af
-            docker system prune -af --volumes
             # Pull fresh image and start
             docker compose pull frontend
             docker compose up frontend -d
-            # Final cleanup
-            docker image prune -af
+            # Clean up unused images
+            docker image prune -f
