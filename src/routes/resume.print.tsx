@@ -18,7 +18,7 @@ function PrintResumePage() {
     setHead({
       title: `Resume (PDF) — ${SEO_DEFAULTS.siteName}`,
       description: SEO_DEFAULTS.description,
-      canonical: location.origin + '/resume/print',
+      canonical: `${SEO_DEFAULTS.siteUrl}/resume/print`,
     })
     // Open print dialog automatically when all data is loaded
     const ready = !projects.isLoading && !languages.isLoading && !education.isLoading && !certificates.isLoading

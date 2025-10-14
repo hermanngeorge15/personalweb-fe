@@ -77,6 +77,7 @@ function setProperty(property: string, content?: string) {
 
 export const SEO_DEFAULTS = {
   siteName: 'Jiří Hermann',
+  siteUrl: 'https://jirihermann.com',
   description:
     'Backend Software Engineer specializing in Kotlin, Java, Spring Boot, and scalable systems. Founder of Kotlin Server Squad community. Building clean, reliable backend solutions.',
   image: '/og-default.png',

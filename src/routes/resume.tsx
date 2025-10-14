@@ -35,10 +35,10 @@ function ResumePage() {
     setHead({
       title: `Resume — ${SEO_DEFAULTS.siteName}`,
       description: SEO_DEFAULTS.description,
-      canonical: location.origin + '/resume',
+      canonical: `${SEO_DEFAULTS.siteUrl}/resume`,
       og: {
         title: `Resume — ${SEO_DEFAULTS.siteName}`,
-        url: location.origin + '/resume',
+        url: `${SEO_DEFAULTS.siteUrl}/resume`,
         image: SEO_DEFAULTS.image,
         description: SEO_DEFAULTS.description,
       },

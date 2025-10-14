@@ -15,10 +15,10 @@ function BlogList() {
     setHead({
       title: `Blog — ${SEO_DEFAULTS.siteName}`,
       description: SEO_DEFAULTS.description,
-      canonical: location.origin + '/blog',
+      canonical: `${SEO_DEFAULTS.siteUrl}/blog`,
       og: {
         title: `Blog — ${SEO_DEFAULTS.siteName}`,
-        url: location.origin + '/blog',
+        url: `${SEO_DEFAULTS.siteUrl}/blog`,
         image: SEO_DEFAULTS.image,
         description: SEO_DEFAULTS.description,
       },

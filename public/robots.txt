@@ -1,5 +1,7 @@
 User-agent: *
 Allow: /
-Sitemap: /sitemap.xml
+Disallow: /admin/
+
+Sitemap: https://jirihermann.com/sitemap.xml
 
 

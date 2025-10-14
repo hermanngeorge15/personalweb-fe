@@ -8,10 +8,10 @@ function AboutPage() {
     setHead({
       title: `About — ${SEO_DEFAULTS.siteName}`,
       description: description,
-      canonical: location.origin + '/about',
+      canonical: `${SEO_DEFAULTS.siteUrl}/about`,
       og: {
         title: `About — ${SEO_DEFAULTS.siteName}`,
-        url: location.origin + '/about',
+        url: `${SEO_DEFAULTS.siteUrl}/about`,
         image: SEO_DEFAULTS.image,
         description: description,
       },

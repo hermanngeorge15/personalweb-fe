@@ -10,10 +10,10 @@ function TestimonialsPage() {
     setHead({
       title: `Testimonials — ${SEO_DEFAULTS.siteName}`,
       description: SEO_DEFAULTS.description,
-      canonical: location.origin + '/testimonials',
+      canonical: `${SEO_DEFAULTS.siteUrl}/testimonials`,
       og: {
         title: `Testimonials — ${SEO_DEFAULTS.siteName}`,
-        url: location.origin + '/testimonials',
+        url: `${SEO_DEFAULTS.siteUrl}/testimonials`,
         image: SEO_DEFAULTS.image,
         description: SEO_DEFAULTS.description,
       },

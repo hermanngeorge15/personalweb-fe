@@ -8,10 +8,10 @@ function ContactPage() {
     setHead({
       title: `Contact — ${SEO_DEFAULTS.siteName}`,
       description: SEO_DEFAULTS.description,
-      canonical: location.origin + '/contact',
+      canonical: `${SEO_DEFAULTS.siteUrl}/contact`,
       og: {
         title: `Contact — ${SEO_DEFAULTS.siteName}`,
-        url: location.origin + '/contact',
+        url: `${SEO_DEFAULTS.siteUrl}/contact`,
         image: SEO_DEFAULTS.image,
         description: SEO_DEFAULTS.description,
       },

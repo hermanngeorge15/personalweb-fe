@@ -24,10 +24,10 @@ function HomePage() {
     setHead({
       title: `Home — ${SEO_DEFAULTS.siteName}`,
       description: SEO_DEFAULTS.description,
-      canonical: location.origin + '/',
+      canonical: `${SEO_DEFAULTS.siteUrl}/`,
       og: {
         title: `Home — ${SEO_DEFAULTS.siteName}`,
-        url: location.origin + '/',
+        url: `${SEO_DEFAULTS.siteUrl}/`,
         image: SEO_DEFAULTS.image,
         description: SEO_DEFAULTS.description,
       },

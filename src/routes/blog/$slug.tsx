@@ -3,7 +3,7 @@ import { useParams, Link } from '@tanstack/react-router'
 import { usePost } from '@/lib/queries'
 import MDXContent from '@/components/MDXContent'
 import { useEffect, useState } from 'react'
-import { setHead, setJsonLd } from '@/lib/seo'
+import { SEO_DEFAULTS, setHead, setJsonLd } from '@/lib/seo'
 import { MotionSection } from '@/components/MotionSection'
 import { Button } from '@heroui/react'
 import { 
@@ -20,29 +20,30 @@ function BlogPost() {
   const [copied, setCopied] = useState(false)
   useEffect(() => {
     if (data?.title) {
+      const canonicalUrl = `${SEO_DEFAULTS.siteUrl}/blog/${slug}`
       setHead({
-        title: `${data.title} — WriteWave`,
-        canonical: location.href,
+        title: `${data.title} — ${SEO_DEFAULTS.siteName}`,
+        canonical: canonicalUrl,
         og: {
-          title: `${data.title} — WriteWave`,
-          url: location.href,
+          title: `${data.title} — ${SEO_DEFAULTS.siteName}`,
+          url: canonicalUrl,
         },
         twitter: {
           card: 'summary',
-          title: `${data.title} — WriteWave`,
+          title: `${data.title} — ${SEO_DEFAULTS.siteName}`,
         },
       })
       setJsonLd({
         '@context': 'https://schema.org',
         '@type': 'BlogPosting',
         headline: data.title,
-        url: location.href,
-        mainEntityOfPage: location.href,
-        author: { '@type': 'Person', name: 'Jiri Hermann' },
-        publisher: { '@type': 'Organization', name: 'WriteWave' },
+        url: canonicalUrl,
+        mainEntityOfPage: canonicalUrl,
+        author: { '@type': 'Person', name: 'Jiří Hermann' },
+        publisher: { '@type': 'Organization', name: SEO_DEFAULTS.siteName },
       })
     }
-  }, [data?.title])
+  }, [data?.title, slug])
 
   const handleCopyLink = async () => {
     const success = await copyToClipboard(window.location.href)

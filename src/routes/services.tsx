@@ -7,10 +7,10 @@ function ServicesPage() {
     setHead({
       title: `Services — ${SEO_DEFAULTS.siteName}`,
       description: SEO_DEFAULTS.description,
-      canonical: location.origin + '/services',
+      canonical: `${SEO_DEFAULTS.siteUrl}/services`,
       og: {
         title: `Services — ${SEO_DEFAULTS.siteName}`,
-        url: location.origin + '/services',
+        url: `${SEO_DEFAULTS.siteUrl}/services`,
         image: SEO_DEFAULTS.image,
         description: SEO_DEFAULTS.description,
       },
