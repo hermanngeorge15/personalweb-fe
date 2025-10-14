@@ -9,16 +9,3 @@ interface ImportMetaEnv {
 interface ImportMeta {
   readonly env: ImportMetaEnv
 }
-
-// reCAPTCHA v3 type declarations
-interface ReCaptchaV3 {
-  ready: (callback: () => void) => void
-  execute: (
-    siteKey: string,
-    options: { action: string },
-  ) => Promise<string>
-}
-
-interface Window {
-  grecaptcha?: ReCaptchaV3
-}

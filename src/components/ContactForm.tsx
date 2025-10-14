@@ -3,12 +3,9 @@ import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Input, Textarea, Button } from '@heroui/react'
 import { useState, useCallback } from 'react'
+import { useGoogleReCaptcha } from 'react-google-recaptcha-v3'
 import { api } from '@/lib/api'
-import {
-  executeRecaptcha,
-  RECAPTCHA_ACTIONS,
-  RECAPTCHA_ENABLED,
-} from '@/lib/recaptcha'
+import { RECAPTCHA_ACTIONS, RECAPTCHA_ENABLED } from '@/lib/recaptcha'
 
 const schema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -21,6 +18,7 @@ type ContactFormValues = z.infer<typeof schema>
 export function ContactForm() {
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [submitSuccess, setSubmitSuccess] = useState(false)
+  const { executeRecaptcha } = useGoogleReCaptcha()
 
   const {
     register,
@@ -36,9 +34,11 @@ export function ContactForm() {
 
       try {
         // Get reCAPTCHA token
-        const recaptchaToken = await executeRecaptcha(
-          RECAPTCHA_ACTIONS.CONTACT_FORM,
-        )
+        let recaptchaToken: string | undefined
+
+        if (RECAPTCHA_ENABLED && executeRecaptcha) {
+          recaptchaToken = await executeRecaptcha(RECAPTCHA_ACTIONS.CONTACT_FORM)
+        }
 
         // Submit form with CAPTCHA token
         await api('/api/contact', {
@@ -65,7 +65,7 @@ export function ContactForm() {
         )
       }
     },
-    [reset],
+    [executeRecaptcha, reset],
   )
 
   return (
