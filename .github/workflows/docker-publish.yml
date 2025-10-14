@@ -51,6 +51,7 @@ jobs:
             VITE_KEYCLOAK_REALM=${{ secrets.VITE_KEYCLOAK_REALM }}
             VITE_KEYCLOAK_CLIENT_ID=${{ secrets.VITE_KEYCLOAK_CLIENT_ID }}
             VITE_KEYCLOAK_CHECK_SSO=true
+            VITE_RECAPTCHA_SITE_KEY=${{ secrets.VITE_RECAPTCHA_SITE_KEY }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
