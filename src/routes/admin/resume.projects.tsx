@@ -14,7 +14,9 @@ function AdminResumeProjects() {
   return (
     <AppShell path="Admin / Resume / Projects">
       <section className="grid gap-6 md:gap-8">
-        <h1 className="text-2xl font-semibold tracking-tight">Resume Projects</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">
+          Resume Projects
+        </h1>
         <form
           className="grid gap-2 rounded border p-3"
           onSubmit={async (e) => {
@@ -51,25 +53,61 @@ function AdminResumeProjects() {
           }}
         >
           <div className="grid gap-2 md:grid-cols-2">
-            <input name="company" placeholder="company" className="rounded border p-2" />
-            <input name="projectName" placeholder="project name" className="rounded border p-2" />
+            <input
+              name="company"
+              placeholder="company"
+              className="rounded border p-2"
+            />
+            <input
+              name="projectName"
+              placeholder="project name"
+              className="rounded border p-2"
+            />
           </div>
           <div className="grid gap-2 md:grid-cols-2">
             <label className="grid gap-1">
               <span className="text-muted-foreground text-sm">From</span>
-              <input name="from" type="datetime-local" className="rounded border p-2" />
+              <input
+                name="from"
+                type="datetime-local"
+                className="rounded border p-2"
+              />
             </label>
             <label className="grid gap-1">
               <span className="text-muted-foreground text-sm">Until</span>
-              <input name="until" type="datetime-local" className="rounded border p-2" />
+              <input
+                name="until"
+                type="datetime-local"
+                className="rounded border p-2"
+              />
             </label>
           </div>
-          <textarea name="description" placeholder="description" className="min-h-[120px] rounded border p-2" />
-          <input name="responsibilities" placeholder="responsibilities (comma-separated)" className="rounded border p-2" />
-          <input name="techStack" placeholder="tech stack (comma-separated)" className="rounded border p-2" />
+          <textarea
+            name="description"
+            placeholder="description"
+            className="min-h-[120px] rounded border p-2"
+          />
+          <input
+            name="responsibilities"
+            placeholder="responsibilities (comma-separated)"
+            className="rounded border p-2"
+          />
+          <input
+            name="techStack"
+            placeholder="tech stack (comma-separated)"
+            className="rounded border p-2"
+          />
           <div className="grid gap-2 md:grid-cols-2">
-            <input name="repoUrl" placeholder="repo URL" className="rounded border p-2" />
-            <input name="demoUrl" placeholder="demo URL" className="rounded border p-2" />
+            <input
+              name="repoUrl"
+              placeholder="repo URL"
+              className="rounded border p-2"
+            />
+            <input
+              name="demoUrl"
+              placeholder="demo URL"
+              className="rounded border p-2"
+            />
           </div>
           <div>
             <button
@@ -88,33 +126,48 @@ function AdminResumeProjects() {
             {data.map((p) => {
               const fmt = (value?: string) =>
                 value
-                  ? new Date(value).toLocaleDateString(undefined, { year: 'numeric', month: 'short' })
+                  ? new Date(value).toLocaleDateString(undefined, {
+                      year: 'numeric',
+                      month: 'short',
+                    })
                   : ''
               const start = fmt(p.from)
               const end = p.until ? fmt(p.until) : 'Present'
-              const range = start || end ? `${start}${start ? ' – ' : ''}${end}` : ''
+              const range =
+                start || end ? `${start}${start ? ' – ' : ''}${end}` : ''
               return (
-                <li key={p.id} className="flex items-center justify-between rounded border p-3">
+                <li
+                  key={p.id}
+                  className="flex items-center justify-between rounded border p-3"
+                >
                   <div>
-                    <div className="font-medium">{p.projectName ?? p.company}</div>
+                    <div className="font-medium">
+                      {p.projectName ?? p.company}
+                    </div>
                     {range && (
-                      <div className="text-sm text-muted-foreground">{range}</div>
+                      <div className="text-muted-foreground text-sm">
+                        {range}
+                      </div>
                     )}
                   </div>
                   <div className="flex items-center gap-3">
-                  <Link to="/admin/resume/projects/$id" params={{ id: p.id }} className="underline">
-                    Edit
-                  </Link>
-                  <button
-                    className="rounded bg-red-600 px-3 py-1 text-white disabled:opacity-50"
-                    onClick={async () => {
-                      await deleteProject.mutateAsync({ id: p.id })
-                    }}
-                    disabled={deleteProject.isPending}
-                  >
-                    {deleteProject.isPending ? 'Deleting…' : 'Delete'}
-                  </button>
-                </div>
+                    <Link
+                      to="/admin/resume/projects/$id"
+                      params={{ id: p.id }}
+                      className="underline"
+                    >
+                      Edit
+                    </Link>
+                    <button
+                      className="rounded bg-red-600 px-3 py-1 text-white disabled:opacity-50"
+                      onClick={async () => {
+                        await deleteProject.mutateAsync({ id: p.id })
+                      }}
+                      disabled={deleteProject.isPending}
+                    >
+                      {deleteProject.isPending ? 'Deleting…' : 'Delete'}
+                    </button>
+                  </div>
                 </li>
               )
             })}
@@ -132,5 +185,3 @@ export const Route = createFileRoute({
   },
   component: AdminResumeProjects,
 })
-
-

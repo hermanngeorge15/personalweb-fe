@@ -39,7 +39,9 @@ function AdminPostsList() {
               cover_url: cover_url || undefined,
               tags,
               status,
-              published_at: publishedAtStr ? new Date(publishedAtStr) : undefined,
+              published_at: publishedAtStr
+                ? new Date(publishedAtStr)
+                : undefined,
             })
             ;(e.currentTarget as HTMLFormElement).reset()
           }}
@@ -88,7 +90,9 @@ function AdminPostsList() {
           </div>
           <div className="grid gap-2 md:grid-cols-3">
             <label className="grid gap-1">
-              <span className="text-muted-foreground text-sm">Published at</span>
+              <span className="text-muted-foreground text-sm">
+                Published at
+              </span>
               <input
                 type="datetime-local"
                 name="published_at"

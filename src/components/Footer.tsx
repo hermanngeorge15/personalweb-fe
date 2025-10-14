@@ -6,7 +6,9 @@ export default function Footer() {
   const meta = useMeta()
   const socials = (() => {
     try {
-      const parsed = meta.data?.socials ? JSON.parse(meta.data.socials) : undefined
+      const parsed = meta.data?.socials
+        ? JSON.parse(meta.data.socials)
+        : undefined
       return parsed ?? {}
     } catch {
       return {}
@@ -35,12 +37,16 @@ export default function Footer() {
                 </span>
               </Link>
               <p className="mt-4 max-w-md text-sm leading-relaxed text-muted-foreground">
-                Backend Software Engineer specializing in Kotlin, Java, Spring Boot, and scalable systems.
-                Founder of Kotlin Server Squad community. Building clean, reliable backend solutions.
+                Backend Software Engineer specializing in Kotlin, Java, Spring Boot, and
+                scalable systems. Founder of Kotlin Server Squad community. Building clean,
+                reliable backend solutions.
               </p>
               <div className="mt-6 flex items-center gap-3">
                 <a
-                  href={(socials.linkedin as string) || 'https://www.linkedin.com/in/your-handle'}
+                  href={
+                    (socials.linkedin as string) ||
+                    'https://www.linkedin.com/in/your-handle'
+                  }
                   target="_blank"
                   rel="noreferrer"
                   aria-label="LinkedIn"
@@ -56,7 +62,10 @@ export default function Footer() {
                   </svg>
                 </a>
                 <a
-                  href={(socials.github as string) || 'https://github.com/your-handle'}
+                  href={
+                    (socials.github as string) ||
+                    'https://github.com/your-handle'
+                  }
                   target="_blank"
                   rel="noreferrer"
                   aria-label="GitHub"
@@ -76,7 +85,10 @@ export default function Footer() {
                   </svg>
                 </a>
                 <a
-                  href={(socials.instagram as string) || 'https://instagram.com/your-handle'}
+                  href={
+                    (socials.instagram as string) ||
+                    'https://instagram.com/your-handle'
+                  }
                   target="_blank"
                   rel="noreferrer"
                   aria-label="Instagram"
@@ -92,7 +104,10 @@ export default function Footer() {
                   </svg>
                 </a>
                 <a
-                  href={(socials.kotlinserversquad as string) || 'https://kotlinserversquad.dev'}
+                  href={
+                    (socials.kotlinserversquad as string) ||
+                    'https://kotlinserversquad.dev'
+                  }
                   target="_blank"
                   rel="noreferrer"
                   aria-label="Kotlin Server Squad"
@@ -199,13 +214,13 @@ export default function Footer() {
 
           {/* Bottom Bar */}
           <div className="mt-12 border-t border-gray-200/50 pt-8">
-            <div className="flex flex-col items-center justify-between gap-4 text-sm text-muted-foreground md:flex-row">
-              <p>
-                © {currentYear} Jiri Hermann. All rights reserved.
-              </p>
+            <div className="text-muted-foreground flex flex-col items-center justify-between gap-4 text-sm md:flex-row">
+              <p>© {currentYear} Jiri Hermann. All rights reserved.</p>
               <p className="flex items-center gap-2">
                 Built with
-                <span className="inline-block animate-pulse text-red-500">♥</span>
+                <span className="inline-block animate-pulse text-red-500">
+                  ♥
+                </span>
                 using React & TypeScript
               </p>
             </div>
@@ -215,4 +230,3 @@ export default function Footer() {
     </footer>
   )
 }
-

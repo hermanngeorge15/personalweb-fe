@@ -20,4 +20,3 @@ export function extractTraceId(traceparent: string): string | null {
   const parts = traceparent.split('-')
   return parts.length >= 2 ? parts[1] : null
 }
-

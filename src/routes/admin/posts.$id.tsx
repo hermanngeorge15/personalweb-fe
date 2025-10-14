@@ -41,7 +41,9 @@ function AdminPostEdit() {
                 cover_url: cover_url || undefined,
                 tags,
                 status,
-                published_at: publishedAtStr ? new Date(publishedAtStr) : undefined,
+                published_at: publishedAtStr
+                  ? new Date(publishedAtStr)
+                  : undefined,
               })
             }}
           >
@@ -102,8 +104,14 @@ function AdminPostEdit() {
               </label>
             </div>
             <label className="grid gap-1">
-              <span className="text-muted-foreground text-sm">Published at</span>
-              <input type="datetime-local" name="published_at" className="w-full rounded border p-2" />
+              <span className="text-muted-foreground text-sm">
+                Published at
+              </span>
+              <input
+                type="datetime-local"
+                name="published_at"
+                className="w-full rounded border p-2"
+              />
             </label>
             <div>
               <button

@@ -30,7 +30,7 @@ async function bootstrap() {
   // Initialize Keycloak (silent SSO if configured)
   try {
     await initAuth()
-  } catch (e) {
+  } catch {
     // Non-fatal at startup; admin routes enforce login via beforeLoad
   }
 

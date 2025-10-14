@@ -35,7 +35,10 @@ function ServicesPage() {
         <div className="pointer-events-none absolute -bottom-24 -right-24 h-64 w-64 rounded-full bg-gradient-to-tr from-emerald-400/20 via-cyan-400/20 to-blue-400/20 blur-3xl" />
         <div className="prose relative max-w-none">
           <h1>Services</h1>
-          <p>I offer end-to-end product development, UI engineering, and design systems work.</p>
+          <p>
+            I offer end-to-end product development, UI engineering, and design
+            systems work.
+          </p>
         </div>
       </section>
     </AppShell>

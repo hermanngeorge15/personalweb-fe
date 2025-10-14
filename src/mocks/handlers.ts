@@ -82,7 +82,10 @@ export const handlers = [
       sections: [
         {
           title: 'Experience',
-          items: ['Company A — Senior Backend Engineer', 'Company B — Backend Developer'],
+          items: [
+            'Company A — Senior Backend Engineer',
+            'Company B — Backend Developer',
+          ],
         },
         {
           title: 'Skills',

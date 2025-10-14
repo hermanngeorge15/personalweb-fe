@@ -21,13 +21,13 @@ export default defineConfig({
     postcss: './postcss.config.js',
   },
   build: {
-    cssCodeSplit: false,  // Disable to ensure all CSS in one file
+    cssCodeSplit: false, // Disable to ensure all CSS in one file
     assetsInlineLimit: 4096,
     rollupOptions: {
       output: {
         manualChunks: {
           'react-vendor': ['react', 'react-dom'],
-          'heroui': ['@heroui/react'],
+          heroui: ['@heroui/react'],
         },
       },
     },
@@ -36,24 +36,20 @@ export default defineConfig({
     port: 3333,
     proxy: {
       '/actuator': {
-        target:
-          process.env.VITE_PROXY_TARGET ?? 'http://localhost:8891',
+        target: process.env.VITE_PROXY_TARGET ?? 'http://localhost:8891',
         changeOrigin: true,
       },
       '/api': {
-        target:
-          process.env.VITE_PROXY_TARGET ?? 'http://localhost:8891',
+        target: process.env.VITE_PROXY_TARGET ?? 'http://localhost:8891',
         changeOrigin: true,
       },
       // BFF session & SSE endpoints (proxy to BE so we avoid CORS and keep HttpOnly cookies)
       '/session': {
-        target:
-          process.env.VITE_PROXY_TARGET ?? 'http://localhost:8891',
+        target: process.env.VITE_PROXY_TARGET ?? 'http://localhost:8891',
         changeOrigin: true,
       },
       '/sse': {
-        target:
-          process.env.VITE_PROXY_TARGET ?? 'http://localhost:8891',
+        target: process.env.VITE_PROXY_TARGET ?? 'http://localhost:8891',
         changeOrigin: true,
       },
     },

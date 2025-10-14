@@ -13,7 +13,9 @@ function AdminResumeLanguages() {
   return (
     <AppShell path="Admin / Resume / Languages">
       <section className="grid gap-6 md:gap-8">
-        <h1 className="text-2xl font-semibold tracking-tight">Resume Languages</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">
+          Resume Languages
+        </h1>
         <form
           className="flex flex-wrap gap-2 rounded border p-3"
           onSubmit={async (e) => {
@@ -26,8 +28,17 @@ function AdminResumeLanguages() {
             ;(e.currentTarget as HTMLFormElement).reset()
           }}
         >
-          <input name="name" placeholder="name" className="rounded border p-2" required />
-          <input name="level" placeholder="level" className="rounded border p-2" />
+          <input
+            name="name"
+            placeholder="name"
+            className="rounded border p-2"
+            required
+          />
+          <input
+            name="level"
+            placeholder="level"
+            className="rounded border p-2"
+          />
           <button
             type="submit"
             className="rounded bg-blue-600 px-3 py-2 text-white disabled:opacity-50"
@@ -41,8 +52,14 @@ function AdminResumeLanguages() {
         {data && (
           <ul className="grid gap-2">
             {data.map((l) => (
-              <li key={l.id} className="flex items-center justify-between rounded border p-3">
-                <span>{l.name}{l.level ? ` — ${l.level}` : ''}</span>
+              <li
+                key={l.id}
+                className="flex items-center justify-between rounded border p-3"
+              >
+                <span>
+                  {l.name}
+                  {l.level ? ` — ${l.level}` : ''}
+                </span>
                 <button
                   className="rounded bg-red-600 px-3 py-1 text-white disabled:opacity-50"
                   onClick={async () => {
@@ -69,5 +86,3 @@ export const Route = createFileRoute({
   path: '/admin/resume/languages',
   component: AdminResumeLanguages,
 })
-
-

@@ -6,12 +6,12 @@ import { useEffect, useState } from 'react'
 import { SEO_DEFAULTS, setHead, setJsonLd } from '@/lib/seo'
 import { MotionSection } from '@/components/MotionSection'
 import { Button } from '@heroui/react'
-import { 
-  formatDate, 
-  calculateReadingTime, 
-  shareOnTwitter, 
-  shareOnLinkedIn, 
-  copyToClipboard 
+import {
+  formatDate,
+  calculateReadingTime,
+  shareOnTwitter,
+  shareOnLinkedIn,
+  copyToClipboard,
 } from '@/lib/blog-utils'
 
 function BlogPost() {
@@ -61,29 +61,38 @@ function BlogPost() {
         <div className="flex items-center justify-center py-20">
           <div className="text-center">
             <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"></div>
-            <p className="mt-4 text-muted-foreground">Loading post...</p>
+            <p className="text-muted-foreground mt-4">Loading post...</p>
           </div>
         </div>
       )}
-      
+
       {isError && (
         <div className="rounded-lg border border-red-200 bg-red-50 p-8 text-center">
-          <svg className="mx-auto h-12 w-12 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-          </svg>
-          <h3 className="mt-4 text-lg font-semibold text-red-900">Failed to load post</h3>
-          <p className="mt-2 text-sm text-red-600">This post may not exist or there was an error loading it.</p>
-          <Button
-            as={Link}
-            to="/blog"
-            className="mt-6"
-            variant="bordered"
+          <svg
+            className="mx-auto h-12 w-12 text-red-400"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
           >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+            />
+          </svg>
+          <h3 className="mt-4 text-lg font-semibold text-red-900">
+            Failed to load post
+          </h3>
+          <p className="mt-2 text-sm text-red-600">
+            This post may not exist or there was an error loading it.
+          </p>
+          <Button as={Link} to="/blog" className="mt-6" variant="bordered">
             ← Back to Blog
           </Button>
         </div>
       )}
-      
+
       {data && (
         <div className="grid gap-8">
           {/* Back Button */}
@@ -94,8 +103,18 @@ function BlogPost() {
               variant="light"
               className="hover:underline"
             >
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              <svg
+                className="h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 19l-7-7 7-7"
+                />
               </svg>
               Back to Blog
             </Button>
@@ -106,7 +125,7 @@ function BlogPost() {
             <div className="relative overflow-hidden rounded-3xl border border-blue-200/50 bg-white/40 p-8 shadow-lg ring-1 ring-blue-500/10 backdrop-blur md:p-12">
               <div className="pointer-events-none absolute -left-24 -top-24 h-64 w-64 rounded-full bg-gradient-to-br from-blue-400/20 via-cyan-400/10 to-teal-400/10 blur-3xl" />
               <div className="pointer-events-none absolute -bottom-24 -right-24 h-64 w-64 rounded-full bg-gradient-to-tr from-green-400/20 via-emerald-400/10 to-teal-400/10 blur-3xl" />
-              
+
               <div className="relative">
                 <h1 className="text-3xl font-bold leading-tight tracking-tight md:text-4xl lg:text-5xl">
                   <span className="bg-gradient-to-br from-blue-600 via-cyan-500 to-green-500 bg-clip-text text-transparent">
@@ -114,24 +133,56 @@ function BlogPost() {
                   </span>
                 </h1>
 
-                <div className="mt-6 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+                <div className="text-muted-foreground mt-6 flex flex-wrap items-center gap-4 text-sm">
                   {data.publishedAt && (
                     <div className="flex items-center gap-2">
-                      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      <svg
+                        className="h-5 w-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                        />
                       </svg>
-                      <span className="font-medium">{formatDate(data.publishedAt)}</span>
+                      <span className="font-medium">
+                        {formatDate(data.publishedAt)}
+                      </span>
                     </div>
                   )}
                   <div className="flex items-center gap-2">
-                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    <svg
+                      className="h-5 w-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
                     </svg>
                     <span>{readingTime} min read</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    <svg
+                      className="h-5 w-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                      />
                     </svg>
                     <span>Jiri Hermann</span>
                   </div>
@@ -152,13 +203,21 @@ function BlogPost() {
 
                 {/* Share Buttons */}
                 <div className="mt-8 flex flex-wrap items-center gap-3">
-                  <span className="text-sm font-medium text-gray-700">Share:</span>
+                  <span className="text-sm font-medium text-gray-700">
+                    Share:
+                  </span>
                   <button
-                    onClick={() => shareOnTwitter(data.title, window.location.href)}
+                    onClick={() =>
+                      shareOnTwitter(data.title, window.location.href)
+                    }
                     className="inline-flex items-center gap-2 rounded-lg bg-black px-4 py-2 text-sm font-medium text-white transition-all hover:scale-105 hover:bg-gray-800"
                   >
-                    <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                    <svg
+                      className="h-4 w-4"
+                      fill="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
                     </svg>
                     Twitter
                   </button>
@@ -166,8 +225,12 @@ function BlogPost() {
                     onClick={() => shareOnLinkedIn(window.location.href)}
                     className="inline-flex items-center gap-2 rounded-lg bg-[#0077B5] px-4 py-2 text-sm font-medium text-white transition-all hover:scale-105 hover:bg-[#006399]"
                   >
-                    <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M4.98 3.5C4.98 4.88 3.86 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zM.5 8h4V23h-4V8zM8 8h3.8v2.05h.05c.53-1 1.84-2.05 3.79-2.05 4.05 0 4.8 2.67 4.8 6.15V23h-4v-7.5c0-1.79-.03-4.1-2.5-4.1-2.5 0-2.88 1.95-2.88 3.98V23h-4V8z"/>
+                    <svg
+                      className="h-4 w-4"
+                      fill="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path d="M4.98 3.5C4.98 4.88 3.86 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zM.5 8h4V23h-4V8zM8 8h3.8v2.05h.05c.53-1 1.84-2.05 3.79-2.05 4.05 0 4.8 2.67 4.8 6.15V23h-4v-7.5c0-1.79-.03-4.1-2.5-4.1-2.5 0-2.88 1.95-2.88 3.98V23h-4V8z" />
                     </svg>
                     LinkedIn
                   </button>
@@ -177,15 +240,35 @@ function BlogPost() {
                   >
                     {copied ? (
                       <>
-                        <svg className="h-4 w-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        <svg
+                          className="h-4 w-4 text-green-600"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M5 13l4 4L19 7"
+                          />
                         </svg>
                         Copied!
                       </>
                     ) : (
                       <>
-                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        <svg
+                          className="h-4 w-4"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                          />
                         </svg>
                         Copy Link
                       </>
@@ -212,15 +295,27 @@ function BlogPost() {
                 </div>
                 <div className="flex-1">
                   <h3 className="text-xl font-bold">About the Author</h3>
-                  <p className="mt-2 text-muted-foreground leading-relaxed">
-                    Jiří Hermann is a Backend Software Engineer specializing in Kotlin, Java, Spring Boot, and scalable systems. 
-                    Founder of Kotlin Server Squad community, building clean and reliable backend solutions.
+                  <p className="text-muted-foreground mt-2 leading-relaxed">
+                    Jiří Hermann is a Backend Software Engineer specializing in
+                    Kotlin, Java, Spring Boot, and scalable systems. Founder of
+                    Kotlin Server Squad community, building clean and reliable
+                    backend solutions.
                   </p>
                   <div className="mt-4 flex gap-3">
-                    <a href="https://www.linkedin.com/in/your-handle" target="_blank" rel="noreferrer" className="text-blue-600 hover:underline text-sm font-medium">
+                    <a
+                      href="https://www.linkedin.com/in/your-handle"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-sm font-medium text-blue-600 hover:underline"
+                    >
                       Follow on LinkedIn →
                     </a>
-                    <a href="https://github.com/your-handle" target="_blank" rel="noreferrer" className="text-blue-600 hover:underline text-sm font-medium">
+                    <a
+                      href="https://github.com/your-handle"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-sm font-medium text-blue-600 hover:underline"
+                    >
                       GitHub →
                     </a>
                   </div>

@@ -4,7 +4,8 @@ import { SEO_DEFAULTS, setHead, setJsonLd } from '@/lib/seo'
 
 function AboutPage() {
   useEffect(() => {
-    const description = 'Learn about Jiří Hermann - Backend Software Engineer from Prague, Czech Republic. Specializing in Kotlin, Java, Spring Boot, and building scalable backend systems. Founder of Kotlin Server Squad community.'
+    const description =
+      'Learn about Jiří Hermann - Backend Software Engineer from Prague, Czech Republic. Specializing in Kotlin, Java, Spring Boot, and building scalable backend systems. Founder of Kotlin Server Squad community.'
     setHead({
       title: `About — ${SEO_DEFAULTS.siteName}`,
       description: description,
@@ -38,7 +39,8 @@ function AboutPage() {
             About
           </h1>
           <p className="text-lg leading-relaxed text-gray-700">
-            Hi there! My name is <strong className="text-gray-900">Jiří Hermann</strong>, and I'm a{' '}
+            Hi there! My name is{' '}
+            <strong className="text-gray-900">Jiří Hermann</strong>, and I'm a{' '}
             <strong className="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
               Backend Software Engineer
             </strong>{' '}
@@ -49,17 +51,20 @@ function AboutPage() {
             passionate about designing clean, reliable, and scalable systems.
           </p>
           <p className="leading-relaxed text-gray-700">
-            I'm based in <strong className="text-gray-900">Prague, Czech Republic</strong>, and I love turning complex 
-            ideas into well-structured backend solutions using{' '}
+            I'm based in{' '}
+            <strong className="text-gray-900">Prague, Czech Republic</strong>,
+            and I love turning complex ideas into well-structured backend
+            solutions using{' '}
             <span className="font-semibold text-blue-700">Kotlin</span> and{' '}
-            <span className="font-semibold text-blue-700">Java</span>. My work revolves around{' '}
+            <span className="font-semibold text-blue-700">Java</span>. My work
+            revolves around{' '}
             <span className="font-medium text-gray-800">Spring Boot</span>,{' '}
             <span className="font-medium text-gray-800">Micronaut</span>,{' '}
             <span className="font-medium text-gray-800">PostgreSQL</span>,{' '}
             <span className="font-medium text-gray-800">Redis</span>,{' '}
             <span className="font-medium text-gray-800">Kafka</span>, and{' '}
-            <span className="font-medium text-gray-800">Docker</span>, always with a focus on clean 
-            architecture and automation.
+            <span className="font-medium text-gray-800">Docker</span>, always
+            with a focus on clean architecture and automation.
           </p>
           <p className="leading-relaxed text-gray-700">
             Beyond engineering, I'm the founder of{' '}
@@ -71,21 +76,26 @@ function AboutPage() {
             >
               Kotlin Server Squad
             </a>{' '}
-            — a community for developers who share a passion for building, learning, and helping each 
-            other grow. It's not just about Kotlin; it's about connecting people across the JVM world 
-            and creating a space where ideas come to life.
+            — a community for developers who share a passion for building,
+            learning, and helping each other grow. It's not just about Kotlin;
+            it's about connecting people across the JVM world and creating a
+            space where ideas come to life.
           </p>
           <p className="leading-relaxed text-gray-700">
             Recently, I've been exploring{' '}
-            <span className="font-semibold text-cyan-700">frontend development</span> with{' '}
-            <span className="font-medium text-gray-800">React</span> and{' '}
-            <span className="font-medium text-gray-800">TypeScript</span> to better understand 
-            full-stack workflows and bridge the gap between backend and user experience.
+            <span className="font-semibold text-cyan-700">
+              frontend development
+            </span>{' '}
+            with <span className="font-medium text-gray-800">React</span> and{' '}
+            <span className="font-medium text-gray-800">TypeScript</span> to
+            better understand full-stack workflows and bridge the gap between
+            backend and user experience.
           </p>
           <div className="mt-8 rounded-2xl border border-blue-200/70 bg-gradient-to-br from-blue-50/80 via-cyan-50/60 to-green-50/80 p-6 shadow-lg shadow-blue-500/5">
             <p className="mb-0 text-base leading-relaxed text-gray-800">
               <strong className="bg-gradient-to-r from-blue-700 to-cyan-700 bg-clip-text text-lg text-transparent">
-                If you're looking for a dedicated engineer who builds with purpose and fosters community,
+                If you're looking for a dedicated engineer who builds with
+                purpose and fosters community,
               </strong>{' '}
               I'd love to connect and see how we can collaborate.
             </p>

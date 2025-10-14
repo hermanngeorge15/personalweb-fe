@@ -13,7 +13,9 @@ function AdminResumeCertificates() {
   return (
     <AppShell path="Admin / Resume / Certificates">
       <section className="grid gap-6 md:gap-8">
-        <h1 className="text-2xl font-semibold tracking-tight">Resume Certificates</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">
+          Resume Certificates
+        </h1>
         <form
           className="grid gap-2 rounded border p-3"
           onSubmit={async (e) => {
@@ -27,8 +29,17 @@ function AdminResumeCertificates() {
           }}
         >
           <div className="grid gap-2 md:grid-cols-2">
-            <input name="name" placeholder="name" className="rounded border p-2" required />
-            <input name="issuer" placeholder="issuer" className="rounded border p-2" />
+            <input
+              name="name"
+              placeholder="name"
+              className="rounded border p-2"
+              required
+            />
+            <input
+              name="issuer"
+              placeholder="issuer"
+              className="rounded border p-2"
+            />
           </div>
           <div>
             <button
@@ -45,8 +56,14 @@ function AdminResumeCertificates() {
         {data && (
           <ul className="grid gap-2">
             {data.map((c) => (
-              <li key={c.id} className="flex items-center justify-between rounded border p-3">
-                <span>{c.name}{c.issuer ? ` — ${c.issuer}` : ''}</span>
+              <li
+                key={c.id}
+                className="flex items-center justify-between rounded border p-3"
+              >
+                <span>
+                  {c.name}
+                  {c.issuer ? ` — ${c.issuer}` : ''}
+                </span>
                 <button
                   className="rounded bg-red-600 px-3 py-1 text-white disabled:opacity-50"
                   onClick={async () => {
@@ -73,5 +90,3 @@ export const Route = createFileRoute({
   path: '/admin/resume/certificates',
   component: AdminResumeCertificates,
 })
-
-

@@ -642,9 +642,13 @@ export function useDeleteResumeCertificate() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: async (input: { id: string }) => {
-      await apiAuth(`/api/resume/certificates/${input.id}`, await authHeader(), {
-        method: 'DELETE',
-      })
+      await apiAuth(
+        `/api/resume/certificates/${input.id}`,
+        await authHeader(),
+        {
+          method: 'DELETE',
+        },
+      )
       return input.id
     },
     onSuccess: () => {

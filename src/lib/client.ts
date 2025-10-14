@@ -9,7 +9,9 @@ function getBasePath() {
     return '' // production: empty base, paths already have /api/ prefix
   }
   const base = import.meta.env.VITE_API_BASE_URL
-  return base && String(base).length > 0 ? String(base) : 'http://localhost:8891'
+  return base && String(base).length > 0
+    ? String(base)
+    : 'http://localhost:8891'
 }
 
 // Middleware to add X-Trace-Id header to every request
@@ -38,5 +40,3 @@ export function createApiConfig() {
 export function getPostApi() {
   return new PostControllerApi(createApiConfig())
 }
-
-

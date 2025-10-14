@@ -2,8 +2,8 @@ name: fe-docker-publish
 
 on:
   push:
-    branches: [ "main" ]
-    tags: [ "v*" ]
+    branches: ['main']
+    tags: ['v*']
   pull_request:
 
 permissions:
@@ -57,7 +57,7 @@ jobs:
 
   deploy:
     if: github.ref == 'refs/heads/main'
-    needs: [ docker ]
+    needs: [docker]
     runs-on: ubuntu-latest
     steps:
       - name: SSH redeploy on server

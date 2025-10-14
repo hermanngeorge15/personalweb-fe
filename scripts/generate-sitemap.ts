@@ -12,7 +12,14 @@ const API_BASE = process.env.VITE_API_BASE_URL || 'http://localhost:8891'
 
 type SitemapUrl = {
   loc: string
-  changefreq: 'always' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly' | 'never'
+  changefreq:
+    | 'always'
+    | 'hourly'
+    | 'daily'
+    | 'weekly'
+    | 'monthly'
+    | 'yearly'
+    | 'never'
   priority: number
   lastmod?: string
 }
@@ -59,7 +66,7 @@ const staticPages: SitemapUrl[] = [
 async function fetchBlogPosts(): Promise<SitemapUrl[]> {
   try {
     console.log(`📡 Fetching blog posts from: ${API_BASE}/api/posts`)
-    
+
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), 10000) // 10s timeout
 
@@ -81,7 +88,9 @@ async function fetchBlogPosts(): Promise<SitemapUrl[]> {
       loc: `${DOMAIN}/blog/${post.slug}`,
       changefreq: 'monthly' as const,
       priority: 0.7,
-      lastmod: post.published_at ? new Date(post.published_at).toISOString().split('T')[0] : undefined,
+      lastmod: post.published_at
+        ? new Date(post.published_at).toISOString().split('T')[0]
+        : undefined,
     }))
   } catch (error) {
     if (error instanceof Error && error.name === 'AbortError') {
@@ -101,9 +110,13 @@ function generateXML(urls: SitemapUrl[]): string {
   <url>
     <loc>${url.loc}</loc>
     <changefreq>${url.changefreq}</changefreq>
-    <priority>${url.priority}</priority>${url.lastmod ? `
-    <lastmod>${url.lastmod}</lastmod>` : ''}
-  </url>`
+    <priority>${url.priority}</priority>${
+      url.lastmod
+        ? `
+    <lastmod>${url.lastmod}</lastmod>`
+        : ''
+    }
+  </url>`,
     )
     .join('')
 

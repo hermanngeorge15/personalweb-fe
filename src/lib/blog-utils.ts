@@ -14,11 +14,11 @@ export function calculateReadingTime(content: string): number {
  */
 export function formatDate(date: Date | string | undefined): string {
   if (!date) return 'Unknown date'
-  
+
   const dateObj = typeof date === 'string' ? new Date(date) : date
-  
+
   if (isNaN(dateObj.getTime())) return 'Unknown date'
-  
+
   return dateObj.toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
@@ -31,21 +31,26 @@ export function formatDate(date: Date | string | undefined): string {
  */
 export function formatRelativeTime(date: Date | string | undefined): string {
   if (!date) return 'Unknown date'
-  
+
   const dateObj = typeof date === 'string' ? new Date(date) : date
-  
+
   if (isNaN(dateObj.getTime())) return 'Unknown date'
-  
+
   const now = new Date()
   const diffInSeconds = Math.floor((now.getTime() - dateObj.getTime()) / 1000)
-  
+
   if (diffInSeconds < 60) return 'Just now'
-  if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} minutes ago`
-  if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`
-  if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)} days ago`
-  if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 604800)} weeks ago`
-  if (diffInSeconds < 31536000) return `${Math.floor(diffInSeconds / 2592000)} months ago`
-  
+  if (diffInSeconds < 3600)
+    return `${Math.floor(diffInSeconds / 60)} minutes ago`
+  if (diffInSeconds < 86400)
+    return `${Math.floor(diffInSeconds / 3600)} hours ago`
+  if (diffInSeconds < 604800)
+    return `${Math.floor(diffInSeconds / 86400)} days ago`
+  if (diffInSeconds < 2592000)
+    return `${Math.floor(diffInSeconds / 604800)} weeks ago`
+  if (diffInSeconds < 31536000)
+    return `${Math.floor(diffInSeconds / 2592000)} months ago`
+
   return `${Math.floor(diffInSeconds / 31536000)} years ago`
 }
 
@@ -71,7 +76,7 @@ export function shareOnTwitter(title: string, url: string) {
   window.open(
     `https://twitter.com/intent/tweet?text=${text}&url=${shareUrl}`,
     '_blank',
-    'width=550,height=420'
+    'width=550,height=420',
   )
 }
 
@@ -80,7 +85,7 @@ export function shareOnLinkedIn(url: string) {
   window.open(
     `https://www.linkedin.com/sharing/share-offsite/?url=${shareUrl}`,
     '_blank',
-    'width=550,height=420'
+    'width=550,height=420',
   )
 }
 
@@ -89,7 +94,6 @@ export function shareOnFacebook(url: string) {
   window.open(
     `https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`,
     '_blank',
-    'width=550,height=420'
+    'width=550,height=420',
   )
 }
-

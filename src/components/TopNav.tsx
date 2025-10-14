@@ -27,10 +27,7 @@ export default function TopNav() {
           </div>
           <ul className="hidden items-center gap-6 text-sm md:flex">
             <li>
-              <a
-                href="/#about-me"
-                className="hover:underline"
-              >
+              <a href="/#about-me" className="hover:underline">
                 About
               </a>
             </li>

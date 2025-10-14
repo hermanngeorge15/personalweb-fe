@@ -5,10 +5,13 @@
  * @param slug - User slug (e.g., 'jirihermann')
  * @param lang - Language code (e.g., 'eng')
  */
-export async function downloadCV(slug: string = 'jirihermann', lang: string = 'eng'): Promise<void> {
+export async function downloadCV(
+  slug: string = 'jirihermann',
+  lang: string = 'eng',
+): Promise<void> {
   try {
     const url = `/api/cv/${slug}.${lang}.pdf`
-    
+
     // Fetch the PDF
     const response = await fetch(url, {
       method: 'GET',
@@ -27,11 +30,11 @@ export async function downloadCV(slug: string = 'jirihermann', lang: string = 'e
     const link = document.createElement('a')
     link.href = downloadUrl
     link.download = `${slug}-cv-${lang}.pdf`
-    
+
     // Trigger download
     document.body.appendChild(link)
     link.click()
-    
+
     // Cleanup
     document.body.removeChild(link)
     window.URL.revokeObjectURL(downloadUrl)
@@ -40,4 +43,3 @@ export async function downloadCV(slug: string = 'jirihermann', lang: string = 'e
     throw error
   }
 }
-

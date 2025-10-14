@@ -17,8 +17,9 @@ function AdminTestimonials() {
           <h1 className="text-2xl font-semibold tracking-tight">
             Testimonials Management
           </h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Add testimonials from LinkedIn or other sources. Include author name, role, avatar URL, and the quote.
+          <p className="text-muted-foreground mt-2 text-sm">
+            Add testimonials from LinkedIn or other sources. Include author
+            name, role, avatar URL, and the quote.
           </p>
         </div>
 
@@ -89,8 +90,9 @@ function AdminTestimonials() {
                 placeholder="https://example.com/avatar.jpg"
                 className="w-full rounded border p-2"
               />
-              <p className="mt-1 text-xs text-muted-foreground">
-                Tip: Right-click on LinkedIn profile picture → Copy image address
+              <p className="text-muted-foreground mt-1 text-xs">
+                Tip: Right-click on LinkedIn profile picture → Copy image
+                address
               </p>
             </div>
             <div>
@@ -117,7 +119,9 @@ function AdminTestimonials() {
         <div className="rounded-xl border bg-white/60 p-6 shadow-sm">
           <h2 className="mb-4 text-lg font-semibold">Existing Testimonials</h2>
           {isLoading && <div>Loading…</div>}
-          {isError && <div className="text-red-600">Failed to load testimonials.</div>}
+          {isError && (
+            <div className="text-red-600">Failed to load testimonials.</div>
+          )}
           {data && (
             <ul className="grid gap-3">
               {data.map((t) => (
@@ -138,13 +142,23 @@ function AdminTestimonials() {
                   )}
                   <div className="flex-1">
                     <div className="font-semibold">{t.author}</div>
-                    {t.role && <div className="text-sm text-muted-foreground">{t.role}</div>}
-                    <p className="mt-2 italic text-sm text-muted-foreground">"{t.quote}"</p>
+                    {t.role && (
+                      <div className="text-muted-foreground text-sm">
+                        {t.role}
+                      </div>
+                    )}
+                    <p className="text-muted-foreground mt-2 text-sm italic">
+                      "{t.quote}"
+                    </p>
                   </div>
                   <button
                     className="rounded bg-red-600 px-3 py-1 text-sm text-white transition-colors hover:bg-red-700 disabled:opacity-50"
                     onClick={async () => {
-                      if (confirm('Are you sure you want to delete this testimonial?')) {
+                      if (
+                        confirm(
+                          'Are you sure you want to delete this testimonial?',
+                        )
+                      ) {
                         await deleteTestimonial.mutateAsync({ id: t.id })
                       }
                     }}

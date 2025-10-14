@@ -2,17 +2,17 @@ import { useEffect, useMemo } from 'react'
 import { ensureKeycloakAuth } from '@/lib/keycloak'
 import AppShell from '@/components/AppShell'
 import { useParams } from '@tanstack/react-router'
-import {
-  useResumeProjects,
-  useUpdateResumeProject,
-} from '@/lib/queries'
+import { useResumeProjects, useUpdateResumeProject } from '@/lib/queries'
 
 function AdminResumeProjectEdit() {
   const { id } = useParams({ from: '/admin/resume/projects/$id' })
   const list = useResumeProjects()
   const update = useUpdateResumeProject()
 
-  const project = useMemo(() => list.data?.find((p) => p.id === id), [list.data, id])
+  const project = useMemo(
+    () => list.data?.find((p) => p.id === id),
+    [list.data, id],
+  )
 
   useEffect(() => {
     // ensure list is fetched
@@ -58,8 +58,18 @@ function AdminResumeProjectEdit() {
             }}
           >
             <div className="grid gap-2 md:grid-cols-2">
-              <input name="company" defaultValue={project.company} placeholder="company" className="rounded border p-2" />
-              <input name="projectName" defaultValue={project.projectName} placeholder="project name" className="rounded border p-2" />
+              <input
+                name="company"
+                defaultValue={project.company}
+                placeholder="company"
+                className="rounded border p-2"
+              />
+              <input
+                name="projectName"
+                defaultValue={project.projectName}
+                placeholder="project name"
+                className="rounded border p-2"
+              />
             </div>
             <div className="grid gap-2 md:grid-cols-2">
               <label className="grid gap-1">
@@ -67,7 +77,11 @@ function AdminResumeProjectEdit() {
                 <input
                   name="from"
                   type="datetime-local"
-                  defaultValue={project.from ? new Date(project.from).toISOString().slice(0, 16) : ''}
+                  defaultValue={
+                    project.from
+                      ? new Date(project.from).toISOString().slice(0, 16)
+                      : ''
+                  }
                   className="rounded border p-2"
                 />
               </label>
@@ -76,12 +90,21 @@ function AdminResumeProjectEdit() {
                 <input
                   name="until"
                   type="datetime-local"
-                  defaultValue={project.until ? new Date(project.until).toISOString().slice(0, 16) : ''}
+                  defaultValue={
+                    project.until
+                      ? new Date(project.until).toISOString().slice(0, 16)
+                      : ''
+                  }
                   className="rounded border p-2"
                 />
               </label>
             </div>
-            <textarea name="description" defaultValue={project.description} placeholder="description" className="min-h-[120px] rounded border p-2" />
+            <textarea
+              name="description"
+              defaultValue={project.description}
+              placeholder="description"
+              className="min-h-[120px] rounded border p-2"
+            />
             <input
               name="responsibilities"
               defaultValue={(project.responsibilities ?? []).join(', ')}
@@ -95,8 +118,18 @@ function AdminResumeProjectEdit() {
               className="rounded border p-2"
             />
             <div className="grid gap-2 md:grid-cols-2">
-              <input name="repoUrl" defaultValue={project.repoUrl} placeholder="repo URL" className="rounded border p-2" />
-              <input name="demoUrl" defaultValue={project.demoUrl} placeholder="demo URL" className="rounded border p-2" />
+              <input
+                name="repoUrl"
+                defaultValue={project.repoUrl}
+                placeholder="repo URL"
+                className="rounded border p-2"
+              />
+              <input
+                name="demoUrl"
+                defaultValue={project.demoUrl}
+                placeholder="demo URL"
+                className="rounded border p-2"
+              />
             </div>
             <div>
               <button
@@ -121,5 +154,3 @@ export const Route = createFileRoute({
   },
   component: AdminResumeProjectEdit,
 })
-
-

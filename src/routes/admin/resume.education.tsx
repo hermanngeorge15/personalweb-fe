@@ -13,7 +13,9 @@ function AdminResumeEducation() {
   return (
     <AppShell path="Admin / Resume / Education">
       <section className="grid gap-6 md:gap-8">
-        <h1 className="text-2xl font-semibold tracking-tight">Resume Education</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">
+          Resume Education
+        </h1>
         <form
           className="grid gap-2 rounded border p-3"
           onSubmit={async (e) => {
@@ -28,9 +30,22 @@ function AdminResumeEducation() {
           }}
         >
           <div className="grid gap-2 md:grid-cols-3">
-            <input name="institution" placeholder="institution" className="rounded border p-2" required />
-            <input name="degree" placeholder="degree" className="rounded border p-2" />
-            <input name="field" placeholder="field" className="rounded border p-2" />
+            <input
+              name="institution"
+              placeholder="institution"
+              className="rounded border p-2"
+              required
+            />
+            <input
+              name="degree"
+              placeholder="degree"
+              className="rounded border p-2"
+            />
+            <input
+              name="field"
+              placeholder="field"
+              className="rounded border p-2"
+            />
           </div>
           <div>
             <button
@@ -47,8 +62,14 @@ function AdminResumeEducation() {
         {data && (
           <ul className="grid gap-2">
             {data.map((ed) => (
-              <li key={ed.id} className="flex items-center justify-between rounded border p-3">
-                <span>{ed.institution}{ed.degree ? ` — ${ed.degree}` : ''}</span>
+              <li
+                key={ed.id}
+                className="flex items-center justify-between rounded border p-3"
+              >
+                <span>
+                  {ed.institution}
+                  {ed.degree ? ` — ${ed.degree}` : ''}
+                </span>
                 <button
                   className="rounded bg-red-600 px-3 py-1 text-white disabled:opacity-50"
                   onClick={async () => {
@@ -75,5 +96,3 @@ export const Route = createFileRoute({
   path: '/admin/resume/education',
   component: AdminResumeEducation,
 })
-
-

@@ -10,4 +10,3 @@ export const RECAPTCHA_ACTIONS = {
 } as const
 
 export { RECAPTCHA_ENABLED, RECAPTCHA_SITE_KEY }
-

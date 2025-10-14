@@ -65,16 +65,18 @@ function ResumePage() {
             {isDownloading ? 'Downloading...' : 'Download PDF'}
           </Button>
         </div>
-        {(projects.isLoading || languages.isLoading || education.isLoading || certificates.isLoading || hobbies.isLoading) && (
-          <div>Loading…</div>
-        )}
-        {(projects.isError || languages.isError || education.isError || certificates.isError || hobbies.isError) && (
-          <div>Failed to load resume.</div>
-        )}
+        {(projects.isLoading ||
+          languages.isLoading ||
+          education.isLoading ||
+          certificates.isLoading ||
+          hobbies.isLoading) && <div>Loading…</div>}
+        {(projects.isError ||
+          languages.isError ||
+          education.isError ||
+          certificates.isError ||
+          hobbies.isError) && <div>Failed to load resume.</div>}
         {
           <div className="prose">
-            
-
             {/* Projects */}
             {projects.data && projects.data.length > 0 && (
               <section>
@@ -86,7 +88,10 @@ function ResumePage() {
                     const formatDate = (value?: string) => {
                       if (!value) return ''
                       const d = new Date(value)
-                      return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short' })
+                      return d.toLocaleDateString(undefined, {
+                        year: 'numeric',
+                        month: 'short',
+                      })
                     }
                     const start = formatDate(p.from)
                     const end = p.until ? formatDate(p.until) : 'Present'
@@ -96,13 +101,17 @@ function ResumePage() {
                         <div className="rounded-xl border bg-white/70 p-4 ring-1 ring-black/5 backdrop-blur">
                           <div className="flex flex-col gap-1 md:flex-row md:items-center md:justify-between">
                             <div>
-                              <div className="text-lg font-semibold">{company}</div>
+                              <div className="text-lg font-semibold">
+                                {company}
+                              </div>
                               {projectName && (
-                                <div className="text-muted-foreground">{projectName}</div>
+                                <div className="text-muted-foreground">
+                                  {projectName}
+                                </div>
                               )}
                             </div>
                             {hasAnyDates && (
-                              <div className="text-sm text-muted-foreground">
+                              <div className="text-muted-foreground text-sm">
                                 {start}
                                 {start && ' – '}
                                 {end}
@@ -110,22 +119,30 @@ function ResumePage() {
                             )}
                           </div>
                           {p.description && (
-                            <p className="mt-3 text-[15px] leading-relaxed">{p.description}</p>
+                            <p className="mt-3 text-[15px] leading-relaxed">
+                              {p.description}
+                            </p>
                           )}
-                          {(p.responsibilities && p.responsibilities.length > 0) && (
-                            <div className="mt-3">
-                              <div className="text-sm font-medium">Responsibilities</div>
-                              <ul className="mt-1 list-disc pl-6 text-[15px]">
-                                {p.responsibilities.map((r, idx) => (
-                                  <li key={idx}>{r}</li>
-                                ))}
-                              </ul>
-                            </div>
-                          )}
-                          {(p.techStack && p.techStack.length > 0) && (
+                          {p.responsibilities &&
+                            p.responsibilities.length > 0 && (
+                              <div className="mt-3">
+                                <div className="text-sm font-medium">
+                                  Responsibilities
+                                </div>
+                                <ul className="mt-1 list-disc pl-6 text-[15px]">
+                                  {p.responsibilities.map((r, idx) => (
+                                    <li key={idx}>{r}</li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                          {p.techStack && p.techStack.length > 0 && (
                             <div className="mt-3 flex flex-wrap gap-2">
                               {p.techStack.map((t, idx) => (
-                                <span key={idx} className="rounded-full border bg-white/60 px-2 py-0.5 text-xs ring-1 ring-black/5 backdrop-blur">
+                                <span
+                                  key={idx}
+                                  className="rounded-full border bg-white/60 px-2 py-0.5 text-xs ring-1 ring-black/5 backdrop-blur"
+                                >
                                   {t}
                                 </span>
                               ))}
@@ -134,12 +151,22 @@ function ResumePage() {
                           {(p.repoUrl || p.demoUrl) && (
                             <div className="mt-3 flex gap-3 text-sm">
                               {p.repoUrl && (
-                                <a className="underline" href={p.repoUrl} target="_blank" rel="noreferrer">
+                                <a
+                                  className="underline"
+                                  href={p.repoUrl}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                >
                                   Repo
                                 </a>
                               )}
                               {p.demoUrl && (
-                                <a className="underline" href={p.demoUrl} target="_blank" rel="noreferrer">
+                                <a
+                                  className="underline"
+                                  href={p.demoUrl}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                >
                                   Demo
                                 </a>
                               )}
@@ -192,7 +219,7 @@ function ResumePage() {
                     <li key={l.id}>
                       <strong>{l.name}</strong>
                       {l.level ? ` — ${l.level}` : ''}
-                  </li>
+                    </li>
                   ))}
                 </ul>
               </section>

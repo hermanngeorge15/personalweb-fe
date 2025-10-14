@@ -8,7 +8,9 @@ function AdminResumeHobbies() {
   return (
     <AppShell path="Admin / Resume / Hobbies">
       <section className="grid gap-6 md:gap-8">
-        <h1 className="text-2xl font-semibold tracking-tight">Resume Hobbies</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">
+          Resume Hobbies
+        </h1>
         <form
           className="grid gap-2 rounded border p-3"
           onSubmit={async (e) => {
@@ -28,8 +30,18 @@ function AdminResumeHobbies() {
             })
           }}
         >
-          <input name="sports" placeholder="sports (comma-separated)" className="rounded border p-2" defaultValue={(data?.sports ?? []).join(', ')} />
-          <input name="others" placeholder="others (comma-separated)" className="rounded border p-2" defaultValue={(data?.others ?? []).join(', ')} />
+          <input
+            name="sports"
+            placeholder="sports (comma-separated)"
+            className="rounded border p-2"
+            defaultValue={(data?.sports ?? []).join(', ')}
+          />
+          <input
+            name="others"
+            placeholder="others (comma-separated)"
+            className="rounded border p-2"
+            defaultValue={(data?.others ?? []).join(', ')}
+          />
           <div>
             <button
               type="submit"
@@ -55,5 +67,3 @@ export const Route = createFileRoute({
   path: '/admin/resume/hobbies',
   component: AdminResumeHobbies,
 })
-
-
