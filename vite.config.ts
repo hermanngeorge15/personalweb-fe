@@ -21,7 +21,7 @@ export default defineConfig({
     postcss: './postcss.config.js',
   },
   build: {
-    cssCodeSplit: true,
+    cssCodeSplit: false,  // Disable to ensure all CSS in one file
     assetsInlineLimit: 4096,
     rollupOptions: {
       output: {
@@ -71,6 +71,8 @@ export default defineConfig({
       'react-markdown',
       'remark-gfm',
       'rehype-highlight',
+      '@heroui/react',
+      '@heroui/theme',
     ],
   },
 })
