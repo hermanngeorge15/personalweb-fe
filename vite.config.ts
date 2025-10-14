@@ -8,7 +8,7 @@ import { tanstackRouter } from '@tanstack/router-plugin/vite'
  * @see https://vitejs.dev/config/
  */
 export default defineConfig({
-  base: './', // Relative paths for Docker/reverse proxy compatibility
+  base: '/', // Absolute paths for proper asset resolution in production
   plugins: [
     tanstackRouter({
       target: 'react',
