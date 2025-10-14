@@ -17,6 +17,21 @@ export default defineConfig({
     react(),
     eslintPlugin(),
   ],
+  css: {
+    postcss: './postcss.config.js',
+  },
+  build: {
+    cssCodeSplit: true,
+    assetsInlineLimit: 4096,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom'],
+          'heroui': ['@heroui/react'],
+        },
+      },
+    },
+  },
   server: {
     port: 3333,
     proxy: {
