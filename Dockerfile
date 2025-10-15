@@ -27,12 +27,40 @@
     COPY package.json pnpm-lock.yaml ./
     RUN pnpm install --frozen-lockfile
     COPY . .
+    
+    # Generate build-info.json BEFORE build in public folder
+    RUN mkdir -p /app/public && \
+      echo '{"buildTime":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'","buildNumber":"'${GITHUB_RUN_NUMBER:-unknown}'","commit":"'${GITHUB_SHA:-unknown}'","branch":"'${GITHUB_REF_NAME:-unknown}'","nodeVersion":"'$(node --version)'","timestamp":'$(date +%s)'}' > /app/public/build-info.json && \
+      echo "=== Generated build-info.json in public/ ===" && \
+      cat /app/public/build-info.json
+    
     RUN pnpm build
+    
+    # Verify it was copied to dist
+    RUN if [ -f /app/dist/build-info.json ]; then \
+      echo "=== ✅ build-info.json found in dist ===" && \
+      cat /app/dist/build-info.json; \
+    else \
+      echo "=== ❌ build-info.json NOT in dist! Copying manually... ===" && \
+      cp /app/public/build-info.json /app/dist/build-info.json && \
+      cat /app/dist/build-info.json; \
+    fi
     
     # ---- Runtime ----
     FROM nginx:1.27-alpine
     COPY ./deploy/nginx.conf /etc/nginx/conf.d/default.conf
     COPY --from=build /app/dist /usr/share/nginx/html
+    
+    # Verify build-info.json exists in nginx html directory
+    RUN ls -lah /usr/share/nginx/html/ && \
+      if [ -f /usr/share/nginx/html/build-info.json ]; then \
+        echo "=== ✅ build-info.json successfully copied to nginx ===" && \
+        cat /usr/share/nginx/html/build-info.json; \
+      else \
+        echo "=== ❌ ERROR: build-info.json NOT found in nginx html directory! ==="; \
+        exit 1; \
+      fi
+    
     EXPOSE 80
     HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
       CMD wget -qO- http://localhost/ || exit 1

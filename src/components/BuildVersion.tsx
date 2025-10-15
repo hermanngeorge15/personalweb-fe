@@ -21,6 +21,12 @@ export function BuildVersion() {
     const fetchBuildInfo = async () => {
       try {
         const response = await fetch('/build-info.json?t=' + Date.now())
+        
+        if (!response.ok) {
+          console.warn('Build info not available (this is normal in local dev)')
+          return
+        }
+        
         const info = await response.json()
         setBuildInfo(info)
 
@@ -34,7 +40,8 @@ export function BuildVersion() {
         // Log to console
         console.log('🏗️ Build Info:', info)
       } catch (error) {
-        console.warn('Could not fetch build info:', error)
+        // Silently fail in dev, build-info.json only exists in production
+        console.debug('Build info not available:', error)
       }
     }
 
