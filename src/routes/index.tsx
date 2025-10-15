@@ -283,16 +283,28 @@ function HomePage() {
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {[
                   {
-                    title: 'Backend Development',
-                    body: 'CraftiDeveloping scalable services, integrations, and business logic',
+                    title: 'Kotlin & Spring Boot',
+                    body: 'Expert in building scalable backend services with Kotlin, Spring Boot, Coroutines, and reactive programming',
                   },
                   {
-                    title: 'Java / Kotlin',
-                    body: 'Building clean, maintainable backend systems on the JVM',
+                    title: 'Microservices Architecture',
+                    body: 'Designing distributed systems with Docker, Kubernetes, OpenShift, and CI/CD automation via GitHub and GitLab',
                   },
                   {
-                    title: 'Spring Boot / Webflux',
-                    body: 'Extensive experience across Spring Boot and Webflux.',
+                    title: 'Database Design',
+                    body: 'Working with PostgreSQL, MongoDB, Cassandra, Oracle, Redis, and Elasticsearch for diverse data needs',
+                  },
+                  {
+                    title: 'API Development',
+                    body: 'Building robust REST APIs, PSD2 integrations, and banking-grade applications with high reliability',
+                  },
+                  {
+                    title: 'Observability & Monitoring',
+                    body: 'Implementing comprehensive monitoring with Grafana, Prometheus, Loki, ELK stack, and Kibana for system insights',
+                  },
+                  {
+                    title: 'Event-Driven Systems',
+                    body: 'Implementing messaging solutions with Kafka, RabbitMQ, and asynchronous processing patterns',
                   },
                 ].map((s) => (
                   <Card
