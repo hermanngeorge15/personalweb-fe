@@ -1,7 +1,6 @@
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Input, Textarea, Button } from '@heroui/react'
 import { useState, useCallback } from 'react'
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3'
 import { api } from '@/lib/api'
@@ -73,56 +72,75 @@ export function ContactForm() {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       {/* Name Field */}
-      <div>
-        <Input
-          label="Name"
-          labelPlacement="outside"
-          placeholder="Your full name"
+      <div className="space-y-2">
+        <label
+          htmlFor="name"
+          className="block text-sm font-semibold text-gray-900"
+        >
+          Name
+        </label>
+        <input
           {...register('name')}
-          isInvalid={!!errors.name}
-          errorMessage={errors.name?.message}
-          variant="bordered"
-          classNames={{
-            input: 'text-base',
-            inputWrapper: 'border-gray-300 hover:border-blue-400 focus-within:!border-blue-500',
-          }}
+          id="name"
+          type="text"
+          placeholder="Your full name"
+          className={`w-full rounded-xl border px-4 py-3 text-base transition-colors ${
+            errors.name
+              ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-500'
+              : 'border-gray-200 bg-white focus:border-blue-500 focus:ring-blue-500'
+          } shadow-sm focus:outline-none focus:ring-2 focus:ring-opacity-50`}
         />
+        {errors.name && (
+          <p className="text-sm text-red-600">{errors.name.message}</p>
+        )}
       </div>
 
       {/* Email Field */}
-      <div>
-        <Input
-          label="Email"
-          type="email"
-          labelPlacement="outside"
-          placeholder="your.email@example.com"
+      <div className="space-y-2">
+        <label
+          htmlFor="email"
+          className="block text-sm font-semibold text-gray-900"
+        >
+          Email
+        </label>
+        <input
           {...register('email')}
-          isInvalid={!!errors.email}
-          errorMessage={errors.email?.message}
-          variant="bordered"
-          classNames={{
-            input: 'text-base',
-            inputWrapper: 'border-gray-300 hover:border-blue-400 focus-within:!border-blue-500',
-          }}
+          id="email"
+          type="email"
+          placeholder="your.email@example.com"
+          className={`w-full rounded-xl border px-4 py-3 text-base transition-colors ${
+            errors.email
+              ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-500'
+              : 'border-gray-200 bg-white focus:border-blue-500 focus:ring-blue-500'
+          } shadow-sm focus:outline-none focus:ring-2 focus:ring-opacity-50`}
         />
+        {errors.email && (
+          <p className="text-sm text-red-600">{errors.email.message}</p>
+        )}
       </div>
 
       {/* Message Field */}
-      <div>
-        <Textarea
-          label="Message"
-          labelPlacement="outside"
-          placeholder="Tell me about your project or inquiry..."
-          minRows={6}
+      <div className="space-y-2">
+        <label
+          htmlFor="message"
+          className="block text-sm font-semibold text-gray-900"
+        >
+          Message
+        </label>
+        <textarea
           {...register('message')}
-          isInvalid={!!errors.message}
-          errorMessage={errors.message?.message}
-          variant="bordered"
-          classNames={{
-            input: 'text-base',
-            inputWrapper: 'border-gray-300 hover:border-blue-400 focus-within:!border-blue-500',
-          }}
+          id="message"
+          rows={6}
+          placeholder="Tell me about your project or inquiry..."
+          className={`w-full rounded-xl border px-4 py-3 text-base transition-colors ${
+            errors.message
+              ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-500'
+              : 'border-gray-200 bg-white focus:border-blue-500 focus:ring-blue-500'
+          } shadow-sm focus:outline-none focus:ring-2 focus:ring-opacity-50 resize-none`}
         />
+        {errors.message && (
+          <p className="text-sm text-red-600">{errors.message.message}</p>
+        )}
       </div>
 
       {/* Error message */}
@@ -174,16 +192,38 @@ export function ContactForm() {
       )}
 
       {/* Submit Button */}
-      <Button
+      <button
         type="submit"
-        isDisabled={isSubmitting}
-        color="primary"
-        size="lg"
-        isLoading={isSubmitting}
-        className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 font-semibold shadow-lg hover:shadow-xl"
+        disabled={isSubmitting}
+        className="w-full rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 px-6 py-3.5 text-base font-semibold text-white shadow-lg transition-all hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-60"
       >
-        {isSubmitting ? 'Sending...' : 'Send Message'}
-      </Button>
+        {isSubmitting ? (
+          <span className="flex items-center justify-center gap-2">
+            <svg
+              className="h-5 w-5 animate-spin"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              />
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              />
+            </svg>
+            Sending...
+          </span>
+        ) : (
+          'Send Message'
+        )}
+      </button>
 
       {/* reCAPTCHA badge notice */}
       {RECAPTCHA_ENABLED && (

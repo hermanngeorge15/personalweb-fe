@@ -3,6 +3,7 @@ import eslintPlugin from '@nabla/vite-plugin-eslint'
 import react from '@vitejs/plugin-react-swc'
 import path from 'path'
 import { tanstackRouter } from '@tanstack/router-plugin/vite'
+import tailwindcss from '@tailwindcss/vite'
 
 /**
  * @see https://vitejs.dev/config/
@@ -10,6 +11,7 @@ import { tanstackRouter } from '@tanstack/router-plugin/vite'
 export default defineConfig({
   base: '/', // Absolute paths for proper asset resolution in production
   plugins: [
+    tailwindcss(),
     tanstackRouter({
       target: 'react',
       autoCodeSplitting: true,
@@ -18,9 +20,6 @@ export default defineConfig({
     react(),
     eslintPlugin(),
   ],
-  css: {
-    postcss: './postcss.config.js',
-  },
   build: {
     cssCodeSplit: false, // Disable to ensure all CSS in one file
     assetsInlineLimit: 4096,

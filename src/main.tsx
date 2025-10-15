@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import { createRouter, RouterProvider } from '@tanstack/react-router'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { HeroUIProvider } from '@heroui/react'
+
 import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3'
 import './styles/globals.css'
 
