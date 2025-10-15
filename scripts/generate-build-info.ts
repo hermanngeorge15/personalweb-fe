@@ -4,7 +4,7 @@
  * This helps verify which version is deployed in production
  */
 
-import { writeFileSync } from 'fs'
+import { writeFileSync, mkdirSync, existsSync } from 'fs'
 import { resolve } from 'path'
 
 const buildInfo = {
@@ -16,7 +16,13 @@ const buildInfo = {
   timestamp: Date.now(),
 }
 
-const outputPath = resolve(process.cwd(), 'public', 'build-info.json')
+const publicDir = resolve(process.cwd(), 'public')
+const outputPath = resolve(publicDir, 'build-info.json')
+
+// Ensure public directory exists
+if (!existsSync(publicDir)) {
+  mkdirSync(publicDir, { recursive: true })
+}
 
 writeFileSync(outputPath, JSON.stringify(buildInfo, null, 2))
 
