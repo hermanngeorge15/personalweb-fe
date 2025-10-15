@@ -166,16 +166,8 @@ function HomePage() {
                       Get in touch
                     </Button>
                   </Link>
-                  <Link to="/services">
-                    <Button
-                      variant="bordered"
-                      className="transition-transform hover:translate-y-[1px]"
-                    >
-                      Services
-                    </Button>
-                  </Link>
                   <Link to="/resume">
-                    <Button variant="light" className="hover:underline">
+                    <Button variant="bordered" className="hover:underline">
                       Resume
                     </Button>
                   </Link>

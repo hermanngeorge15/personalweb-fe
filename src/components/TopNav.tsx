@@ -33,14 +33,6 @@ export default function TopNav() {
             </li>
             <li>
               <Link
-                to="/services"
-                activeProps={{ className: 'font-semibold underline' }}
-              >
-                Services
-              </Link>
-            </li>
-            <li>
-              <Link
                 to="/resume"
                 activeProps={{ className: 'font-semibold underline' }}
               >
@@ -79,15 +71,6 @@ export default function TopNav() {
                 >
                   About
                 </a>
-              </li>
-              <li>
-                <Link
-                  to="/services"
-                  onClick={() => setOpen(false)}
-                  activeProps={{ className: 'font-semibold underline' }}
-                >
-                  Services
-                </Link>
               </li>
               <li>
                 <Link

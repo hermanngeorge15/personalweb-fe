@@ -141,14 +141,6 @@ export default function Footer() {
                 </li>
                 <li>
                   <Link
-                    to="/services"
-                    className="text-muted-foreground transition-colors hover:text-blue-600"
-                  >
-                    Services
-                  </Link>
-                </li>
-                <li>
-                  <Link
                     to="/resume"
                     className="text-muted-foreground transition-colors hover:text-blue-600"
                   >
