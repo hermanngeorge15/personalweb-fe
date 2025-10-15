@@ -112,20 +112,27 @@ function ResumePage() {
                   <h2 className="text-2xl font-bold text-gray-900">Professional Experience</h2>
                 </div>
                 <ul className="grid gap-6">
-                  {projects.data.map((p) => {
+                  {projects.data
+                    .sort((a, b) => {
+                      const dateA = a.startAt ? new Date(a.startAt).getTime() : 0
+                      const dateB = b.startAt ? new Date(b.startAt).getTime() : 0
+                      return dateB - dateA // Most recent first
+                    })
+                    .map((p) => {
                     const company = p.company || '—'
                     const projectName = p.projectName || ''
                     const formatDate = (value?: string) => {
-                      if (!value) return ''
+                      if (!value || value.trim() === '') return ''
                       const d = new Date(value)
-                      return d.toLocaleDateString(undefined, {
+                      return d.toLocaleDateString('en-US', {
                         year: 'numeric',
                         month: 'short',
                       })
                     }
-                    const start = formatDate(p.from)
-                    const end = p.until ? formatDate(p.until) : 'Present'
-                    const hasAnyDates = Boolean(start || end)
+                    const start = formatDate(p.startAt)
+                    const endDate = formatDate(p.endAt)
+                    const end = endDate || 'Present'
+                    const hasAnyDates = Boolean(start)
                     return (
                       <li key={p.id}>
                         <div className="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-6 shadow-sm ring-1 ring-black/5 transition-all hover:-translate-y-1 hover:shadow-lg md:p-8">
@@ -246,7 +253,13 @@ function ResumePage() {
                   <h2 className="text-2xl font-bold text-gray-900">Education</h2>
                 </div>
                 <div className="grid gap-4">
-                  {education.data.map((e) => (
+                  {education.data
+                    .sort((a, b) => {
+                      const dateA = a.since ? new Date(a.since).getTime() : 0
+                      const dateB = b.since ? new Date(b.since).getTime() : 0
+                      return dateB - dateA // Most recent first
+                    })
+                    .map((e) => (
                     <div key={e.id} className="rounded-2xl border border-purple-100 bg-gradient-to-br from-purple-50/50 to-white p-6 shadow-sm ring-1 ring-black/5 backdrop-blur transition-all hover:-translate-y-0.5 hover:shadow-md">
                       <div className="font-semibold text-gray-900">{e.institution}</div>
                       {e.degree && <div className="mt-1 text-sm text-gray-600">{e.degree}</div>}
@@ -268,7 +281,13 @@ function ResumePage() {
                   <h2 className="text-2xl font-bold text-gray-900">Certificates</h2>
                 </div>
                 <div className="grid gap-4 sm:grid-cols-2">
-                  {certificates.data.map((c) => (
+                  {certificates.data
+                    .sort((a, b) => {
+                      const dateA = a.startAt ? new Date(a.startAt).getTime() : 0
+                      const dateB = b.startAt ? new Date(b.startAt).getTime() : 0
+                      return dateB - dateA // Most recent first
+                    })
+                    .map((c) => (
                     <div key={c.id} className="rounded-2xl border border-amber-100 bg-gradient-to-br from-amber-50/50 to-white p-5 shadow-sm ring-1 ring-black/5 backdrop-blur transition-all hover:-translate-y-0.5 hover:shadow-md">
                       <div className="font-semibold text-gray-900">{c.name}</div>
                       {c.issuer && <div className="mt-1 text-sm text-gray-600">{c.issuer}</div>}

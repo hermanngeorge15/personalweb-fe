@@ -16,86 +16,93 @@ import { mapValues } from '../runtime';
 /**
  * 
  * @export
- * @interface ProjectUpsertRequest
+ * @interface ResumeProjectEntity
  */
-export interface ProjectUpsertRequest {
+export interface ResumeProjectEntity {
     /**
      * 
      * @type {string}
-     * @memberof ProjectUpsertRequest
+     * @memberof ResumeProjectEntity
+     */
+    id?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResumeProjectEntity
      */
     company?: string;
     /**
      * 
      * @type {string}
-     * @memberof ProjectUpsertRequest
+     * @memberof ResumeProjectEntity
      */
     projectName?: string;
     /**
      * 
      * @type {Date}
-     * @memberof ProjectUpsertRequest
+     * @memberof ResumeProjectEntity
      */
-    from?: Date;
+    startAt?: Date;
     /**
      * 
      * @type {Date}
-     * @memberof ProjectUpsertRequest
+     * @memberof ResumeProjectEntity
      */
-    until?: Date;
+    endAt?: Date;
     /**
      * 
      * @type {string}
-     * @memberof ProjectUpsertRequest
+     * @memberof ResumeProjectEntity
      */
     description?: string;
     /**
      * 
      * @type {Array<string>}
-     * @memberof ProjectUpsertRequest
+     * @memberof ResumeProjectEntity
      */
     responsibilities?: Array<string>;
     /**
      * 
      * @type {Array<string>}
-     * @memberof ProjectUpsertRequest
+     * @memberof ResumeProjectEntity
      */
     techStack?: Array<string>;
     /**
      * 
      * @type {string}
-     * @memberof ProjectUpsertRequest
+     * @memberof ResumeProjectEntity
      */
     repoUrl?: string;
     /**
      * 
      * @type {string}
-     * @memberof ProjectUpsertRequest
+     * @memberof ResumeProjectEntity
      */
     demoUrl?: string;
 }
 
 /**
- * Check if a given object implements the ProjectUpsertRequest interface.
+ * Check if a given object implements the ResumeProjectEntity interface.
  */
-export function instanceOfProjectUpsertRequest(value: object): value is ProjectUpsertRequest {
+export function instanceOfResumeProjectEntity(value: object): value is ResumeProjectEntity {
     return true;
 }
 
-export function ProjectUpsertRequestFromJSON(json: any): ProjectUpsertRequest {
-    return ProjectUpsertRequestFromJSONTyped(json, false);
+export function ResumeProjectEntityFromJSON(json: any): ResumeProjectEntity {
+    return ResumeProjectEntityFromJSONTyped(json, false);
 }
 
-export function ProjectUpsertRequestFromJSONTyped(json: any, ignoreDiscriminator: boolean): ProjectUpsertRequest {
+export function ResumeProjectEntityFromJSONTyped(json: any, ignoreDiscriminator: boolean): ResumeProjectEntity {
     if (json == null) {
         return json;
     }
     return {
         
+        'id': json['id'] == null ? undefined : json['id'],
         'company': json['company'] == null ? undefined : json['company'],
         'projectName': json['projectName'] == null ? undefined : json['projectName'],
-        'from': json['from'] == null ? undefined : (new Date(json['from'])),
-        'until': json['until'] == null ? undefined : (new Date(json['until'])),
+        'startAt': json['startAt'] == null ? undefined : (new Date(json['startAt'])),
+        'endAt': json['endAt'] == null ? undefined : (new Date(json['endAt'])),
         'description': json['description'] == null ? undefined : json['description'],
         'responsibilities': json['responsibilities'] == null ? undefined : json['responsibilities'],
         'techStack': json['techStack'] == null ? undefined : json['techStack'],
@@ -104,21 +111,22 @@ export function ProjectUpsertRequestFromJSONTyped(json: any, ignoreDiscriminator
     };
 }
 
-export function ProjectUpsertRequestToJSON(json: any): ProjectUpsertRequest {
-    return ProjectUpsertRequestToJSONTyped(json, false);
+export function ResumeProjectEntityToJSON(json: any): ResumeProjectEntity {
+    return ResumeProjectEntityToJSONTyped(json, false);
 }
 
-export function ProjectUpsertRequestToJSONTyped(value?: ProjectUpsertRequest | null, ignoreDiscriminator: boolean = false): any {
+export function ResumeProjectEntityToJSONTyped(value?: ResumeProjectEntity | null, ignoreDiscriminator: boolean = false): any {
     if (value == null) {
         return value;
     }
 
     return {
         
+        'id': value['id'],
         'company': value['company'],
         'projectName': value['projectName'],
-        'from': value['from'] == null ? undefined : ((value['from']).toISOString()),
-        'until': value['until'] == null ? undefined : ((value['until']).toISOString()),
+        'startAt': value['startAt'] == null ? undefined : ((value['startAt']).toISOString()),
+        'endAt': value['endAt'] == null ? undefined : ((value['endAt']).toISOString()),
         'description': value['description'],
         'responsibilities': value['responsibilities'],
         'techStack': value['techStack'],

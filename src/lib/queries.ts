@@ -65,8 +65,8 @@ export type ResumeProject = {
   id: string
   company?: string
   projectName?: string
-  from?: string
-  until?: string
+  startAt?: string
+  endAt?: string
   description?: string
   responsibilities?: string[]
   techStack?: string[]
@@ -96,8 +96,8 @@ export type ResumeCertificate = {
   id: string
   name?: string
   issuer?: string
-  from?: string
-  to?: string
+  startAt?: string
+  endAt?: string
   description?: string
   certificateId?: string
   url?: string
@@ -463,8 +463,8 @@ export function useUpdateResumeProject() {
         body: JSON.stringify({
           company: input.company,
           projectName: input.projectName,
-          from: input.from,
-          until: input.until,
+          from: input.startAt,
+          until: input.endAt,
           description: input.description,
           responsibilities: input.responsibilities,
           techStack: input.techStack,
@@ -623,8 +623,8 @@ export function useUpdateResumeCertificate() {
         body: JSON.stringify({
           name: input.name,
           issuer: input.issuer,
-          from: input.from,
-          to: input.to,
+          from: input.startAt,
+          to: input.endAt,
           description: input.description,
           certificateId: input.certificateId,
           url: input.url,

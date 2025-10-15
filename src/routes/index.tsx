@@ -287,8 +287,8 @@ function HomePage() {
                     body: 'Expert in building scalable backend services with Kotlin, Spring Boot, Coroutines, and reactive programming',
                   },
                   {
-                    title: 'Microservices Architecture',
-                    body: 'Designing distributed systems with Docker, Kubernetes, OpenShift, and CI/CD automation via GitHub and GitLab',
+                    title: 'System Integration & APIs',
+                    body: 'Building seamless integrations with banking systems, payment gateways, and third-party services via REST and messaging',
                   },
                   {
                     title: 'Database Design',
