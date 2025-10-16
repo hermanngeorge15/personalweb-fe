@@ -23,7 +23,17 @@ export async function api<T>(path: string, init?: RequestInit): Promise<T> {
     throw new Error(`HTTP ${res.status} ${res.statusText} ${errorBody}`)
   }
 
-  if (res.status === 204) {
+  // Handle responses with no content (204 No Content, 202 Accepted)
+  if (res.status === 204 || res.status === 202) {
+    return undefined as unknown as T
+  }
+
+  // Check if response has content before parsing JSON
+  const contentType = res.headers.get('content-type')
+  const contentLength = res.headers.get('content-length')
+  
+  // Return undefined for empty responses
+  if (contentLength === '0' || !contentType?.includes('application/json')) {
     return undefined as unknown as T
   }
 
