@@ -3,6 +3,7 @@ import { useTestimonials } from '@/lib/queries'
 import { MotionSection } from '@/components/MotionSection'
 import { useEffect } from 'react'
 import { SEO_DEFAULTS, setHead } from '@/lib/seo'
+import { createFileRoute } from '@tanstack/react-router'
 
 function TestimonialsPage() {
   const { data, isLoading, isError } = useTestimonials()

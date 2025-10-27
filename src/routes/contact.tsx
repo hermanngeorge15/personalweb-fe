@@ -2,6 +2,7 @@ import AppShell from '@/components/AppShell'
 import { ContactForm } from '@/components/ContactForm'
 import { useEffect } from 'react'
 import { SEO_DEFAULTS, setHead } from '@/lib/seo'
+import { createFileRoute } from '@tanstack/react-router'
 
 function ContactPage() {
   useEffect(() => {

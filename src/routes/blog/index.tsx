@@ -1,6 +1,6 @@
 import AppShell from '@/components/AppShell'
 import { usePosts } from '@/lib/queries'
-import { Link } from '@tanstack/react-router'
+import { Link, createFileRoute } from '@tanstack/react-router'
 import { useEffect } from 'react'
 import { SEO_DEFAULTS, setHead } from '@/lib/seo'
 import { Skeleton } from '@heroui/react'
