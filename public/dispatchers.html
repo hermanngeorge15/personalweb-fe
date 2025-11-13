@@ -1,0 +1,1744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kotlin Coroutines Dispatcher Visualizer - Complete Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        /* Scenarios Section */
+        .scenarios-section {
+            background: #f8f9ff;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 2px solid #667eea;
+        }
+
+        .scenarios-title {
+            font-size: 1.4em;
+            color: #667eea;
+            margin-bottom: 15px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .scenarios-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .scenario-card {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid #e0e0e0;
+            position: relative;
+        }
+
+        .scenario-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+            border-color: #667eea;
+        }
+
+        .scenario-card.active {
+            border-color: #4CAF50;
+            background: #e8f5e9;
+        }
+
+        .scenario-emoji {
+            font-size: 2em;
+            margin-bottom: 8px;
+        }
+
+        .scenario-name {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 6px;
+            font-size: 1.05em;
+        }
+
+        .scenario-desc {
+            font-size: 0.85em;
+            color: #666;
+            line-height: 1.4;
+            margin-bottom: 8px;
+        }
+
+        .scenario-tag {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.7em;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        .tag-good {
+            background: #c8e6c9;
+            color: #2e7d32;
+        }
+
+        .tag-pitfall {
+            background: #ffcdd2;
+            color: #c62828;
+        }
+
+        .tag-learn {
+            background: #bbdefb;
+            color: #1565c0;
+        }
+
+        .tag-advanced {
+            background: #ffe0b2;
+            color: #e65100;
+        }
+
+        /* Alert System */
+        .alert-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 380px;
+            max-width: 90vw;
+            z-index: 1000;
+        }
+
+        .alert {
+            background: white;
+            border-radius: 12px;
+            padding: 18px;
+            margin-bottom: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+            border-left: 5px solid;
+            animation: slideInRight 0.3s ease-out;
+            display: none;
+        }
+
+        .alert.show {
+            display: block;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .alert.info { border-left-color: #2196F3; }
+        .alert.success { border-left-color: #4CAF50; }
+        .alert.warning { border-left-color: #ff9800; }
+        .alert.error { border-left-color: #f44336; }
+
+        .alert-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .alert-icon {
+            font-size: 1.3em;
+        }
+
+        .alert-title {
+            font-weight: bold;
+            font-size: 1em;
+            color: #333;
+        }
+
+        .alert-message {
+            color: #666;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 24px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+
+        .btn-default {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-io {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .btn-clear {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 18px 20px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+            transition: transform 0.3s;
+        }
+
+        .stat-box:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+        }
+
+        .stat-label {
+            font-size: 0.85em;
+            opacity: 0.95;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            line-height: 1;
+        }
+
+        .scheduler {
+            border: 3px solid #667eea;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            background: #f8f9ff;
+        }
+
+        .scheduler-title {
+            font-size: 1.5em;
+            color: #667eea;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .queues {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .queue {
+            flex: 1;
+            min-width: 300px;
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .queue-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            padding: 8px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .cpu-queue-title {
+            background: #667eea;
+            color: white;
+        }
+
+        .blocking-queue-title {
+            background: #f5576c;
+            color: white;
+        }
+
+        .queue-tasks {
+            display: flex;
+            gap: 8px;
+            min-height: 60px;
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 5px;
+            flex-wrap: wrap;
+            align-items: flex-start;
+        }
+
+        .task {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            animation: taskAppear 0.3s ease-out;
+            cursor: pointer;
+            transition: transform 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .task:hover {
+            transform: scale(1.1);
+        }
+
+        .task-cpu {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .task-blocking {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        @keyframes taskAppear {
+            from {
+                transform: scale(0);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .workers {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .worker {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+        }
+
+        .worker.active {
+            border: 3px solid #4CAF50;
+            box-shadow: 0 0 20px rgba(76, 175, 80, 0.4);
+        }
+
+        .worker.parked {
+            opacity: 0.5;
+        }
+
+        .worker-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .worker-name {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .worker-status {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+
+        .status-executing {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .status-parked {
+            background: #9e9e9e;
+            color: white;
+        }
+
+        .worker-current {
+            min-height: 60px;
+            margin-bottom: 10px;
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .worker-queue {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+            min-height: 60px;
+            padding: 8px;
+            background: #fafafa;
+            border-radius: 5px;
+        }
+
+        .local-queue-label {
+            font-size: 0.85em;
+            color: #666;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .legend {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9ff;
+            border-radius: 10px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .legend-color {
+            width: 30px;
+            height: 30px;
+            border-radius: 5px;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        .worker.active .worker-current {
+            animation: pulse 1s infinite;
+        }
+
+        .info-panel {
+            background: #e3f2fd;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 5px;
+        }
+
+        .info-panel h3 {
+            color: #1976D2;
+            margin-bottom: 10px;
+        }
+
+        .info-panel p {
+            color: #333;
+            line-height: 1.6;
+        }
+
+        /* Event Log */
+        .log-section {
+            background: #1e1e1e;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            max-height: 250px;
+            overflow-y: auto;
+        }
+
+        .log-title {
+            color: #fff;
+            font-weight: bold;
+            margin-bottom: 12px;
+            font-size: 1.1em;
+        }
+
+        .log-entry {
+            padding: 6px 10px;
+            margin-bottom: 4px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85em;
+            display: flex;
+            gap: 10px;
+        }
+
+        .log-time {
+            color: #888;
+            min-width: 70px;
+        }
+
+        .log-message {
+            color: #e0e0e0;
+            flex: 1;
+        }
+
+        .log-entry.info { background: rgba(33, 150, 243, 0.1); }
+        .log-entry.success { background: rgba(76, 175, 80, 0.1); }
+        .log-entry.warning { background: rgba(255, 152, 0, 0.1); }
+        .log-entry.error { background: rgba(244, 67, 54, 0.1); }
+
+        .log-message.success { color: #81c784; }
+        .log-message.warning { color: #ffb74d; }
+        .log-message.error { color: #e57373; }
+
+        /* Explanation boxes */
+        .explain-box {
+            background: #fff3e0;
+            border-left: 4px solid #ff9800;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+
+        .explain-box.success {
+            background: #e8f5e9;
+            border-left-color: #4CAF50;
+        }
+
+        .explain-box.error {
+            background: #ffebee;
+            border-left-color: #f44336;
+        }
+
+        .explain-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .explain-text {
+            font-size: 0.9em;
+            line-height: 1.6;
+            color: #555;
+        }
+
+        /* Memory/Resource indicators */
+        .resource-bar {
+            background: #e0e0e0;
+            height: 24px;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-top: 8px;
+            position: relative;
+        }
+
+        .resource-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #8BC34A);
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8em;
+            font-weight: bold;
+            color: white;
+        }
+
+        .resource-fill.warning {
+            background: linear-gradient(90deg, #ff9800, #ffc107);
+        }
+
+        .resource-fill.danger {
+            background: linear-gradient(90deg, #f44336, #e53935);
+        }
+
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: help;
+            border-bottom: 1px dotted #666;
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 220px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 8px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -110px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.85em;
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* Slider Styling */
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            height: 8px;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            border-radius: 5px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border: 3px solid #667eea;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            transition: all 0.2s;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: white;
+            border: 3px solid #667eea;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            transition: all 0.2s;
+        }
+
+        input[type="range"]::-moz-range-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .config-panel {
+            background: linear-gradient(135deg, #f8f9ff 0%, #e8eaf6 100%);
+            border: 2px solid #667eea;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+        }
+
+        .config-title {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Alert Container -->
+    <div class="alert-container" id="alertContainer"></div>
+
+    <div class="container">
+        <h1>🚀 Kotlin Coroutines Dispatcher Visualizer</h1>
+        <p class="subtitle">Interactive learning tool - from basics to advanced pitfalls</p>
+
+        <!-- Scenarios Section -->
+        <div class="scenarios-section">
+            <div class="scenarios-title">🎯 Choose a Scenario</div>
+            <div class="scenarios-grid" id="scenariosGrid"></div>
+            <div class="explain-box">
+                <div class="explain-title">💡 How to use</div>
+                <div class="explain-text">
+                    Click a scenario card above to see it in action. Watch the workers (threads) execute tasks in real-time.
+                    Pay attention to alerts and logs to understand what's happening and why!
+                </div>
+            </div>
+        </div>
+
+        <!-- Configuration Panel -->
+        <div class="config-panel">
+            <div class="config-title">
+                ⚙️ System Configuration
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 20px;">
+                <!-- CPU Cores Configuration -->
+                <div style="background: rgba(255,255,255,0.5); padding: 15px; border-radius: 10px; border: 2px solid #4CAF50;">
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 20px; flex-wrap: wrap; margin-bottom: 12px;">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <label style="font-weight: 600; color: #4CAF50; font-size: 1.05em;">🖥️ CPU Cores:</label>
+                            <input type="range" id="cpuCoresSlider" min="1" max="32" step="1" value="8" 
+                                   style="width: 250px; background: linear-gradient(90deg, #4CAF50 0%, #8BC34A 100%);" oninput="updateCpuCores(this.value)">
+                            <span id="cpuCoresDisplay" style="font-weight: bold; color: #4CAF50; min-width: 50px; font-size: 1.2em;">8</span>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap;">
+                        <span style="font-size: 0.9em; color: #666; font-weight: 600;">Quick presets:</span>
+                        <button class="btn-clear" style="padding: 6px 14px; font-size: 0.85em;" onclick="setCpuCores(2)">2 cores</button>
+                        <button class="btn-clear" style="padding: 6px 14px; font-size: 0.85em;" onclick="setCpuCores(4)">4 cores</button>
+                        <button class="btn-clear" style="padding: 6px 14px; font-size: 0.85em; background: #4CAF50; color: white;" onclick="setCpuCores(8)">8 cores</button>
+                        <button class="btn-clear" style="padding: 6px 14px; font-size: 0.85em;" onclick="setCpuCores(16)">16 cores</button>
+                        <button class="btn-clear" style="padding: 6px 14px; font-size: 0.85em;" onclick="setCpuCores(32)">32 cores</button>
+                    </div>
+                    <div style="background: rgba(76, 175, 80, 0.1); padding: 8px 12px; border-radius: 6px; color: #2e7d32; font-size: 0.85em; margin-top: 10px; text-align: center;">
+                        <strong>ℹ️ Info:</strong> Sets Dispatchers.Default thread pool size. More cores = more parallel CPU work possible.
+                    </div>
+                </div>
+
+                <!-- Task Duration Configuration -->
+                <div style="background: rgba(255,255,255,0.5); padding: 15px; border-radius: 10px; border: 2px solid #667eea;">
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 20px; flex-wrap: wrap; margin-bottom: 12px;">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <label style="font-weight: 600; color: #667eea; font-size: 1.05em;">⏱️ Task Duration:</label>
+                            <input type="range" id="taskDurationSlider" min="100" max="100000" step="100" value="2000" 
+                                   style="width: 250px;" oninput="updateTaskDuration(this.value)">
+                            <span id="taskDurationDisplay" style="font-weight: bold; color: #667eea; min-width: 70px; font-size: 1.1em;">2.0s</span>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap;">
+                        <span style="font-size: 0.9em; color: #666; font-weight: 600;">Quick presets:</span>
+                        <button class="btn-clear" style="padding: 6px 14px; font-size: 0.85em;" onclick="setTaskDuration(100)">⚡⚡ 0.1s</button>
+                        <button class="btn-clear" style="padding: 6px 14px; font-size: 0.85em;" onclick="setTaskDuration(500)">⚡ 0.5s</button>
+                        <button class="btn-clear" style="padding: 6px 14px; font-size: 0.85em;" onclick="setTaskDuration(1000)">🏃 1s</button>
+                        <button class="btn-default" style="padding: 6px 14px; font-size: 0.85em;" onclick="setTaskDuration(2000)">👍 2s</button>
+                        <button class="btn-clear" style="padding: 6px 14px; font-size: 0.85em;" onclick="setTaskDuration(5000)">🚶 5s</button>
+                        <button class="btn-clear" style="padding: 6px 14px; font-size: 0.85em;" onclick="setTaskDuration(10000)">🐢 10s</button>
+                        <button class="btn-clear" style="padding: 6px 14px; font-size: 0.85em;" onclick="setTaskDuration(30000)">🐌 30s</button>
+                        <button class="btn-clear" style="padding: 6px 14px; font-size: 0.85em;" onclick="setTaskDuration(60000)">🦥 60s</button>
+                        <button class="btn-clear" style="padding: 6px 14px; font-size: 0.85em;" onclick="setTaskDuration(100000)">🪨 100s</button>
+                        <button class="btn-clear" style="padding: 6px 14px; font-size: 0.85em;" onclick="customTaskDuration()">✏️ Custom...</button>
+                    </div>
+                    <div style="background: rgba(102, 126, 234, 0.1); padding: 8px 12px; border-radius: 6px; color: #5568d3; font-size: 0.85em; margin-top: 10px; text-align: center;">
+                        <strong>ℹ️ Info:</strong> Range 0.1s - 100s. Ultra-fast for testing, ultra-slow for teaching/presentation.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Manual Controls -->
+        <div class="controls">
+            <button class="btn-default" onclick="dispatchCpuTask()">
+                ⚡ Dispatch CPU Task
+            </button>
+            <button class="btn-io" onclick="dispatchBlockingTask()">
+                💾 Dispatch I/O Task
+            </button>
+            <button class="btn-clear" onclick="addLimitedDispatcher()">
+                ➕ Add Limited(N)
+            </button>
+            <button class="btn-clear" onclick="reset()">
+                🔄 Reset
+            </button>
+            <button class="btn-default" onclick="toggleAutoSimulation()">
+                <span id="autoBtn">▶️ Auto</span>
+            </button>
+        </div>
+
+        <div class="stats">
+            <div class="stat-box" style="background: linear-gradient(135deg, #4CAF50 0%, #8BC34A 100%); color: white;">
+                <div class="stat-label" style="color: rgba(255,255,255,0.9);">🖥️ CPU Cores</div>
+                <div class="stat-value" id="cpuCoresStats" style="color: white;">8</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Total Tasks</div>
+                <div class="stat-value" id="totalTasks">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Active Workers</div>
+                <div class="stat-value" id="activeWorkers">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Completed</div>
+                <div class="stat-value" id="completedTasks">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Total Execution Time</div>
+                <div class="stat-value" id="totalExecutionTime">0s</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Avg Utilization</div>
+                <div class="stat-value" id="avgUtilization">0%</div>
+            </div>
+        </div>
+
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color task-cpu"></div>
+                <span>CPU Task (Dispatchers.Default)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color task-blocking"></div>
+                <span>Blocking Task (Dispatchers.IO)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color status-executing"></div>
+                <span>Worker Executing</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color status-parked"></div>
+                <span>Worker Parked</span>
+            </div>
+        </div>
+
+        <!-- Dispatchers Panel -->
+        <div class="scheduler">
+            <div class="scheduler-title">🎯 Active Dispatchers <button class="btn-clear" style="font-size: 0.8em; padding: 6px 12px; margin-left: 10px;" onclick="showDispatcherInfo()">ℹ️ Info</button></div>
+            <div id="dispatchersPanel" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:15px;margin-bottom:20px;"></div>
+        </div>
+
+        <!-- CPU Cores Visualization -->
+        <div class="scheduler">
+            <div class="scheduler-title">
+                🖥️ Physical CPU Cores 
+                <span style="font-size: 0.85em; color: #4CAF50; font-weight: bold;">(Hardware - ${CPU_CORES} cores)</span>
+            </div>
+            <div style="background: rgba(76,175,80,0.1); padding: 10px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #4CAF50;">
+                <strong>💡 Critical Concept:</strong> Only <strong id="coreCountInfo">8</strong> worker threads can execute <em>simultaneously</em> - one per CPU core! 
+                Other threads wait for cores to become available.
+            </div>
+            <div id="cpuCores" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 20px;"></div>
+        </div>
+
+        <!-- Global Queues & Workers -->
+        <div class="scheduler">
+            <div class="scheduler-title">
+                📦 CoroutineScheduler - Global Queues 
+                <span style="font-size: 0.85em; color: #888; font-weight: normal;">(Shared by ALL dispatchers)</span>
+            </div>
+            <div style="background: rgba(255,193,7,0.1); padding: 10px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #FFC107;">
+                <strong>ℹ️ Key Concept:</strong> All dispatchers (Default, IO, custom limitedParallelism) share these same two global queues and the same thread pool below!
+            </div>
+            <div class="queues">
+                <div class="queue">
+                    <div class="queue-title cpu-queue-title">
+                        🔵 Global CPU Queue
+                        <span style="font-size: 0.75em; font-weight: normal; opacity: 0.8;">(CPU-bound tasks)</span>
+                    </div>
+                    <div class="queue-tasks" id="cpuQueue"></div>
+                </div>
+                <div class="queue">
+                    <div class="queue-title blocking-queue-title">
+                        🟠 Global Blocking Queue
+                        <span style="font-size: 0.75em; font-weight: normal; opacity: 0.8;">(IO/blocking tasks)</span>
+                    </div>
+                    <div class="queue-tasks" id="blockingQueue"></div>
+                </div>
+            </div>
+
+            <div class="scheduler-title">
+                🔧 Worker Thread Pool 
+                <span style="font-size: 0.85em; color: #888; font-weight: normal;">(OS threads - can be MORE than CPU cores!)</span>
+            </div>
+            <div style="background: rgba(102,126,234,0.1); padding: 8px 12px; border-radius: 8px; margin-bottom: 15px; border-left: 3px solid #667eea;">
+                <strong>📌 Note:</strong> When a worker is <strong>executing</strong>, it's scheduled on a CPU core above. 
+                When <strong>parked</strong>, it's idle (no core needed).
+            </div>
+            <div class="workers" id="workers"></div>
+        </div>
+
+        <!-- Event Log -->
+        <div class="log-section">
+            <div class="log-title">📝 Event Log</div>
+            <div id="logContainer"></div>
+        </div>
+
+        <div class="info-panel">
+            <h3>Understanding the visualization:</h3>
+            <p>
+                <strong>Dispatchers:</strong> Control how many tasks can run concurrently<br>
+                <strong>Global Queues:</strong> Shared by all dispatchers, tasks wait here for workers<br>
+                <strong>Workers:</strong> Actual OS threads (green=executing, gray=idle)<br>
+                <strong>Local Queues:</strong> Each worker has its own queue for better cache locality<br>
+                <strong>Work Stealing:</strong> Idle workers steal tasks from busy workers to balance load
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        let CPU_CORES = 8;  // Changed to let so it can be updated
+        const MAX_THREADS = 64;
+        let TASK_DURATION = 2000;  // Changed to let so it can be updated
+
+        // Scenarios definition
+        const SCENARIOS = [
+            {
+                id: 'basic',
+                emoji: '✅',
+                name: 'Basic - Good Practice',
+                desc: 'CPU work on Default, I/O work on IO dispatcher',
+                tag: 'good',
+                tagText: 'BEST PRACTICE'
+            },
+            {
+                id: 'cpuOnIo',
+                emoji: '⚡',
+                name: 'CPU Work on IO',
+                desc: 'Running CPU tasks on IO dispatcher - WASTES threads!',
+                tag: 'pitfall',
+                tagText: 'PITFALL'
+            },
+            {
+                id: 'blockingOnDefault',
+                emoji: '🛑',
+                name: 'Blocking on Default',
+                desc: 'Blocking calls on Default (only 8 threads) - FREEZES system!',
+                tag: 'pitfall',
+                tagText: 'PITFALL'
+            },
+            {
+                id: 'limited',
+                emoji: '🎛️',
+                name: 'Limited Parallelism',
+                desc: 'Control concurrent operations with limitedParallelism(N)',
+                tag: 'learn',
+                tagText: 'LEARN'
+            },
+            {
+                id: 'multiLimited',
+                emoji: '🔄',
+                name: 'Multiple Limited Dispatchers',
+                desc: 'Multiple limitedParallelism() share the same thread pool',
+                tag: 'advanced',
+                tagText: 'ADVANCED'
+            },
+            {
+                id: 'starvation',
+                emoji: '⏳',
+                name: 'Thread Starvation',
+                desc: 'Too many tasks for available threads - queue grows!',
+                tag: 'advanced',
+                tagText: 'ADVANCED'
+            }
+        ];
+
+        // State
+        let state = {
+            dispatchers: [],
+            workers: [],
+            cpuQueue: [],
+            blockingQueue: [],
+            taskCounter: 0,
+            completedTasks: 0,
+            autoRunning: false,
+            currentScenario: null,
+            startTime: Date.now(),
+            cpuCores: []  // Track which worker is on which core
+        };
+
+        // Initialize
+        function init() {
+            renderScenarios();
+            initCpuCores();
+            initWorkers();
+            // Initialize slider visual states
+            updateCpuCores(CPU_CORES);
+            updateTaskDuration(TASK_DURATION);
+            log('System initialized. Choose a scenario to begin!', 'success');
+            log(`🖥️ System Config: ${CPU_CORES} CPU cores, ${TASK_DURATION/1000}s task duration`, 'info');
+            updateAll();
+        }
+
+        // Initialize CPU Cores
+        function initCpuCores() {
+            state.cpuCores = [];
+            for (let i = 0; i < CPU_CORES; i++) {
+                state.cpuCores.push({
+                    id: i,
+                    worker: null,  // Which worker is currently using this core
+                    busy: false
+                });
+            }
+        }
+
+        // Render scenarios
+        function renderScenarios() {
+            const grid = document.getElementById('scenariosGrid');
+            grid.innerHTML = SCENARIOS.map(s => `
+                <div class="scenario-card" onclick="runScenario('${s.id}')" id="scenario-${s.id}">
+                    <div class="scenario-emoji">${s.emoji}</div>
+                    <div class="scenario-name">${s.name}</div>
+                    <div class="scenario-desc">${s.desc}</div>
+                    <span class="scenario-tag tag-${s.tag}">${s.tagText}</span>
+                </div>
+            `).join('');
+        }
+
+        // Init workers
+        function initWorkers() {
+            for (let i = 0; i < CPU_CORES; i++) {
+                state.workers.push({
+                    id: i + 1,
+                    status: 'parked',
+                    currentTask: null,
+                    localQueue: [],
+                    dispatcherName: null,
+                    totalExecutionTime: 0,  // Total ms spent executing
+                    taskCount: 0,           // Number of tasks executed
+                    currentTaskStartTime: null,
+                    coreId: null            // Which CPU core this worker is scheduled on
+                });
+            }
+        }
+
+        // Scenarios
+        function runScenario(id) {
+            reset();
+            state.currentScenario = id;
+            
+            document.querySelectorAll('.scenario-card').forEach(c => c.classList.remove('active'));
+            document.getElementById(`scenario-${id}`).classList.add('active');
+
+            switch(id) {
+                case 'basic': scenarioBasic(); break;
+                case 'cpuOnIo': scenarioCpuOnIo(); break;
+                case 'blockingOnDefault': scenarioBlockingOnDefault(); break;
+                case 'limited': scenarioLimited(); break;
+                case 'multiLimited': scenarioMultiLimited(); break;
+                case 'starvation': scenarioStarvation(); break;
+            }
+        }
+
+        function scenarioBasic() {
+            showAlert('✅ Good Practice', 'Watch CPU work go to Default (8 threads) and I/O work go to IO (64 threads). This is correct!', 'success');
+            log('SCENARIO: Good Practice - Proper dispatcher usage', 'success');
+            
+            addDispatcher('default');
+            addDispatcher('io');
+            
+            setTimeout(() => {
+                log('Dispatching 5 CPU tasks to Default...', 'info');
+                for (let i = 0; i < 5; i++) {
+                    setTimeout(() => dispatchTask(0, 'cpu'), i * 300);
+                }
+            }, 1000);
+            
+            setTimeout(() => {
+                log('Dispatching 10 I/O tasks to IO...', 'info');
+                for (let i = 0; i < 10; i++) {
+                    setTimeout(() => dispatchTask(1, 'blocking'), i * 200);
+                }
+            }, 2500);
+        }
+
+        function scenarioCpuOnIo() {
+            showAlert('⚠️ PITFALL', 'Running CPU work on IO dispatcher wastes threads meant for blocking I/O!', 'warning');
+            log('PITFALL: CPU work on IO dispatcher (WRONG!)', 'error');
+            
+            addDispatcher('io');
+            
+            setTimeout(() => {
+                log('Dispatching 15 CPU tasks to IO dispatcher (BAD!)', 'warning');
+                for (let i = 0; i < 15; i++) {
+                    setTimeout(() => dispatchTask(0, 'cpu', 4000), i * 150);
+                }
+            }, 1000);
+            
+            setTimeout(() => {
+                log('Now trying actual I/O work...', 'info');
+                for (let i = 0; i < 8; i++) {
+                    setTimeout(() => dispatchTask(0, 'blocking'), i * 100);
+                }
+                setTimeout(() => {
+                    showAlert('🔴 Problem!', 'I/O tasks are queued because CPU tasks are hogging threads! Use Default for CPU work.', 'error');
+                    log('I/O tasks starved by CPU tasks!', 'error');
+                }, 1000);
+            }, 3000);
+        }
+
+        function scenarioBlockingOnDefault() {
+            showAlert('🛑 DANGER', 'Blocking on Default (only 8 threads) will freeze the system!', 'error');
+            log('PITFALL: Blocking on Default dispatcher (VERY BAD!)', 'error');
+            
+            addDispatcher('default');
+            
+            setTimeout(() => {
+                log('Dispatching 12 blocking tasks to Default (WRONG!)', 'error');
+                for (let i = 0; i < 12; i++) {
+                    setTimeout(() => dispatchTask(0, 'blocking', 6000), i * 200);
+                }
+            }, 1000);
+            
+            setTimeout(() => {
+                showAlert('💀 System Frozen!', 'All 8 threads blocked! This is why you NEVER block on Default!', 'error');
+                log('All threads blocked! System frozen!', 'error');
+            }, 3000);
+        }
+
+        function scenarioLimited() {
+            showAlert('🎛️ Limited Parallelism', 'Creating a dispatcher limited to 10 concurrent tasks. Great for API rate limiting!', 'info');
+            log('SCENARIO: Using limitedParallelism(10)', 'info');
+            
+            addDispatcher('limited', 10);
+            
+            setTimeout(() => {
+                log('Dispatching 25 tasks to limited(10) dispatcher...', 'info');
+                for (let i = 0; i < 25; i++) {
+                    setTimeout(() => dispatchTask(0, 'blocking'), i * 100);
+                }
+            }, 1000);
+        }
+
+        function scenarioMultiLimited() {
+            showAlert('🔄 Pool Sharing', 'Multiple limitedParallelism() dispatchers share the SAME underlying thread pool!', 'info');
+            log('SCENARIO: Multiple limitedParallelism dispatchers', 'info');
+            
+            addDispatcher('limited', 50);
+            addDispatcher('limited', 50);
+            addDispatcher('limited', 30);
+            
+            setTimeout(() => {
+                log('d1 = IO.limitedParallelism(50)', 'info');
+                log('d2 = IO.limitedParallelism(50)', 'info');
+                log('d3 = IO.limitedParallelism(30)', 'info');
+                log('All share the same thread pool!', 'warning');
+                
+                for (let i = 0; i < 20; i++) {
+                    dispatchTask(0, 'blocking');
+                    dispatchTask(1, 'blocking');
+                    dispatchTask(2, 'blocking');
+                }
+            }, 1500);
+        }
+
+        function scenarioStarvation() {
+            showAlert('⏳ Thread Starvation', '50 tasks on a limited(10) dispatcher. Watch the queue grow!', 'warning');
+            log('SCENARIO: Thread starvation', 'warning');
+            
+            addDispatcher('limited', 10);
+            
+            setTimeout(() => {
+                log('Dispatching 50 tasks to limited(10)...', 'warning');
+                for (let i = 0; i < 50; i++) {
+                    setTimeout(() => dispatchTask(0, 'blocking', 4000), i * 50);
+                }
+            }, 1000);
+        }
+
+        // Add dispatcher
+        function addDispatcher(type, parallelism = null) {
+            const id = state.dispatchers.length;
+            let d;
+
+            if (type === 'default') {
+                d = {id, name: 'Dispatchers.Default', type: 'default', parallelism: CPU_CORES, queue: [], active: 0};
+            } else if (type === 'io') {
+                d = {id, name: 'Dispatchers.IO', type: 'io', parallelism: 64, queue: [], active: 0};
+            } else {
+                d = {id, name: `IO.limitedParallelism(${parallelism})`, type: 'custom', parallelism, queue: [], active: 0};
+            }
+
+            state.dispatchers.push(d);
+            log(`Added: ${d.name}`, 'success');
+            updateAll();
+        }
+
+        function addLimitedDispatcher() {
+            const n = prompt('Enter parallelism limit (e.g., 10, 50, 100):', '20');
+            if (n && !isNaN(n) && n > 0) {
+                addDispatcher('limited', parseInt(n));
+            }
+        }
+
+        // Dispatch task
+        function dispatchTask(dispId, type, duration = TASK_DURATION) {
+            const disp = state.dispatchers[dispId];
+            if (!disp) return;
+
+            const task = {
+                id: ++state.taskCounter,
+                type,
+                duration,
+                dispatcherId: dispId,
+                dispatcherName: disp.name
+            };
+
+            if (disp.active < disp.parallelism) {
+                // Can execute immediately
+                if (type === 'cpu') state.cpuQueue.push(task);
+                else state.blockingQueue.push(task);
+                
+                schedule();
+            } else {
+                // Must queue in dispatcher
+                disp.queue.push(task);
+                log(`Task #${task.id} queued in ${disp.name} (${disp.queue.length} waiting)`, 'warning');
+            }
+
+            updateAll();
+        }
+
+        // Schedule
+        function schedule() {
+            // Try to assign queued tasks to workers
+            state.workers.forEach(w => {
+                if (w.status === 'parked') {
+                    let task = state.cpuQueue.shift() || state.blockingQueue.shift();
+                    if (task) {
+                        assignTask(w, task);
+                    }
+                }
+            });
+
+            // Create workers if needed
+            if ((state.cpuQueue.length > 0 || state.blockingQueue.length > 0) && state.workers.length < MAX_THREADS) {
+                const w = {
+                    id: state.workers.length + 1,
+                    status: 'parked',
+                    currentTask: null,
+                    localQueue: [],
+                    dispatcherName: null,
+                    totalExecutionTime: 0,
+                    taskCount: 0,
+                    currentTaskStartTime: null
+                };
+                state.workers.push(w);
+                log(`Created Worker-${w.id}`);
+                schedule();
+            }
+
+            updateAll();
+        }
+
+        function assignTask(worker, task) {
+            worker.status = 'executing';
+            worker.currentTask = task;
+            worker.dispatcherName = task.dispatcherName;
+            worker.currentTaskStartTime = Date.now();
+
+            // Assign to a CPU core
+            const availableCore = state.cpuCores.find(c => c.worker === null);
+            if (availableCore) {
+                availableCore.worker = worker;
+                availableCore.busy = true;
+                worker.coreId = availableCore.id;
+            } else {
+                worker.coreId = null;  // No core available (should rarely happen)
+            }
+
+            const disp = state.dispatchers[task.dispatcherId];
+            disp.active++;
+
+            const coreMsg = worker.coreId !== null ? ` on Core ${worker.coreId}` : ' (waiting for core)';
+            log(`Worker-${worker.id} executing Task #${task.id} from ${disp.name}${coreMsg}`, 'success');
+
+            setTimeout(() => completeTask(worker, task), task.duration);
+        }
+
+        function completeTask(worker, task) {
+            // Calculate execution time
+            const executionTime = Date.now() - worker.currentTaskStartTime;
+            worker.totalExecutionTime += executionTime;
+            worker.taskCount++;
+            
+            // Release the CPU core
+            if (worker.coreId !== null) {
+                const core = state.cpuCores[worker.coreId];
+                if (core) {
+                    core.worker = null;
+                    core.busy = false;
+                }
+                worker.coreId = null;
+            }
+            
+            worker.status = 'parked';
+            worker.currentTask = null;
+            worker.dispatcherName = null;
+            worker.currentTaskStartTime = null;
+            state.completedTasks++;
+
+            const disp = state.dispatchers[task.dispatcherId];
+            disp.active--;
+
+            log(`Task #${task.id} completed (${(executionTime/1000).toFixed(1)}s on Worker-${worker.id})`, 'success');
+
+            // Check if dispatcher has queued tasks
+            if (disp.queue.length > 0) {
+                const nextTask = disp.queue.shift();
+                if (nextTask.type === 'cpu') state.cpuQueue.push(nextTask);
+                else state.blockingQueue.push(nextTask);
+                log(`Task #${nextTask.id} moved from ${disp.name} queue to global queue`);
+            }
+
+            schedule();
+        }
+
+        // UI Updates
+        function updateAll() {
+            updateStats();
+            renderDispatchers();
+            renderCpuCores();
+            renderQueues();
+            renderWorkers();
+        }
+
+        function updateStats() {
+            const now = Date.now();
+            const activeWorkers = state.workers.filter(w => w.status === 'executing').length;
+            
+            // Calculate total execution time across all workers
+            let totalExecTime = 0;
+            state.workers.forEach(w => {
+                totalExecTime += w.totalExecutionTime;
+                // Add current task time if executing
+                if (w.status === 'executing' && w.currentTaskStartTime) {
+                    totalExecTime += (now - w.currentTaskStartTime);
+                }
+            });
+            
+            // Calculate average utilization
+            const elapsedTime = now - state.startTime;
+            const avgUtilization = state.workers.length > 0 && elapsedTime > 0 ?
+                ((totalExecTime / (state.workers.length * elapsedTime)) * 100).toFixed(1) : 0;
+            
+            document.getElementById('cpuCoresStats').textContent = CPU_CORES;
+            document.getElementById('totalTasks').textContent = state.taskCounter;
+            document.getElementById('activeWorkers').textContent = activeWorkers;
+            document.getElementById('completedTasks').textContent = state.completedTasks;
+            document.getElementById('totalExecutionTime').textContent = (totalExecTime / 1000).toFixed(1) + 's';
+            document.getElementById('avgUtilization').textContent = avgUtilization + '%';
+        }
+
+        function renderDispatchers() {
+            const panel = document.getElementById('dispatchersPanel');
+            if (state.dispatchers.length === 0) {
+                panel.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:#999;padding:20px;">No dispatchers. Choose a scenario or add one manually!</div>';
+                return;
+            }
+
+            panel.innerHTML = state.dispatchers.map(d => `
+                <div style="background:${d.type==='default'?'#e3f2fd':d.type==='io'?'#fce4ec':'#fff3e0'};border-radius:10px;padding:15px;border:2px solid ${d.type==='default'?'#667eea':d.type==='io'?'#f5576c':'#ff9800'};">
+                    <div style="font-weight:bold;margin-bottom:8px;font-size:1.1em;">${d.name}</div>
+                    <div style="font-size:0.85em;color:#666;margin-bottom:8px;">
+                        Max: ${d.parallelism} concurrent
+                    </div>
+                    <div style="background:white;padding:10px;border-radius:6px;margin-bottom:10px;">
+                        <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+                            <span style="color:#666;">Active:</span>
+                            <strong>${d.active} / ${d.parallelism}</strong>
+                        </div>
+                        <div style="display:flex;justify-content:space-between;">
+                            <span style="color:#666;">Queued:</span>
+                            <strong style="color:${d.queue.length>10?'#f44336':'#333'}">${d.queue.length}</strong>
+                        </div>
+                    </div>
+                    <div style="display:flex;gap:8px;">
+                        <button class="btn-default" style="flex:1;padding:8px;font-size:0.85em;" onclick="dispatchTask(${d.id}, 'cpu')">⚡ CPU</button>
+                        <button class="btn-io" style="flex:1;padding:8px;font-size:0.85em;" onclick="dispatchTask(${d.id}, 'blocking')">💾 I/O</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderQueues() {
+            document.getElementById('cpuQueue').innerHTML = state.cpuQueue.map(t => 
+                `<div class="task task-cpu" title="Task ${t.id} from ${t.dispatcherName}">C${t.id}</div>`
+            ).join('');
+            
+            document.getElementById('blockingQueue').innerHTML = state.blockingQueue.map(t => 
+                `<div class="task task-blocking" title="Task ${t.id} from ${t.dispatcherName}">B${t.id}</div>`
+            ).join('');
+        }
+
+        function renderCpuCores() {
+            const container = document.getElementById('cpuCores');
+            container.innerHTML = state.cpuCores.map(core => {
+                const worker = core.worker;
+                const isActive = worker !== null;
+                
+                return `
+                    <div style="
+                        background: ${isActive ? 'linear-gradient(135deg, #4CAF50, #8BC34A)' : 'linear-gradient(135deg, #e0e0e0, #bdbdbd)'};
+                        padding: 15px;
+                        border-radius: 10px;
+                        text-align: center;
+                        color: ${isActive ? 'white' : '#666'};
+                        border: 3px solid ${isActive ? '#2e7d32' : '#999'};
+                        box-shadow: ${isActive ? '0 4px 12px rgba(76, 175, 80, 0.4)' : '0 2px 4px rgba(0,0,0,0.1)'};
+                        transition: all 0.3s ease;
+                    ">
+                        <div style="font-weight: bold; font-size: 1.1em; margin-bottom: 8px;">
+                            🖥️ Core ${core.id}
+                        </div>
+                        <div style="font-size: 0.9em; min-height: 40px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                            ${isActive ? `
+                                <div style="background: rgba(255,255,255,0.3); padding: 6px 10px; border-radius: 6px; margin: 4px 0;">
+                                    <strong>Worker-${worker.id}</strong>
+                                </div>
+                                <div style="font-size: 0.85em; margin-top: 4px;">
+                                    ${worker.currentTask ? 
+                                        `Task ${worker.currentTask.type === 'cpu' ? 'C' : 'B'}${worker.currentTask.id}` : 
+                                        'Executing'
+                                    }
+                                </div>
+                            ` : `
+                                <div style="font-style: italic; opacity: 0.7;">
+                                    💤 Idle
+                                </div>
+                            `}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderWorkers() {
+            const container = document.getElementById('workers');
+            const now = Date.now();
+            
+            container.innerHTML = state.workers.map(w => {
+                // Calculate current execution time including ongoing task
+                let displayTime = w.totalExecutionTime;
+                if (w.status === 'executing' && w.currentTaskStartTime) {
+                    displayTime += (now - w.currentTaskStartTime);
+                }
+                
+                const totalSeconds = (displayTime / 1000).toFixed(1);
+                const utilization = state.taskCounter > 0 ? 
+                    ((w.totalExecutionTime / (now - (state.startTime || now))) * 100).toFixed(1) : 0;
+                
+                const coreInfo = w.coreId !== null ? `🖥️ Core ${w.coreId}` : '⏸️ Not scheduled';
+                
+                return `
+                    <div class="worker ${w.status === 'executing' ? 'active' : 'parked'}">
+                        <div class="worker-header">
+                            <span class="worker-name">Worker-${w.id}</span>
+                            <span class="worker-status status-${w.status === 'executing' ? 'executing' : 'parked'}">
+                                ${w.status === 'executing' ? '⚡ Running' : '💤 Idle'}
+                            </span>
+                        </div>
+                        ${w.status === 'executing' ? `
+                            <div style="background: linear-gradient(135deg, #4CAF50, #8BC34A); color: white; padding: 6px 10px; border-radius: 6px; text-align: center; font-size: 0.9em; font-weight: bold; margin: 8px 0;">
+                                ${coreInfo}
+                            </div>
+                        ` : ''}
+                        <div class="worker-current">
+                            ${w.currentTask ? 
+                                `<div class="task task-${w.currentTask.type}">
+                                    ${w.currentTask.type === 'cpu' ? 'C' : 'B'}${w.currentTask.id}
+                                </div>
+                                <div style="font-size:0.7em;color:#666;margin-top:5px;">${w.dispatcherName||''}</div>` : 
+                                '<span style="color:#999;">No task</span>'
+                            }
+                        </div>
+                        <div style="background:#f0f0f0;padding:8px;border-radius:6px;margin:8px 0;font-size:0.85em;">
+                            <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+                                <span style="color:#666;">⏱️ Execution Time:</span>
+                                <strong style="color:#667eea;">${totalSeconds}s</strong>
+                            </div>
+                            <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+                                <span style="color:#666;">📊 Tasks Completed:</span>
+                                <strong>${w.taskCount}</strong>
+                            </div>
+                            <div style="display:flex;justify-content:space-between;">
+                                <span style="color:#666;">💯 Utilization:</span>
+                                <strong style="color:${utilization > 80 ? '#4CAF50' : utilization > 50 ? '#ff9800' : '#999'};">${utilization}%</strong>
+                            </div>
+                        </div>
+                        <div class="local-queue-label">Local Queue:</div>
+                        <div class="worker-queue">
+                            ${w.localQueue.map(t => 
+                                `<div class="task task-${t.type}">
+                                    ${t.type === 'cpu' ? 'C' : 'B'}${t.id}
+                                </div>`
+                            ).join('')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Alerts & Logging
+        function showAlert(title, msg, type = 'info') {
+            const icons = {info: 'ℹ️', success: '✅', warning: '⚠️', error: '🔴'};
+            const alert = document.createElement('div');
+            alert.className = `alert ${type} show`;
+            alert.innerHTML = `
+                <div class="alert-header">
+                    <span class="alert-icon">${icons[type]}</span>
+                    <span class="alert-title">${title}</span>
+                </div>
+                <div class="alert-message">${msg}</div>
+            `;
+            document.getElementById('alertContainer').appendChild(alert);
+            setTimeout(() => {
+                alert.classList.remove('show');
+                setTimeout(() => alert.remove(), 300);
+            }, 6000);
+        }
+
+        function log(msg, type = 'info') {
+            const container = document.getElementById('logContainer');
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            const time = new Date().toLocaleTimeString();
+            entry.innerHTML = `
+                <span class="log-time">${time}</span>
+                <span class="log-message ${type}">${msg}</span>
+            `;
+            container.insertBefore(entry, container.firstChild);
+            while (container.children.length > 50) {
+                container.removeChild(container.lastChild);
+            }
+        }
+
+        // Configuration Controls - CPU Cores
+        function updateCpuCores(value) {
+            const oldCores = CPU_CORES;
+            CPU_CORES = parseInt(value);
+            document.getElementById('cpuCoresDisplay').textContent = CPU_CORES;
+            document.getElementById('coreCountInfo').textContent = CPU_CORES;
+            document.getElementById('cpuCoresStats').textContent = CPU_CORES;
+            
+            // Visual feedback on slider
+            const slider = document.getElementById('cpuCoresSlider');
+            const percentage = ((value - 1) / (32 - 1)) * 100;
+            slider.style.background = `linear-gradient(90deg, #4CAF50 0%, #8BC34A ${percentage}%, #e0e0e0 ${percentage}%)`;
+            
+            log(`⚙️ CPU Cores updated to ${CPU_CORES} (was ${oldCores})`, 'info');
+            
+            // Warn about active workers
+            if (state.workers.length > 0) {
+                const activeWorkers = state.workers.filter(w => w.status === 'executing').length;
+                if (activeWorkers > 0) {
+                    showAlert('⚠️ Workers Active', 
+                        `CPU cores changed to ${CPU_CORES}. Active workers: ${activeWorkers}. Reset simulation to apply properly.`, 
+                        'warning');
+                }
+            }
+        }
+
+        function setCpuCores(cores) {
+            document.getElementById('cpuCoresSlider').value = cores;
+            updateCpuCores(cores);
+            
+            if (cores <= 2) {
+                showAlert('🔴 Low Core Count', `Only ${cores} CPU cores available - may cause contention with many tasks!`, 'warning');
+            } else if (cores >= 16) {
+                showAlert('🟢 High Core Count', `${cores} CPU cores available - excellent for high parallelism!`, 'success');
+            } else {
+                showAlert('✅ CPU Cores Set', `System configured with ${cores} CPU cores`, 'success');
+            }
+        }
+
+        // Configuration Controls - Task Duration
+        function updateTaskDuration(value) {
+            TASK_DURATION = parseInt(value);
+            
+            // Format display based on duration
+            let displayText;
+            if (TASK_DURATION >= 60000) {
+                // Show minutes for 60s+
+                const minutes = (TASK_DURATION / 60000).toFixed(1);
+                displayText = minutes + 'm';
+            } else if (TASK_DURATION >= 10000) {
+                // Show whole seconds for 10s+
+                displayText = Math.round(TASK_DURATION / 1000) + 's';
+            } else {
+                // Show one decimal for < 10s
+                displayText = (TASK_DURATION / 1000).toFixed(1) + 's';
+            }
+            document.getElementById('taskDurationDisplay').textContent = displayText;
+            
+            // Visual feedback on slider (logarithmic scale for better UX)
+            const slider = document.getElementById('taskDurationSlider');
+            const percentage = ((value - 100) / (100000 - 100)) * 100;
+            slider.style.background = `linear-gradient(90deg, #667eea 0%, #764ba2 ${percentage}%, #e0e0e0 ${percentage}%)`;
+            
+            log(`⚙️ Task duration updated to ${displayText}`, 'info');
+        }
+
+        function setTaskDuration(milliseconds) {
+            document.getElementById('taskDurationSlider').value = milliseconds;
+            updateTaskDuration(milliseconds);
+            
+            // Show feedback for preset selection with appropriate messaging
+            let displayText;
+            if (milliseconds >= 60000) {
+                displayText = (milliseconds / 60000).toFixed(1) + ' minute(s)';
+            } else {
+                displayText = (milliseconds / 1000).toFixed(1) + ' second(s)';
+            }
+            
+            if (milliseconds <= 500) {
+                showAlert('⚡⚡ Ultra Fast!', 'Tasks will execute in ' + displayText + ' - blazing speed for stress testing!', 'info');
+            } else if (milliseconds <= 2000) {
+                showAlert('⚡ Fast Mode', 'Tasks will execute in ' + displayText + ' - good for quick testing!', 'info');
+            } else if (milliseconds >= 60000) {
+                showAlert('🦥 Ultra Slow Mode', 'Tasks will execute in ' + displayText + ' - perfect for detailed observation and teaching!', 'warning');
+            } else if (milliseconds >= 30000) {
+                showAlert('🐌 Very Slow Mode', 'Tasks will execute in ' + displayText + ' - great for step-by-step analysis!', 'warning');
+            } else if (milliseconds >= 10000) {
+                showAlert('🐢 Slow Mode', 'Tasks will execute in ' + displayText + ' - easy to observe behavior!', 'info');
+            } else {
+                showAlert('✅ Duration Set', 'Tasks will execute in ' + displayText, 'success');
+            }
+        }
+
+        function customTaskDuration() {
+            const currentSeconds = (TASK_DURATION / 1000).toFixed(1);
+            const input = prompt('Enter custom task duration in seconds (0.1 - 100):', currentSeconds);
+            
+            if (input !== null) {
+                const seconds = parseFloat(input);
+                if (!isNaN(seconds) && seconds >= 0.1 && seconds <= 100) {
+                    const milliseconds = Math.round(seconds * 1000);
+                    setTaskDuration(milliseconds);
+                } else {
+                    showAlert('❌ Invalid Input', 'Please enter a number between 0.1 and 100 seconds.', 'error');
+                }
+            }
+        }
+
+        // Controls
+        function dispatchCpuTask() {
+            if (state.dispatchers.length === 0) {
+                showAlert('⚠️ No Dispatchers', 'Add a dispatcher first or choose a scenario!', 'warning');
+                return;
+            }
+            dispatchTask(0, 'cpu');
+        }
+
+        function dispatchBlockingTask() {
+            if (state.dispatchers.length === 0) {
+                showAlert('⚠️ No Dispatchers', 'Add a dispatcher first or choose a scenario!', 'warning');
+                return;
+            }
+            dispatchTask(0, 'blocking');
+        }
+
+        function toggleAutoSimulation() {
+            if (state.autoRunning) {
+                clearInterval(state.autoInterval);
+                state.autoRunning = false;
+                document.getElementById('autoBtn').textContent = '▶️ Auto';
+            } else {
+                if (state.dispatchers.length === 0) {
+                    addDispatcher('default');
+                    addDispatcher('io');
+                }
+                state.autoRunning = true;
+                document.getElementById('autoBtn').textContent = '⏸️ Stop';
+                state.autoInterval = setInterval(() => {
+                    const rand = Math.random();
+                    dispatchTask(0, rand > 0.5 ? 'cpu' : 'blocking');
+                }, 800);
+            }
+        }
+
+        function showDispatcherInfo() {
+            showAlert('💡 Dispatcher Info', 
+                'Dispatchers control concurrency limits. Default = CPU cores (8), IO = 64, Limited = your choice. ' +
+                'All share the same thread pool! Multiple limitedParallelism() instances compete for threads.', 
+                'info');
+        }
+
+        function reset() {
+            if (state.autoRunning) toggleAutoSimulation();
+            
+            state.dispatchers = [];
+            state.workers = [];
+            state.cpuQueue = [];
+            state.blockingQueue = [];
+            state.taskCounter = 0;
+            state.completedTasks = 0;
+            state.currentScenario = null;
+            state.startTime = Date.now();
+
+            initCpuCores();
+            initWorkers();
+            document.getElementById('logContainer').innerHTML = '';
+            document.getElementById('alertContainer').innerHTML = '';
+            document.querySelectorAll('.scenario-card').forEach(c => c.classList.remove('active'));
+            
+            log('System reset', 'info');
+            log(`🖥️ System Config: ${CPU_CORES} CPU cores, ${TASK_DURATION/1000}s task duration`, 'info');
+            updateAll();
+        }
+
+        // Auto update
+        setInterval(updateAll, 500);
+
+        // Initialize
+        init();
+    </script>
+</body>
+</html>
+

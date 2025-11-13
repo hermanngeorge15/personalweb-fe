@@ -458,7 +458,7 @@ export function useUpdateResumeProject() {
   return useMutation({
     mutationFn: async (input: ResumeProject) => {
       if (!input.id) throw new Error('id is required')
-      await apiAuth(`/resume/projects/${input.id}`, await authHeader(), {
+      await apiAuth(`/api/resume/projects/${input.id}`, await authHeader(), {
         method: 'PUT',
         body: JSON.stringify({
           company: input.company,

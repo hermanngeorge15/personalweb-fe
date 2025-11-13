@@ -106,7 +106,7 @@ export default function Footer() {
                 <a
                   href={
                     (socials.kotlinserversquad as string) ||
-                    'https://kotlinserversquad.dev'
+                    'https://kotlinserversquad.com'
                   }
                   target="_blank"
                   rel="noreferrer"

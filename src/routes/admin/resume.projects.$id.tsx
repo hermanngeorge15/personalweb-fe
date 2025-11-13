@@ -36,11 +36,11 @@ function AdminResumeProjectEdit() {
                 company: String(fd.get('company') ?? ''),
                 projectName: String(fd.get('projectName') ?? ''),
                 description: String(fd.get('description') ?? ''),
-                from: (() => {
+                startAt: (() => {
                   const v = String(fd.get('from') ?? '')
                   return v ? new Date(v).toISOString() : undefined
                 })(),
-                until: (() => {
+                endAt: (() => {
                   const v = String(fd.get('until') ?? '')
                   return v ? new Date(v).toISOString() : undefined
                 })(),
@@ -78,8 +78,8 @@ function AdminResumeProjectEdit() {
                   name="from"
                   type="datetime-local"
                   defaultValue={
-                    project.from
-                      ? new Date(project.from).toISOString().slice(0, 16)
+                    project.startAt
+                      ? new Date(project.startAt).toISOString().slice(0, 16)
                       : ''
                   }
                   className="rounded border p-2"
@@ -91,8 +91,8 @@ function AdminResumeProjectEdit() {
                   name="until"
                   type="datetime-local"
                   defaultValue={
-                    project.until
-                      ? new Date(project.until).toISOString().slice(0, 16)
+                    project.endAt
+                      ? new Date(project.endAt).toISOString().slice(0, 16)
                       : ''
                   }
                   className="rounded border p-2"

@@ -14,6 +14,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as TestimonialsRouteImport } from './routes/testimonials'
 import { Route as ServicesRouteImport } from './routes/services'
 import { Route as ResumeRouteImport } from './routes/resume'
+import { Route as DispatchersRouteImport } from './routes/dispatchers'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
@@ -45,6 +46,11 @@ const ServicesRoute = ServicesRouteImport.update({
 const ResumeRoute = ResumeRouteImport.update({
   id: '/resume',
   path: '/resume',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DispatchersRoute = DispatchersRouteImport.update({
+  id: '/dispatchers',
+  path: '/dispatchers',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContactRoute = ContactRouteImport.update({
@@ -137,6 +143,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
+  '/dispatchers': typeof DispatchersRoute
   '/resume': typeof ResumeRouteWithChildren
   '/services': typeof ServicesRoute
   '/testimonials': typeof TestimonialsRoute
@@ -159,6 +166,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
+  '/dispatchers': typeof DispatchersRoute
   '/resume': typeof ResumeRouteWithChildren
   '/services': typeof ServicesRoute
   '/testimonials': typeof TestimonialsRoute
@@ -182,6 +190,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
+  '/dispatchers': typeof DispatchersRoute
   '/resume': typeof ResumeRouteWithChildren
   '/services': typeof ServicesRoute
   '/testimonials': typeof TestimonialsRoute
@@ -206,6 +215,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/contact'
+    | '/dispatchers'
     | '/resume'
     | '/services'
     | '/testimonials'
@@ -228,6 +238,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/contact'
+    | '/dispatchers'
     | '/resume'
     | '/services'
     | '/testimonials'
@@ -250,6 +261,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/contact'
+    | '/dispatchers'
     | '/resume'
     | '/services'
     | '/testimonials'
@@ -273,6 +285,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
   ContactRoute: typeof ContactRoute
+  DispatchersRoute: typeof DispatchersRoute
   ResumeRoute: typeof ResumeRouteWithChildren
   ServicesRoute: typeof ServicesRoute
   TestimonialsRoute: typeof TestimonialsRoute
@@ -310,6 +323,13 @@ declare module '@tanstack/react-router' {
       path: '/contact'
       fullPath: '/contact'
       preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dispatchers': {
+      id: '/dispatchers'
+      path: '/dispatchers'
+      fullPath: '/dispatchers'
+      preLoaderRoute: typeof DispatchersRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/resume': {
@@ -459,6 +479,15 @@ declare module './routes/contact' {
     FileRoutesByPath['/contact']['id'],
     FileRoutesByPath['/contact']['path'],
     FileRoutesByPath['/contact']['fullPath']
+  >
+}
+declare module './routes/dispatchers' {
+  const createFileRoute: CreateFileRoute<
+    '/dispatchers',
+    FileRoutesByPath['/dispatchers']['parentRoute'],
+    FileRoutesByPath['/dispatchers']['id'],
+    FileRoutesByPath['/dispatchers']['path'],
+    FileRoutesByPath['/dispatchers']['fullPath']
   >
 }
 declare module './routes/resume' {
@@ -653,6 +682,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   ContactRoute: ContactRoute,
+  DispatchersRoute: DispatchersRoute,
   ResumeRoute: ResumeRouteWithChildren,
   ServicesRoute: ServicesRoute,
   TestimonialsRoute: TestimonialsRoute,

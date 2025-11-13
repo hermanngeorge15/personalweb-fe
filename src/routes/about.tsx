@@ -1,7 +1,6 @@
 import AppShell from '@/components/AppShell'
 import { useEffect } from 'react'
 import { SEO_DEFAULTS, setHead, setJsonLd } from '@/lib/seo'
-import { createFileRoute } from '@tanstack/react-router'
 
 function AboutPage() {
   useEffect(() => {
