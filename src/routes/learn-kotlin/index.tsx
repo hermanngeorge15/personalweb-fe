@@ -3,9 +3,12 @@ import { Link } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { SEO_DEFAULTS, setHead } from '@/lib/seo'
 import { MotionSection } from '@/components/MotionSection'
-import { Button, Card, CardBody } from '@heroui/react'
+import { Button, Card, CardBody, ButtonGroup } from '@heroui/react'
 import { H1 } from '@/components/ui/Typography'
 import { useKotlinTopicsByModule, type SourceLanguage } from '@/lib/queries'
+import { KotlinMindMap } from '@/components/KotlinMindMap'
+
+type ViewMode = 'list' | 'mindmap'
 
 const STORAGE_KEY = 'kotlin-learning-source-language'
 
@@ -27,6 +30,7 @@ function setStoredLanguage(lang: SourceLanguage) {
 
 function LearnKotlinIndex() {
   const [selectedLanguage, setSelectedLanguage] = useState<SourceLanguage>(null)
+  const [viewMode, setViewMode] = useState<ViewMode>('list')
   const { data: modules, isLoading } = useKotlinTopicsByModule()
 
   useEffect(() => {
@@ -223,94 +227,130 @@ function LearnKotlinIndex() {
                   </span>
                 </p>
               </div>
-              <Button
-                variant="bordered"
-                size="sm"
-                onClick={() => handleSelectLanguage(null)}
-              >
-                Change Language
-              </Button>
+              <div className="flex flex-wrap items-center gap-3">
+                <ButtonGroup size="sm">
+                  <Button
+                    variant={viewMode === 'list' ? 'solid' : 'bordered'}
+                    onClick={() => setViewMode('list')}
+                    className={viewMode === 'list' ? 'bg-purple-600 text-white' : ''}
+                  >
+                    <svg className="mr-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                    </svg>
+                    List
+                  </Button>
+                  <Button
+                    variant={viewMode === 'mindmap' ? 'solid' : 'bordered'}
+                    onClick={() => setViewMode('mindmap')}
+                    className={viewMode === 'mindmap' ? 'bg-purple-600 text-white' : ''}
+                  >
+                    <svg className="mr-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    Mind Map
+                  </Button>
+                </ButtonGroup>
+                <Button
+                  variant="bordered"
+                  size="sm"
+                  onClick={() => handleSelectLanguage(null)}
+                >
+                  Change Language
+                </Button>
+              </div>
             </div>
 
-            {isLoading && (
-              <div className="mt-8 flex items-center justify-center py-12">
-                <div className="h-8 w-8 animate-spin rounded-full border-4 border-purple-600 border-r-transparent"></div>
+            {/* Mind Map View */}
+            {viewMode === 'mindmap' && (
+              <div className="mt-8">
+                <KotlinMindMap selectedLanguage={selectedLanguage} />
               </div>
             )}
 
-            {modules && modules.length === 0 && (
-              <div className="mt-8 rounded-lg border border-gray-200 bg-gray-50 p-12 text-center">
-                <p className="text-gray-600">
-                  Topics coming soon! Check back later.
-                </p>
-              </div>
-            )}
-
-            {modules && modules.length > 0 && (
-              <div className="mt-8 space-y-8">
-                {modules.map((mod) => (
-                  <div key={mod.name}>
-                    <h2 className="text-xl font-bold text-gray-900">
-                      {mod.name}
-                    </h2>
-                    <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                      {mod.topics.map((topic) => (
-                        <Link
-                          key={topic.id}
-                          to="/learn-kotlin/$topicId"
-                          params={{ topicId: topic.id }}
-                          search={{ lang: selectedLanguage }}
-                          className="group"
-                        >
-                          <Card className="h-full cursor-pointer transition-all hover:-translate-y-1 hover:border-purple-200 hover:shadow-lg">
-                            <CardBody className="p-4">
-                              <div className="flex items-start justify-between gap-2">
-                                <h3 className="font-semibold text-gray-900 transition-colors group-hover:text-purple-600">
-                                  {topic.title}
-                                </h3>
-                                <span
-                                  className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${
-                                    topic.difficulty === 'beginner'
-                                      ? 'bg-green-100 text-green-700'
-                                      : topic.difficulty === 'intermediate'
-                                        ? 'bg-yellow-100 text-yellow-700'
-                                        : topic.difficulty === 'advanced'
-                                          ? 'bg-orange-100 text-orange-700'
-                                          : 'bg-red-100 text-red-700'
-                                  }`}
-                                >
-                                  {topic.difficulty}
-                                </span>
-                              </div>
-                              {topic.description && (
-                                <p className="text-muted-foreground mt-2 line-clamp-2 text-sm">
-                                  {topic.description}
-                                </p>
-                              )}
-                              <div className="text-muted-foreground mt-3 flex items-center gap-1 text-xs">
-                                <svg
-                                  className="h-4 w-4"
-                                  fill="none"
-                                  viewBox="0 0 24 24"
-                                  stroke="currentColor"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                                  />
-                                </svg>
-                                <span>{topic.readingTimeMinutes} min</span>
-                              </div>
-                            </CardBody>
-                          </Card>
-                        </Link>
-                      ))}
-                    </div>
+            {/* List View */}
+            {viewMode === 'list' && (
+              <>
+                {isLoading && (
+                  <div className="mt-8 flex items-center justify-center py-12">
+                    <div className="h-8 w-8 animate-spin rounded-full border-4 border-purple-600 border-r-transparent"></div>
                   </div>
-                ))}
-              </div>
+                )}
+
+                {modules && modules.length === 0 && (
+                  <div className="mt-8 rounded-lg border border-gray-200 bg-gray-50 p-12 text-center">
+                    <p className="text-gray-600">
+                      Topics coming soon! Check back later.
+                    </p>
+                  </div>
+                )}
+
+                {modules && modules.length > 0 && (
+                  <div className="mt-8 space-y-8">
+                    {modules.map((mod) => (
+                      <div key={mod.name}>
+                        <h2 className="text-xl font-bold text-gray-900">
+                          {mod.name}
+                        </h2>
+                        <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                          {mod.topics.map((topic) => (
+                            <Link
+                              key={topic.id}
+                              to="/learn-kotlin/$topicId"
+                              params={{ topicId: topic.id }}
+                              search={{ lang: selectedLanguage }}
+                              className="group"
+                            >
+                              <Card className="h-full cursor-pointer transition-all hover:-translate-y-1 hover:border-purple-200 hover:shadow-lg">
+                                <CardBody className="p-4">
+                                  <div className="flex items-start justify-between gap-2">
+                                    <h3 className="font-semibold text-gray-900 transition-colors group-hover:text-purple-600">
+                                      {topic.title}
+                                    </h3>
+                                    <span
+                                      className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${
+                                        topic.difficulty === 'beginner'
+                                          ? 'bg-green-100 text-green-700'
+                                          : topic.difficulty === 'intermediate'
+                                            ? 'bg-yellow-100 text-yellow-700'
+                                            : topic.difficulty === 'advanced'
+                                              ? 'bg-orange-100 text-orange-700'
+                                              : 'bg-red-100 text-red-700'
+                                      }`}
+                                    >
+                                      {topic.difficulty}
+                                    </span>
+                                  </div>
+                                  {topic.description && (
+                                    <p className="text-muted-foreground mt-2 line-clamp-2 text-sm">
+                                      {topic.description}
+                                    </p>
+                                  )}
+                                  <div className="text-muted-foreground mt-3 flex items-center gap-1 text-xs">
+                                    <svg
+                                      className="h-4 w-4"
+                                      fill="none"
+                                      viewBox="0 0 24 24"
+                                      stroke="currentColor"
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                                      />
+                                    </svg>
+                                    <span>{topic.readingTimeMinutes} min</span>
+                                  </div>
+                                </CardBody>
+                              </Card>
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </>
             )}
           </div>
         </section>
