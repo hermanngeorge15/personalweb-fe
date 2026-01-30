@@ -784,3 +784,136 @@ export function useKotlinMindMap() {
     queryFn: () => api<MindMapData>('/api/learn-kotlin/mindmap'),
   })
 }
+
+// ========================================
+// Tiered Content Types & Queries
+// ========================================
+
+export type KotlinContentTier = {
+  tierLevel: number
+  tierName: string
+  title?: string
+  explanation: string
+  codeExamples?: string[]
+  readingTimeMinutes: number
+  learningObjectives?: string[]
+  prerequisites?: string[]
+}
+
+export type KotlinRunnableExample = {
+  title: string
+  description?: string
+  code: string
+  expectedOutput?: string
+  tierLevel: number
+}
+
+export type ExpenseTrackerChapterRef = {
+  chapterNumber: number
+  title: string
+  usageType: string
+  contextDescription?: string
+}
+
+export type KotlinTopicWithTiers = {
+  id: string
+  title: string
+  module: string
+  difficulty: string
+  description?: string
+  partNumber?: number
+  partName?: string
+  contentStructure?: string
+  maxTierLevel: number
+  availableTiers: number[]
+  tiers: KotlinContentTier[]
+  runnableExamples: KotlinRunnableExample[]
+  codeExamples: KotlinCodeExample[]
+  experiences: KotlinExperience[]
+  docLinks: KotlinDocLink[]
+  navigation?: TopicNavigation
+  expenseTrackerChapters?: ExpenseTrackerChapterRef[]
+}
+
+export function useKotlinTopicWithTiers(
+  id: string,
+  sourceLanguage?: SourceLanguage,
+  tier?: number
+) {
+  const params = new URLSearchParams()
+  if (sourceLanguage) params.set('sourceLanguage', sourceLanguage)
+  if (tier) params.set('tier', tier.toString())
+  const queryString = params.toString()
+  const path = `/api/learn-kotlin/topics/${id}/tiered${queryString ? `?${queryString}` : ''}`
+
+  return useQuery({
+    queryKey: ['kotlin-learning', 'topic-tiered', id, sourceLanguage, tier],
+    queryFn: () => api<KotlinTopicWithTiers>(path),
+    enabled: !!id,
+  })
+}
+
+// ========================================
+// Expense Tracker Journey Types & Queries
+// ========================================
+
+export type ExpenseTrackerChapterList = {
+  chapterNumber: number
+  title: string
+  description?: string
+  difficulty: string
+  estimatedTimeMinutes: number
+  topicCount: number
+}
+
+export type ExpenseTrackerTopicRef = {
+  topicId: string
+  topicTitle: string
+  usageType: string
+  contextDescription?: string
+}
+
+export type ExpenseTrackerCodeSnippet = {
+  filename: string
+  language: string
+  code: string
+  explanation?: string
+}
+
+export type ChapterNavigation = {
+  previous?: number
+  next?: number
+}
+
+export type ExpenseTrackerChapterDetail = {
+  chapterNumber: number
+  title: string
+  description?: string
+  introduction?: string
+  implementationSteps?: string[]
+  codeSnippets?: ExpenseTrackerCodeSnippet[]
+  summary?: string
+  difficulty: string
+  estimatedTimeMinutes: number
+  topics: ExpenseTrackerTopicRef[]
+  navigation: ChapterNavigation
+}
+
+export function useExpenseTrackerChapters() {
+  return useQuery({
+    queryKey: ['kotlin-learning', 'expense-tracker', 'chapters'],
+    queryFn: () =>
+      api<ExpenseTrackerChapterList[]>('/api/learn-kotlin/expense-tracker/chapters'),
+  })
+}
+
+export function useExpenseTrackerChapter(chapterNumber: number) {
+  return useQuery({
+    queryKey: ['kotlin-learning', 'expense-tracker', 'chapter', chapterNumber],
+    queryFn: () =>
+      api<ExpenseTrackerChapterDetail>(
+        `/api/learn-kotlin/expense-tracker/chapters/${chapterNumber}`
+      ),
+    enabled: chapterNumber > 0,
+  })
+}
