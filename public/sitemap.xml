@@ -38,22 +38,4 @@
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
-  <url>
-    <loc>https://jirihermann.com/blog/hoovno</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-    <lastmod>2025-10-04</lastmod>
-  </url>
-  <url>
-    <loc>https://jirihermann.com/blog/hello-world</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-    <lastmod>2025-10-03</lastmod>
-  </url>
-  <url>
-    <loc>https://jirihermann.com/blog/java</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-    <lastmod>2025-10-01</lastmod>
-  </url>
 </urlset>
