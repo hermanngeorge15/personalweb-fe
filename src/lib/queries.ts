@@ -671,3 +671,116 @@ export function useUpsertResumeHobbies() {
     },
   })
 }
+
+// ========================================
+// Kotlin Learning Platform Types & Queries
+// ========================================
+
+export type KotlinTopicListItem = {
+  id: string
+  title: string
+  module: string
+  difficulty: string
+  description?: string
+  readingTimeMinutes: number
+}
+
+export type KotlinCodeExample = {
+  language: string
+  versionLabel?: string
+  code: string
+  explanation: string
+}
+
+export type KotlinExperience = {
+  title: string
+  content: string
+  type: string
+}
+
+export type KotlinDocLink = {
+  type: string
+  url: string
+  title: string
+  description?: string
+}
+
+export type TopicNavigation = {
+  previous?: string
+  next?: string
+}
+
+export type KotlinTopicDetail = {
+  id: string
+  title: string
+  module: string
+  difficulty: string
+  description?: string
+  kotlinExplanation: string
+  kotlinCode: string
+  readingTimeMinutes: number
+  codeExamples: KotlinCodeExample[]
+  experiences: KotlinExperience[]
+  docLinks: KotlinDocLink[]
+  navigation?: TopicNavigation
+}
+
+export type KotlinModule = {
+  name: string
+  topics: KotlinTopicListItem[]
+}
+
+export type MindMapTopic = {
+  id: string
+  title: string
+  module: string
+  difficulty: string
+}
+
+export type MindMapDependency = {
+  from: string
+  to: string
+  type: string
+}
+
+export type MindMapData = {
+  topics: MindMapTopic[]
+  dependencies: MindMapDependency[]
+}
+
+// Source language type for filtering
+export type SourceLanguage = 'java' | 'csharp' | null
+
+export function useKotlinTopics() {
+  return useQuery({
+    queryKey: ['kotlin-learning', 'topics'],
+    queryFn: () => api<KotlinTopicListItem[]>('/api/learn-kotlin/topics'),
+  })
+}
+
+export function useKotlinTopicsByModule() {
+  return useQuery({
+    queryKey: ['kotlin-learning', 'topics-by-module'],
+    queryFn: () => api<KotlinModule[]>('/api/learn-kotlin/topics/by-module'),
+  })
+}
+
+export function useKotlinTopic(id: string, sourceLanguage?: SourceLanguage) {
+  const params = new URLSearchParams()
+  if (sourceLanguage) params.set('sourceLanguage', sourceLanguage)
+  const queryString = params.toString()
+  const path = `/api/learn-kotlin/topics/${id}${queryString ? `?${queryString}` : ''}`
+
+  return useQuery({
+    queryKey: ['kotlin-learning', 'topic', id, sourceLanguage],
+    queryFn: () => api<KotlinTopicDetail>(path),
+    enabled: !!id,
+  })
+}
+
+export function useKotlinMindMap() {
+  return useQuery({
+    queryKey: ['kotlin-learning', 'mindmap'],
+    queryFn: () => api<MindMapData>('/api/learn-kotlin/mindmap'),
+  })
+}
