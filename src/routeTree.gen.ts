@@ -22,6 +22,7 @@ import { Route as LearnKotlinIndexRouteImport } from './routes/learn-kotlin/inde
 import { Route as BlogIndexRouteImport } from './routes/blog/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as ResumePrintRouteImport } from './routes/resume.print'
+import { Route as LearnKotlinMindmapRouteImport } from './routes/learn-kotlin/mindmap'
 import { Route as LearnKotlinTopicIdRouteImport } from './routes/learn-kotlin/$topicId'
 import { Route as BlogSlugRouteImport } from './routes/blog/$slug'
 import { Route as AdminTestimonialsRouteImport } from './routes/admin/testimonials'
@@ -89,6 +90,11 @@ const ResumePrintRoute = ResumePrintRouteImport.update({
   id: '/print',
   path: '/print',
   getParentRoute: () => ResumeRoute,
+} as any)
+const LearnKotlinMindmapRoute = LearnKotlinMindmapRouteImport.update({
+  id: '/learn-kotlin/mindmap',
+  path: '/learn-kotlin/mindmap',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const LearnKotlinTopicIdRoute = LearnKotlinTopicIdRouteImport.update({
   id: '/learn-kotlin/$topicId',
@@ -164,6 +170,7 @@ export interface FileRoutesByFullPath {
   '/admin/testimonials': typeof AdminTestimonialsRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/learn-kotlin/$topicId': typeof LearnKotlinTopicIdRoute
+  '/learn-kotlin/mindmap': typeof LearnKotlinMindmapRoute
   '/resume/print': typeof ResumePrintRoute
   '/admin': typeof AdminIndexRoute
   '/blog': typeof BlogIndexRoute
@@ -189,6 +196,7 @@ export interface FileRoutesByTo {
   '/admin/testimonials': typeof AdminTestimonialsRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/learn-kotlin/$topicId': typeof LearnKotlinTopicIdRoute
+  '/learn-kotlin/mindmap': typeof LearnKotlinMindmapRoute
   '/resume/print': typeof ResumePrintRoute
   '/admin': typeof AdminIndexRoute
   '/blog': typeof BlogIndexRoute
@@ -215,6 +223,7 @@ export interface FileRoutesById {
   '/admin/testimonials': typeof AdminTestimonialsRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/learn-kotlin/$topicId': typeof LearnKotlinTopicIdRoute
+  '/learn-kotlin/mindmap': typeof LearnKotlinMindmapRoute
   '/resume/print': typeof ResumePrintRoute
   '/admin/': typeof AdminIndexRoute
   '/blog/': typeof BlogIndexRoute
@@ -242,6 +251,7 @@ export interface FileRouteTypes {
     | '/admin/testimonials'
     | '/blog/$slug'
     | '/learn-kotlin/$topicId'
+    | '/learn-kotlin/mindmap'
     | '/resume/print'
     | '/admin'
     | '/blog'
@@ -267,6 +277,7 @@ export interface FileRouteTypes {
     | '/admin/testimonials'
     | '/blog/$slug'
     | '/learn-kotlin/$topicId'
+    | '/learn-kotlin/mindmap'
     | '/resume/print'
     | '/admin'
     | '/blog'
@@ -292,6 +303,7 @@ export interface FileRouteTypes {
     | '/admin/testimonials'
     | '/blog/$slug'
     | '/learn-kotlin/$topicId'
+    | '/learn-kotlin/mindmap'
     | '/resume/print'
     | '/admin/'
     | '/blog/'
@@ -318,6 +330,7 @@ export interface RootRouteChildren {
   AdminTestimonialsRoute: typeof AdminTestimonialsRoute
   BlogSlugRoute: typeof BlogSlugRoute
   LearnKotlinTopicIdRoute: typeof LearnKotlinTopicIdRoute
+  LearnKotlinMindmapRoute: typeof LearnKotlinMindmapRoute
   AdminIndexRoute: typeof AdminIndexRoute
   BlogIndexRoute: typeof BlogIndexRoute
   LearnKotlinIndexRoute: typeof LearnKotlinIndexRoute
@@ -412,6 +425,13 @@ declare module '@tanstack/react-router' {
       path: '/learn-kotlin/$topicId'
       fullPath: '/learn-kotlin/$topicId'
       preLoaderRoute: typeof LearnKotlinTopicIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/learn-kotlin/mindmap': {
+      id: '/learn-kotlin/mindmap'
+      path: '/learn-kotlin/mindmap'
+      fullPath: '/learn-kotlin/mindmap'
+      preLoaderRoute: typeof LearnKotlinMindmapRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/resume/print': {
@@ -602,6 +622,15 @@ declare module './routes/learn-kotlin/$topicId' {
     FileRoutesByPath['/learn-kotlin/$topicId']['fullPath']
   >
 }
+declare module './routes/learn-kotlin/mindmap' {
+  const createFileRoute: CreateFileRoute<
+    '/learn-kotlin/mindmap',
+    FileRoutesByPath['/learn-kotlin/mindmap']['parentRoute'],
+    FileRoutesByPath['/learn-kotlin/mindmap']['id'],
+    FileRoutesByPath['/learn-kotlin/mindmap']['path'],
+    FileRoutesByPath['/learn-kotlin/mindmap']['fullPath']
+  >
+}
 declare module './routes/resume.print' {
   const createFileRoute: CreateFileRoute<
     '/resume/print',
@@ -749,6 +778,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminTestimonialsRoute: AdminTestimonialsRoute,
   BlogSlugRoute: BlogSlugRoute,
   LearnKotlinTopicIdRoute: LearnKotlinTopicIdRoute,
+  LearnKotlinMindmapRoute: LearnKotlinMindmapRoute,
   AdminIndexRoute: AdminIndexRoute,
   BlogIndexRoute: BlogIndexRoute,
   LearnKotlinIndexRoute: LearnKotlinIndexRoute,
