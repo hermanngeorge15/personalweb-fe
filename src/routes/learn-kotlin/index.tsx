@@ -191,9 +191,33 @@ function LearnKotlinIndex() {
                 </button>
               </div>
 
-              <p className="text-muted-foreground mt-8 text-sm">
-                You can change your language preference at any time
-              </p>
+              <div className="mt-8 flex flex-col items-center gap-3">
+                <Link to="/learn-kotlin/mindmap">
+                  <Button
+                    variant="light"
+                    size="sm"
+                    className="gap-2 text-purple-600"
+                  >
+                    <svg
+                      className="h-4 w-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"
+                      />
+                    </svg>
+                    Preview Learning Mind Map
+                  </Button>
+                </Link>
+                <p className="text-muted-foreground text-sm">
+                  You can change your language preference at any time
+                </p>
+              </div>
             </div>
           </section>
         </MotionSection>
@@ -223,13 +247,37 @@ function LearnKotlinIndex() {
                   </span>
                 </p>
               </div>
-              <Button
-                variant="bordered"
-                size="sm"
-                onClick={() => handleSelectLanguage(null)}
-              >
-                Change Language
-              </Button>
+              <div className="flex items-center gap-2">
+                <Link to="/learn-kotlin/mindmap">
+                  <Button
+                    variant="bordered"
+                    size="sm"
+                    className="gap-2"
+                  >
+                    <svg
+                      className="h-4 w-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"
+                      />
+                    </svg>
+                    Mind Map
+                  </Button>
+                </Link>
+                <Button
+                  variant="bordered"
+                  size="sm"
+                  onClick={() => handleSelectLanguage(null)}
+                >
+                  Change Language
+                </Button>
+              </div>
             </div>
 
             {isLoading && (
