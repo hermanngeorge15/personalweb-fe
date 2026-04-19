@@ -22,6 +22,7 @@ import { Route as LearnKotlinIndexRouteImport } from './routes/learn-kotlin/inde
 import { Route as BlogIndexRouteImport } from './routes/blog/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as ResumePrintRouteImport } from './routes/resume.print'
+import { Route as LearnKotlinMindmapRouteImport } from './routes/learn-kotlin/mindmap'
 import { Route as LearnKotlinTopicIdRouteImport } from './routes/learn-kotlin/$topicId'
 import { Route as BlogSlugRouteImport } from './routes/blog/$slug'
 import { Route as AdminTestimonialsRouteImport } from './routes/admin/testimonials'
@@ -33,7 +34,11 @@ import { Route as AdminResumeHobbiesRouteImport } from './routes/admin/resume.ho
 import { Route as AdminResumeEducationRouteImport } from './routes/admin/resume.education'
 import { Route as AdminResumeCertificatesRouteImport } from './routes/admin/resume.certificates'
 import { Route as AdminPostsIdRouteImport } from './routes/admin/posts.$id'
+import { Route as AdminKotlinTopicsRouteImport } from './routes/admin/kotlin.topics'
+import { Route as AdminKotlinChaptersRouteImport } from './routes/admin/kotlin.chapters'
 import { Route as AdminResumeProjectsIdRouteImport } from './routes/admin/resume.projects.$id'
+import { Route as AdminKotlinTopicsIdRouteImport } from './routes/admin/kotlin.topics.$id'
+import { Route as AdminKotlinChaptersIdRouteImport } from './routes/admin/kotlin.chapters.$id'
 
 const TestimonialsRoute = TestimonialsRouteImport.update({
   id: '/testimonials',
@@ -90,6 +95,11 @@ const ResumePrintRoute = ResumePrintRouteImport.update({
   path: '/print',
   getParentRoute: () => ResumeRoute,
 } as any)
+const LearnKotlinMindmapRoute = LearnKotlinMindmapRouteImport.update({
+  id: '/learn-kotlin/mindmap',
+  path: '/learn-kotlin/mindmap',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LearnKotlinTopicIdRoute = LearnKotlinTopicIdRouteImport.update({
   id: '/learn-kotlin/$topicId',
   path: '/learn-kotlin/$topicId',
@@ -145,10 +155,30 @@ const AdminPostsIdRoute = AdminPostsIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => AdminPostsRoute,
 } as any)
+const AdminKotlinTopicsRoute = AdminKotlinTopicsRouteImport.update({
+  id: '/admin/kotlin/topics',
+  path: '/admin/kotlin/topics',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminKotlinChaptersRoute = AdminKotlinChaptersRouteImport.update({
+  id: '/admin/kotlin/chapters',
+  path: '/admin/kotlin/chapters',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminResumeProjectsIdRoute = AdminResumeProjectsIdRouteImport.update({
   id: '/$id',
   path: '/$id',
   getParentRoute: () => AdminResumeProjectsRoute,
+} as any)
+const AdminKotlinTopicsIdRoute = AdminKotlinTopicsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AdminKotlinTopicsRoute,
+} as any)
+const AdminKotlinChaptersIdRoute = AdminKotlinChaptersIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AdminKotlinChaptersRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -164,16 +194,21 @@ export interface FileRoutesByFullPath {
   '/admin/testimonials': typeof AdminTestimonialsRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/learn-kotlin/$topicId': typeof LearnKotlinTopicIdRoute
+  '/learn-kotlin/mindmap': typeof LearnKotlinMindmapRoute
   '/resume/print': typeof ResumePrintRoute
   '/admin': typeof AdminIndexRoute
   '/blog': typeof BlogIndexRoute
   '/learn-kotlin': typeof LearnKotlinIndexRoute
+  '/admin/kotlin/chapters': typeof AdminKotlinChaptersRouteWithChildren
+  '/admin/kotlin/topics': typeof AdminKotlinTopicsRouteWithChildren
   '/admin/posts/$id': typeof AdminPostsIdRoute
   '/admin/resume/certificates': typeof AdminResumeCertificatesRoute
   '/admin/resume/education': typeof AdminResumeEducationRoute
   '/admin/resume/hobbies': typeof AdminResumeHobbiesRoute
   '/admin/resume/languages': typeof AdminResumeLanguagesRoute
   '/admin/resume/projects': typeof AdminResumeProjectsRouteWithChildren
+  '/admin/kotlin/chapters/$id': typeof AdminKotlinChaptersIdRoute
+  '/admin/kotlin/topics/$id': typeof AdminKotlinTopicsIdRoute
   '/admin/resume/projects/$id': typeof AdminResumeProjectsIdRoute
 }
 export interface FileRoutesByTo {
@@ -189,16 +224,21 @@ export interface FileRoutesByTo {
   '/admin/testimonials': typeof AdminTestimonialsRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/learn-kotlin/$topicId': typeof LearnKotlinTopicIdRoute
+  '/learn-kotlin/mindmap': typeof LearnKotlinMindmapRoute
   '/resume/print': typeof ResumePrintRoute
   '/admin': typeof AdminIndexRoute
   '/blog': typeof BlogIndexRoute
   '/learn-kotlin': typeof LearnKotlinIndexRoute
+  '/admin/kotlin/chapters': typeof AdminKotlinChaptersRouteWithChildren
+  '/admin/kotlin/topics': typeof AdminKotlinTopicsRouteWithChildren
   '/admin/posts/$id': typeof AdminPostsIdRoute
   '/admin/resume/certificates': typeof AdminResumeCertificatesRoute
   '/admin/resume/education': typeof AdminResumeEducationRoute
   '/admin/resume/hobbies': typeof AdminResumeHobbiesRoute
   '/admin/resume/languages': typeof AdminResumeLanguagesRoute
   '/admin/resume/projects': typeof AdminResumeProjectsRouteWithChildren
+  '/admin/kotlin/chapters/$id': typeof AdminKotlinChaptersIdRoute
+  '/admin/kotlin/topics/$id': typeof AdminKotlinTopicsIdRoute
   '/admin/resume/projects/$id': typeof AdminResumeProjectsIdRoute
 }
 export interface FileRoutesById {
@@ -215,16 +255,21 @@ export interface FileRoutesById {
   '/admin/testimonials': typeof AdminTestimonialsRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/learn-kotlin/$topicId': typeof LearnKotlinTopicIdRoute
+  '/learn-kotlin/mindmap': typeof LearnKotlinMindmapRoute
   '/resume/print': typeof ResumePrintRoute
   '/admin/': typeof AdminIndexRoute
   '/blog/': typeof BlogIndexRoute
   '/learn-kotlin/': typeof LearnKotlinIndexRoute
+  '/admin/kotlin/chapters': typeof AdminKotlinChaptersRouteWithChildren
+  '/admin/kotlin/topics': typeof AdminKotlinTopicsRouteWithChildren
   '/admin/posts/$id': typeof AdminPostsIdRoute
   '/admin/resume/certificates': typeof AdminResumeCertificatesRoute
   '/admin/resume/education': typeof AdminResumeEducationRoute
   '/admin/resume/hobbies': typeof AdminResumeHobbiesRoute
   '/admin/resume/languages': typeof AdminResumeLanguagesRoute
   '/admin/resume/projects': typeof AdminResumeProjectsRouteWithChildren
+  '/admin/kotlin/chapters/$id': typeof AdminKotlinChaptersIdRoute
+  '/admin/kotlin/topics/$id': typeof AdminKotlinTopicsIdRoute
   '/admin/resume/projects/$id': typeof AdminResumeProjectsIdRoute
 }
 export interface FileRouteTypes {
@@ -242,16 +287,21 @@ export interface FileRouteTypes {
     | '/admin/testimonials'
     | '/blog/$slug'
     | '/learn-kotlin/$topicId'
+    | '/learn-kotlin/mindmap'
     | '/resume/print'
     | '/admin'
     | '/blog'
     | '/learn-kotlin'
+    | '/admin/kotlin/chapters'
+    | '/admin/kotlin/topics'
     | '/admin/posts/$id'
     | '/admin/resume/certificates'
     | '/admin/resume/education'
     | '/admin/resume/hobbies'
     | '/admin/resume/languages'
     | '/admin/resume/projects'
+    | '/admin/kotlin/chapters/$id'
+    | '/admin/kotlin/topics/$id'
     | '/admin/resume/projects/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -267,16 +317,21 @@ export interface FileRouteTypes {
     | '/admin/testimonials'
     | '/blog/$slug'
     | '/learn-kotlin/$topicId'
+    | '/learn-kotlin/mindmap'
     | '/resume/print'
     | '/admin'
     | '/blog'
     | '/learn-kotlin'
+    | '/admin/kotlin/chapters'
+    | '/admin/kotlin/topics'
     | '/admin/posts/$id'
     | '/admin/resume/certificates'
     | '/admin/resume/education'
     | '/admin/resume/hobbies'
     | '/admin/resume/languages'
     | '/admin/resume/projects'
+    | '/admin/kotlin/chapters/$id'
+    | '/admin/kotlin/topics/$id'
     | '/admin/resume/projects/$id'
   id:
     | '__root__'
@@ -292,16 +347,21 @@ export interface FileRouteTypes {
     | '/admin/testimonials'
     | '/blog/$slug'
     | '/learn-kotlin/$topicId'
+    | '/learn-kotlin/mindmap'
     | '/resume/print'
     | '/admin/'
     | '/blog/'
     | '/learn-kotlin/'
+    | '/admin/kotlin/chapters'
+    | '/admin/kotlin/topics'
     | '/admin/posts/$id'
     | '/admin/resume/certificates'
     | '/admin/resume/education'
     | '/admin/resume/hobbies'
     | '/admin/resume/languages'
     | '/admin/resume/projects'
+    | '/admin/kotlin/chapters/$id'
+    | '/admin/kotlin/topics/$id'
     | '/admin/resume/projects/$id'
   fileRoutesById: FileRoutesById
 }
@@ -318,9 +378,12 @@ export interface RootRouteChildren {
   AdminTestimonialsRoute: typeof AdminTestimonialsRoute
   BlogSlugRoute: typeof BlogSlugRoute
   LearnKotlinTopicIdRoute: typeof LearnKotlinTopicIdRoute
+  LearnKotlinMindmapRoute: typeof LearnKotlinMindmapRoute
   AdminIndexRoute: typeof AdminIndexRoute
   BlogIndexRoute: typeof BlogIndexRoute
   LearnKotlinIndexRoute: typeof LearnKotlinIndexRoute
+  AdminKotlinChaptersRoute: typeof AdminKotlinChaptersRouteWithChildren
+  AdminKotlinTopicsRoute: typeof AdminKotlinTopicsRouteWithChildren
   AdminResumeCertificatesRoute: typeof AdminResumeCertificatesRoute
   AdminResumeEducationRoute: typeof AdminResumeEducationRoute
   AdminResumeHobbiesRoute: typeof AdminResumeHobbiesRoute
@@ -414,6 +477,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LearnKotlinTopicIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/learn-kotlin/mindmap': {
+      id: '/learn-kotlin/mindmap'
+      path: '/learn-kotlin/mindmap'
+      fullPath: '/learn-kotlin/mindmap'
+      preLoaderRoute: typeof LearnKotlinMindmapRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/resume/print': {
       id: '/resume/print'
       path: '/print'
@@ -440,6 +510,20 @@ declare module '@tanstack/react-router' {
       path: '/learn-kotlin'
       fullPath: '/learn-kotlin'
       preLoaderRoute: typeof LearnKotlinIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/kotlin/chapters': {
+      id: '/admin/kotlin/chapters'
+      path: '/admin/kotlin/chapters'
+      fullPath: '/admin/kotlin/chapters'
+      preLoaderRoute: typeof AdminKotlinChaptersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/kotlin/topics': {
+      id: '/admin/kotlin/topics'
+      path: '/admin/kotlin/topics'
+      fullPath: '/admin/kotlin/topics'
+      preLoaderRoute: typeof AdminKotlinTopicsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/posts/$id': {
@@ -483,6 +567,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/resume/projects'
       preLoaderRoute: typeof AdminResumeProjectsRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/admin/kotlin/chapters/$id': {
+      id: '/admin/kotlin/chapters/$id'
+      path: '/$id'
+      fullPath: '/admin/kotlin/chapters/$id'
+      preLoaderRoute: typeof AdminKotlinChaptersIdRouteImport
+      parentRoute: typeof AdminKotlinChaptersRoute
+    }
+    '/admin/kotlin/topics/$id': {
+      id: '/admin/kotlin/topics/$id'
+      path: '/$id'
+      fullPath: '/admin/kotlin/topics/$id'
+      preLoaderRoute: typeof AdminKotlinTopicsIdRouteImport
+      parentRoute: typeof AdminKotlinTopicsRoute
     }
     '/admin/resume/projects/$id': {
       id: '/admin/resume/projects/$id'
@@ -602,6 +700,15 @@ declare module './routes/learn-kotlin/$topicId' {
     FileRoutesByPath['/learn-kotlin/$topicId']['fullPath']
   >
 }
+declare module './routes/learn-kotlin/mindmap' {
+  const createFileRoute: CreateFileRoute<
+    '/learn-kotlin/mindmap',
+    FileRoutesByPath['/learn-kotlin/mindmap']['parentRoute'],
+    FileRoutesByPath['/learn-kotlin/mindmap']['id'],
+    FileRoutesByPath['/learn-kotlin/mindmap']['path'],
+    FileRoutesByPath['/learn-kotlin/mindmap']['fullPath']
+  >
+}
 declare module './routes/resume.print' {
   const createFileRoute: CreateFileRoute<
     '/resume/print',
@@ -636,6 +743,24 @@ declare module './routes/learn-kotlin/index' {
     FileRoutesByPath['/learn-kotlin/']['id'],
     FileRoutesByPath['/learn-kotlin/']['path'],
     FileRoutesByPath['/learn-kotlin/']['fullPath']
+  >
+}
+declare module './routes/admin/kotlin.chapters' {
+  const createFileRoute: CreateFileRoute<
+    '/admin/kotlin/chapters',
+    FileRoutesByPath['/admin/kotlin/chapters']['parentRoute'],
+    FileRoutesByPath['/admin/kotlin/chapters']['id'],
+    FileRoutesByPath['/admin/kotlin/chapters']['path'],
+    FileRoutesByPath['/admin/kotlin/chapters']['fullPath']
+  >
+}
+declare module './routes/admin/kotlin.topics' {
+  const createFileRoute: CreateFileRoute<
+    '/admin/kotlin/topics',
+    FileRoutesByPath['/admin/kotlin/topics']['parentRoute'],
+    FileRoutesByPath['/admin/kotlin/topics']['id'],
+    FileRoutesByPath['/admin/kotlin/topics']['path'],
+    FileRoutesByPath['/admin/kotlin/topics']['fullPath']
   >
 }
 declare module './routes/admin/posts.$id' {
@@ -692,6 +817,24 @@ declare module './routes/admin/resume.projects' {
     FileRoutesByPath['/admin/resume/projects']['fullPath']
   >
 }
+declare module './routes/admin/kotlin.chapters.$id' {
+  const createFileRoute: CreateFileRoute<
+    '/admin/kotlin/chapters/$id',
+    FileRoutesByPath['/admin/kotlin/chapters/$id']['parentRoute'],
+    FileRoutesByPath['/admin/kotlin/chapters/$id']['id'],
+    FileRoutesByPath['/admin/kotlin/chapters/$id']['path'],
+    FileRoutesByPath['/admin/kotlin/chapters/$id']['fullPath']
+  >
+}
+declare module './routes/admin/kotlin.topics.$id' {
+  const createFileRoute: CreateFileRoute<
+    '/admin/kotlin/topics/$id',
+    FileRoutesByPath['/admin/kotlin/topics/$id']['parentRoute'],
+    FileRoutesByPath['/admin/kotlin/topics/$id']['id'],
+    FileRoutesByPath['/admin/kotlin/topics/$id']['path'],
+    FileRoutesByPath['/admin/kotlin/topics/$id']['fullPath']
+  >
+}
 declare module './routes/admin/resume.projects.$id' {
   const createFileRoute: CreateFileRoute<
     '/admin/resume/projects/$id',
@@ -725,6 +868,28 @@ const AdminPostsRouteWithChildren = AdminPostsRoute._addFileChildren(
   AdminPostsRouteChildren,
 )
 
+interface AdminKotlinChaptersRouteChildren {
+  AdminKotlinChaptersIdRoute: typeof AdminKotlinChaptersIdRoute
+}
+
+const AdminKotlinChaptersRouteChildren: AdminKotlinChaptersRouteChildren = {
+  AdminKotlinChaptersIdRoute: AdminKotlinChaptersIdRoute,
+}
+
+const AdminKotlinChaptersRouteWithChildren =
+  AdminKotlinChaptersRoute._addFileChildren(AdminKotlinChaptersRouteChildren)
+
+interface AdminKotlinTopicsRouteChildren {
+  AdminKotlinTopicsIdRoute: typeof AdminKotlinTopicsIdRoute
+}
+
+const AdminKotlinTopicsRouteChildren: AdminKotlinTopicsRouteChildren = {
+  AdminKotlinTopicsIdRoute: AdminKotlinTopicsIdRoute,
+}
+
+const AdminKotlinTopicsRouteWithChildren =
+  AdminKotlinTopicsRoute._addFileChildren(AdminKotlinTopicsRouteChildren)
+
 interface AdminResumeProjectsRouteChildren {
   AdminResumeProjectsIdRoute: typeof AdminResumeProjectsIdRoute
 }
@@ -749,9 +914,12 @@ const rootRouteChildren: RootRouteChildren = {
   AdminTestimonialsRoute: AdminTestimonialsRoute,
   BlogSlugRoute: BlogSlugRoute,
   LearnKotlinTopicIdRoute: LearnKotlinTopicIdRoute,
+  LearnKotlinMindmapRoute: LearnKotlinMindmapRoute,
   AdminIndexRoute: AdminIndexRoute,
   BlogIndexRoute: BlogIndexRoute,
   LearnKotlinIndexRoute: LearnKotlinIndexRoute,
+  AdminKotlinChaptersRoute: AdminKotlinChaptersRouteWithChildren,
+  AdminKotlinTopicsRoute: AdminKotlinTopicsRouteWithChildren,
   AdminResumeCertificatesRoute: AdminResumeCertificatesRoute,
   AdminResumeEducationRoute: AdminResumeEducationRoute,
   AdminResumeHobbiesRoute: AdminResumeHobbiesRoute,

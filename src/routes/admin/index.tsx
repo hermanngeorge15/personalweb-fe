@@ -50,6 +50,16 @@ export const Route = createFileRoute({
               Resume: Hobbies
             </a>
           </li>
+          <li>
+            <a className="underline" href="/admin/kotlin/topics">
+              Kotlin: Topics
+            </a>
+          </li>
+          <li>
+            <a className="underline" href="/admin/kotlin/chapters">
+              Kotlin: Chapters
+            </a>
+          </li>
         </ul>
       </div>
     </AppShell>

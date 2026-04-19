@@ -136,9 +136,9 @@ export function usePosts(params?: {
           slug: i.slug ?? '',
           title: i.title ?? '',
           excerpt: i.excerpt ?? '',
-          publishedAt: i.published_at,
+          publishedAt: i.publishedAt,
           tags: i.tags ?? [],
-          coverUrl: i.cover_url,
+          coverUrl: i.coverUrl,
         })),
         nextCursor: res.nextCursor ?? null,
       } satisfies PostsResponse
@@ -156,9 +156,9 @@ export function usePost(slug: string) {
       return {
         slug: res.slug ?? slug,
         title: res.title ?? '',
-        mdx: res.content_mdx ?? '',
+        mdx: res.contentMdx ?? '',
         tags: res.tags ?? [],
-        publishedAt: res.published_at ?? undefined,
+        publishedAt: res.publishedAt ?? undefined,
       } satisfies PostDetail
     },
     enabled: !!slug,
@@ -185,11 +185,11 @@ export function useUpdatePost() {
           slug: input.slug,
           title: input.title,
           excerpt: input.excerpt,
-          content_mdx: input.mdx,
-          cover_url: input.cover_url ?? undefined,
+          contentMdx: input.mdx,
+          coverUrl: input.cover_url ?? undefined,
           tags: input.tags,
           status: input.status,
-          published_at: input.published_at ?? undefined,
+          publishedAt: input.published_at ?? undefined,
         },
       })
     },
@@ -219,11 +219,11 @@ export function useCreatePost() {
           slug: input.slug,
           title: input.title,
           excerpt: input.excerpt,
-          content_mdx: input.mdx,
-          cover_url: input.cover_url ?? undefined,
+          contentMdx: input.mdx,
+          coverUrl: input.cover_url ?? undefined,
           tags: input.tags,
           status: input.status,
-          published_at: input.published_at ?? undefined,
+          publishedAt: input.published_at ?? undefined,
         },
       })
     },
@@ -838,7 +838,7 @@ export type KotlinTopicWithTiers = {
 export function useKotlinTopicWithTiers(
   id: string,
   sourceLanguage?: SourceLanguage,
-  tier?: number
+  tier?: number,
 ) {
   const params = new URLSearchParams()
   if (sourceLanguage) params.set('sourceLanguage', sourceLanguage)
@@ -903,7 +903,9 @@ export function useExpenseTrackerChapters() {
   return useQuery({
     queryKey: ['kotlin-learning', 'expense-tracker', 'chapters'],
     queryFn: () =>
-      api<ExpenseTrackerChapterList[]>('/api/learn-kotlin/expense-tracker/chapters'),
+      api<ExpenseTrackerChapterList[]>(
+        '/api/learn-kotlin/expense-tracker/chapters',
+      ),
   })
 }
 
@@ -912,8 +914,240 @@ export function useExpenseTrackerChapter(chapterNumber: number) {
     queryKey: ['kotlin-learning', 'expense-tracker', 'chapter', chapterNumber],
     queryFn: () =>
       api<ExpenseTrackerChapterDetail>(
-        `/api/learn-kotlin/expense-tracker/chapters/${chapterNumber}`
+        `/api/learn-kotlin/expense-tracker/chapters/${chapterNumber}`,
       ),
     enabled: chapterNumber > 0,
+  })
+}
+
+// ========================================
+// Kotlin Learning Admin Types & Mutations
+// ========================================
+
+export type KotlinTopicAdmin = {
+  id: string
+  title: string
+  module: string
+  difficulty: string
+  description?: string
+  kotlinExplanation: string
+  kotlinCode: string
+  readingTimeMinutes: number
+  orderIndex: number
+  partNumber?: number
+  partName?: string
+  contentStructure?: string
+  maxTierLevel: number
+}
+
+export type KotlinTopicUpsertRequest = {
+  id: string
+  title: string
+  module: string
+  difficulty: string
+  description?: string
+  kotlinExplanation: string
+  kotlinCode: string
+  readingTimeMinutes?: number
+  orderIndex?: number
+  partNumber?: number
+  partName?: string
+  contentStructure?: string
+  maxTierLevel?: number
+}
+
+export type ExpenseTrackerChapterAdmin = {
+  id: number
+  chapterNumber: number
+  title: string
+  description?: string
+  introduction?: string
+  implementationSteps?: string
+  codeSnippets?: string
+  summary?: string
+  difficulty: string
+  estimatedTimeMinutes: number
+  previousChapter?: number
+  nextChapter?: number
+}
+
+export type ExpenseTrackerChapterUpsertRequest = {
+  chapterNumber: number
+  title: string
+  description?: string
+  introduction?: string
+  implementationSteps?: string
+  codeSnippets?: string
+  summary?: string
+  difficulty?: string
+  estimatedTimeMinutes?: number
+}
+
+// Admin queries for topics
+export function useKotlinTopicsAdmin() {
+  return useQuery({
+    queryKey: ['kotlin-learning', 'admin', 'topics'],
+    queryFn: () => api<KotlinTopicAdmin[]>('/api/learn-kotlin/admin/topics'),
+  })
+}
+
+export function useKotlinTopicAdmin(id: string) {
+  return useQuery({
+    queryKey: ['kotlin-learning', 'admin', 'topic', id],
+    queryFn: () =>
+      api<KotlinTopicAdmin>(`/api/learn-kotlin/admin/topics/${id}`),
+    enabled: !!id,
+  })
+}
+
+// Admin mutations for topics
+export function useCreateKotlinTopic() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (input: KotlinTopicUpsertRequest) => {
+      return apiAuth<{ id: string }>(
+        '/api/learn-kotlin/topics',
+        await authHeader(),
+        {
+          method: 'POST',
+          body: JSON.stringify(input),
+        },
+      )
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['kotlin-learning'] })
+    },
+  })
+}
+
+export function useUpdateKotlinTopic() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (input: KotlinTopicUpsertRequest) => {
+      await apiAuth(
+        `/api/learn-kotlin/topics/${input.id}`,
+        await authHeader(),
+        {
+          method: 'PUT',
+          body: JSON.stringify(input),
+        },
+      )
+      return input.id
+    },
+    onSuccess: (id) => {
+      qc.invalidateQueries({ queryKey: ['kotlin-learning'] })
+      qc.invalidateQueries({
+        queryKey: ['kotlin-learning', 'admin', 'topic', id],
+      })
+    },
+  })
+}
+
+export function useDeleteKotlinTopic() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (input: { id: string }) => {
+      await apiAuth(
+        `/api/learn-kotlin/topics/${input.id}`,
+        await authHeader(),
+        {
+          method: 'DELETE',
+        },
+      )
+      return input.id
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['kotlin-learning'] })
+    },
+  })
+}
+
+// Admin queries for chapters
+export function useKotlinChaptersAdmin() {
+  return useQuery({
+    queryKey: ['kotlin-learning', 'admin', 'chapters'],
+    queryFn: () =>
+      api<ExpenseTrackerChapterAdmin[]>('/api/learn-kotlin/admin/chapters'),
+  })
+}
+
+export function useKotlinChapterAdmin(id: number) {
+  return useQuery({
+    queryKey: ['kotlin-learning', 'admin', 'chapter', id],
+    queryFn: () =>
+      api<ExpenseTrackerChapterAdmin>(`/api/learn-kotlin/admin/chapters/${id}`),
+    enabled: id > 0,
+  })
+}
+
+// Admin mutations for chapters
+export function useCreateKotlinChapter() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (input: ExpenseTrackerChapterUpsertRequest) => {
+      return apiAuth<{ id: number }>(
+        '/api/learn-kotlin/chapters',
+        await authHeader(),
+        {
+          method: 'POST',
+          body: JSON.stringify(input),
+        },
+      )
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['kotlin-learning'] })
+    },
+  })
+}
+
+export function useUpdateKotlinChapter() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (input: ExpenseTrackerChapterAdmin) => {
+      await apiAuth(
+        `/api/learn-kotlin/chapters/${input.id}`,
+        await authHeader(),
+        {
+          method: 'PUT',
+          body: JSON.stringify({
+            chapterNumber: input.chapterNumber,
+            title: input.title,
+            description: input.description,
+            introduction: input.introduction,
+            implementationSteps: input.implementationSteps,
+            codeSnippets: input.codeSnippets,
+            summary: input.summary,
+            difficulty: input.difficulty,
+            estimatedTimeMinutes: input.estimatedTimeMinutes,
+          }),
+        },
+      )
+      return input.id
+    },
+    onSuccess: (id) => {
+      qc.invalidateQueries({ queryKey: ['kotlin-learning'] })
+      qc.invalidateQueries({
+        queryKey: ['kotlin-learning', 'admin', 'chapter', id],
+      })
+    },
+  })
+}
+
+export function useDeleteKotlinChapter() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (input: { id: number }) => {
+      await apiAuth(
+        `/api/learn-kotlin/chapters/${input.id}`,
+        await authHeader(),
+        {
+          method: 'DELETE',
+        },
+      )
+      return input.id
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['kotlin-learning'] })
+    },
   })
 }
