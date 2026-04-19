@@ -5,6 +5,11 @@ on:
     branches: ['main']
     tags: ['v*']
   pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: fe-deploy-${{ github.ref }}
+  cancel-in-progress: false
 
 permissions:
   contents: read
@@ -17,6 +22,7 @@ env:
 jobs:
   docker:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
 
@@ -75,6 +81,10 @@ jobs:
     if: github.ref == 'refs/heads/main'
     needs: [docker]
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: production
+      url: https://jirihermann.com
     steps:
       - name: SSH redeploy on server
         uses: appleboy/ssh-action@v1.2.0
@@ -83,14 +93,34 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.SSH_PORT }}
+          command_timeout: 8m
           script: |
             set -e
             cd /opt/jiri-site
-            # Stop and remove container
-            docker compose stop frontend
-            docker compose rm -f frontend
-            # Pull fresh image and start
             docker compose pull frontend
-            docker compose up frontend -d
-            # Clean up unused images
+            docker compose up -d --force-recreate frontend
+
+            echo "Waiting for frontend to come up..."
+            for attempt in 1 2 3 4 5 6; do
+              sleep 5
+              if docker compose ps frontend --status running | grep -q frontend; then
+                echo "✅ Frontend container running (attempt ${attempt})"
+                break
+              fi
+            done
+
             docker image prune -f
+
+      - name: Public smoke test
+        run: |
+          for attempt in 1 2 3 4 5; do
+            sleep 5
+            code=$(curl -s -o /dev/null -w "%{http_code}" https://jirihermann.com/)
+            if [ "$code" = "200" ]; then
+              echo "✅ https://jirihermann.com/ returned 200"
+              exit 0
+            fi
+            echo "Attempt ${attempt}: got HTTP ${code}"
+          done
+          echo "❌ Site did not return 200 after 25s"
+          exit 1
