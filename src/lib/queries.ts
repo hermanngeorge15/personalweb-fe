@@ -25,7 +25,9 @@ export type PostsResponse = {
 export type PostDetail = {
   slug: string
   title: string
+  excerpt?: string
   mdx: string
+  coverUrl?: string
   tags?: string[]
   publishedAt?: Date
 }
@@ -156,7 +158,9 @@ export function usePost(slug: string) {
       return {
         slug: res.slug ?? slug,
         title: res.title ?? '',
+        excerpt: res.excerpt ?? undefined,
         mdx: res.contentMdx ?? '',
+        coverUrl: res.coverUrl ?? undefined,
         tags: res.tags ?? [],
         publishedAt: res.publishedAt ?? undefined,
       } satisfies PostDetail

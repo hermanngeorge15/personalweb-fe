@@ -36,13 +36,31 @@ export interface PostDetailDto {
      * @type {string}
      * @memberof PostDetailDto
      */
+    excerpt?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PostDetailDto
+     */
     contentMdx?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PostDetailDto
+     */
+    coverUrl?: string;
     /**
      * 
      * @type {Array<string>}
      * @memberof PostDetailDto
      */
     tags?: Array<string>;
+    /**
+     * 
+     * @type {string}
+     * @memberof PostDetailDto
+     */
+    status?: string;
     /**
      * 
      * @type {Date}
@@ -70,8 +88,11 @@ export function PostDetailDtoFromJSONTyped(json: any, ignoreDiscriminator: boole
         
         'slug': json['slug'] == null ? undefined : json['slug'],
         'title': json['title'] == null ? undefined : json['title'],
+        'excerpt': json['excerpt'] == null ? undefined : json['excerpt'],
         'contentMdx': json['content_mdx'] == null ? undefined : json['content_mdx'],
+        'coverUrl': json['cover_url'] == null ? undefined : json['cover_url'],
         'tags': json['tags'] == null ? undefined : json['tags'],
+        'status': json['status'] == null ? undefined : json['status'],
         'publishedAt': json['published_at'] == null ? undefined : (new Date(json['published_at'])),
     };
 }
@@ -89,8 +110,11 @@ export function PostDetailDtoToJSONTyped(value?: PostDetailDto | null, ignoreDis
         
         'slug': value['slug'],
         'title': value['title'],
+        'excerpt': value['excerpt'],
         'content_mdx': value['contentMdx'],
+        'cover_url': value['coverUrl'],
         'tags': value['tags'],
+        'status': value['status'],
         'published_at': value['publishedAt'] == null ? undefined : ((value['publishedAt']).toISOString()),
     };
 }
