@@ -127,11 +127,25 @@ function BlogPost() {
               <div className="pointer-events-none absolute -bottom-24 -right-24 h-64 w-64 rounded-full bg-gradient-to-tr from-green-400/20 via-emerald-400/10 to-teal-400/10 blur-3xl" />
 
               <div className="relative">
+                {data.coverUrl && (
+                  <img
+                    src={data.coverUrl}
+                    alt={data.title}
+                    loading="eager"
+                    className="mb-6 max-h-[420px] w-full rounded-2xl object-cover shadow-md"
+                  />
+                )}
                 <h1 className="text-3xl font-bold leading-tight tracking-tight md:text-4xl lg:text-5xl">
                   <span className="bg-gradient-to-br from-blue-600 via-cyan-500 to-green-500 bg-clip-text text-transparent">
                     {data.title}
                   </span>
                 </h1>
+
+                {data.excerpt && (
+                  <p className="mt-4 text-lg leading-relaxed text-gray-700 md:text-xl">
+                    {data.excerpt}
+                  </p>
+                )}
 
                 <div className="text-muted-foreground mt-6 flex flex-wrap items-center gap-4 text-sm">
                   {data.publishedAt && (

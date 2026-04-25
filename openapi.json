@@ -1689,7 +1689,13 @@
           "title": {
             "type": "string"
           },
+          "excerpt": {
+            "type": "string"
+          },
           "content_mdx": {
+            "type": "string"
+          },
+          "cover_url": {
             "type": "string"
           },
           "tags": {
@@ -1697,6 +1703,9 @@
             "items": {
               "type": "string"
             }
+          },
+          "status": {
+            "type": "string"
           },
           "published_at": {
             "type": "string",
