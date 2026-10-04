@@ -32,6 +32,8 @@ function AdminKotlinTopics() {
           className="grid gap-2 rounded border p-3"
           onSubmit={async (e) => {
             e.preventDefault()
+            // currentTarget is null after an await, so keep the form for reset().
+            const form = e.currentTarget as HTMLFormElement
             const fd = new FormData(e.currentTarget as HTMLFormElement)
             const id = String(fd.get('id') ?? '')
             const title = String(fd.get('title') ?? '')
@@ -59,8 +61,12 @@ function AdminKotlinTopics() {
               kotlinCode,
               readingTimeMinutes,
               orderIndex,
+              // The backend reads missing fields as null rather than using its defaults
+              // (no Jackson Kotlin module), so send them explicitly.
+              contentStructure: 'tiered',
+              maxTierLevel: 2,
             })
-            ;(e.currentTarget as HTMLFormElement).reset()
+            form.reset()
           }}
         >
           <div className="grid gap-2 md:grid-cols-3">

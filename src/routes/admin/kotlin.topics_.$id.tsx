@@ -1,11 +1,11 @@
 import { useEffect, useMemo } from 'react'
-import { Link, useParams } from '@tanstack/react-router'
+import { Link } from '@tanstack/react-router'
 import { ensureKeycloakAuth } from '@/lib/keycloak'
 import AppShell from '@/components/AppShell'
 import { useKotlinTopicsAdmin, useUpdateKotlinTopic } from '@/lib/queries'
 
 function AdminKotlinTopicEdit() {
-  const { id } = useParams({ from: '/admin/kotlin/topics/$id' })
+  const { id } = Route.useParams()
   const list = useKotlinTopicsAdmin()
   const update = useUpdateKotlinTopic()
 
@@ -49,7 +49,9 @@ function AdminKotlinTopicEdit() {
                 ),
                 kotlinCode: String(fd.get('kotlinCode') ?? topic.kotlinCode),
                 readingTimeMinutes: parseInt(
-                  String(fd.get('readingTimeMinutes') ?? topic.readingTimeMinutes),
+                  String(
+                    fd.get('readingTimeMinutes') ?? topic.readingTimeMinutes,
+                  ),
                   10,
                 ),
                 orderIndex: parseInt(
@@ -70,7 +72,9 @@ function AdminKotlinTopicEdit() {
             }}
           >
             <label className="grid gap-1">
-              <span className="text-muted-foreground text-sm">ID (readonly)</span>
+              <span className="text-muted-foreground text-sm">
+                ID (readonly)
+              </span>
               <input
                 className="w-full rounded border bg-gray-100 p-2"
                 value={topic.id}
@@ -101,7 +105,9 @@ function AdminKotlinTopicEdit() {
 
             <div className="grid gap-3 md:grid-cols-4">
               <label className="grid gap-1">
-                <span className="text-muted-foreground text-sm">Difficulty</span>
+                <span className="text-muted-foreground text-sm">
+                  Difficulty
+                </span>
                 <select
                   name="difficulty"
                   className="w-full rounded border p-2"
@@ -124,7 +130,9 @@ function AdminKotlinTopicEdit() {
                 />
               </label>
               <label className="grid gap-1">
-                <span className="text-muted-foreground text-sm">Order Index</span>
+                <span className="text-muted-foreground text-sm">
+                  Order Index
+                </span>
                 <input
                   name="orderIndex"
                   type="number"
@@ -149,7 +157,9 @@ function AdminKotlinTopicEdit() {
 
             <div className="grid gap-3 md:grid-cols-3">
               <label className="grid gap-1">
-                <span className="text-muted-foreground text-sm">Part Number</span>
+                <span className="text-muted-foreground text-sm">
+                  Part Number
+                </span>
                 <input
                   name="partNumber"
                   type="number"

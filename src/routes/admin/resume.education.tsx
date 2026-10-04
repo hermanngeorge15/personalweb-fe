@@ -1,90 +1,107 @@
+import { z } from 'zod'
 import { ensureKeycloakAuth } from '@/lib/keycloak'
-import AppShell from '@/components/AppShell'
+import { CrudList } from '@/components/admin/CrudList'
+import type {
+  AdminField,
+  AdminFormValues,
+  AdminSchema,
+} from '@/components/admin/AdminForm'
+import {
+  fromDateInput,
+  optionalText,
+  requiredText,
+  toDateInput,
+} from '@/lib/adminFormat'
 import {
   useResumeEducation,
   useCreateResumeEducation,
+  useUpdateResumeEducation,
   useDeleteResumeEducation,
+  type EducationBody,
+  type ResumeEducation,
 } from '@/lib/queries'
+
+const fields: AdminField[] = [
+  { name: 'institution', label: 'Institution' },
+  { name: 'degree', label: 'Degree' },
+  { name: 'field', label: 'Field' },
+  {
+    name: 'status',
+    label: 'Status',
+    type: 'select',
+    options: ['studying', 'graduated'],
+  },
+  { name: 'since', label: 'Since', type: 'date' },
+  { name: 'expectedUntil', label: 'Until (expected)', type: 'date' },
+  { name: 'thesisTitle', label: 'Thesis title' },
+  {
+    name: 'thesisDescription',
+    label: 'Thesis description',
+    type: 'textarea',
+    rows: 3,
+  },
+]
+
+const schema: AdminSchema<EducationBody> = z.object({
+  institution: requiredText('Institution'),
+  degree: optionalText,
+  field: optionalText,
+  status: z.enum(['studying', 'graduated']),
+  // The backend requires a start date.
+  since: z
+    .string()
+    .min(1, 'Since is required')
+    .transform((value) => fromDateInput(value) ?? ''),
+  expectedUntil: z.string().transform(fromDateInput),
+  thesisTitle: optionalText,
+  thesisDescription: optionalText,
+})
+
+const empty: AdminFormValues = {
+  institution: '',
+  degree: '',
+  field: '',
+  status: 'studying',
+  since: '',
+  expectedUntil: '',
+  thesisTitle: '',
+  thesisDescription: '',
+}
+
+const toValues = (e: ResumeEducation): AdminFormValues => ({
+  institution: e.institution ?? '',
+  degree: e.degree ?? '',
+  field: e.field ?? '',
+  status: e.status === 'graduated' ? 'graduated' : 'studying',
+  since: toDateInput(e.since),
+  expectedUntil: toDateInput(e.expectedUntil),
+  thesisTitle: e.thesisTitle ?? '',
+  thesisDescription: e.thesisDescription ?? '',
+})
 
 function AdminResumeEducation() {
   const { data, isLoading, isError } = useResumeEducation()
-  const createEducation = useCreateResumeEducation()
-  const deleteEducation = useDeleteResumeEducation()
+  const create = useCreateResumeEducation()
+  const update = useUpdateResumeEducation()
+  const remove = useDeleteResumeEducation()
   return (
-    <AppShell path="Admin / Resume / Education">
-      <section className="grid gap-6 md:gap-8">
-        <h1 className="text-2xl font-semibold tracking-tight">
-          Resume Education
-        </h1>
-        <form
-          className="grid gap-2 rounded border p-3"
-          onSubmit={async (e) => {
-            e.preventDefault()
-            const fd = new FormData(e.currentTarget as HTMLFormElement)
-            const institution = String(fd.get('institution') ?? '')
-            const degree = String(fd.get('degree') ?? '')
-            const field = String(fd.get('field') ?? '')
-            if (!institution) return
-            await createEducation.mutateAsync({ institution, degree, field })
-            ;(e.currentTarget as HTMLFormElement).reset()
-          }}
-        >
-          <div className="grid gap-2 md:grid-cols-3">
-            <input
-              name="institution"
-              placeholder="institution"
-              className="rounded border p-2"
-              required
-            />
-            <input
-              name="degree"
-              placeholder="degree"
-              className="rounded border p-2"
-            />
-            <input
-              name="field"
-              placeholder="field"
-              className="rounded border p-2"
-            />
-          </div>
-          <div>
-            <button
-              type="submit"
-              className="rounded bg-blue-600 px-3 py-2 text-white disabled:opacity-50"
-              disabled={createEducation.isPending}
-            >
-              {createEducation.isPending ? 'Creating…' : 'Create'}
-            </button>
-          </div>
-        </form>
-        {isLoading && <div>Loading…</div>}
-        {isError && <div>Failed to load resume education.</div>}
-        {data && (
-          <ul className="grid gap-2">
-            {data.map((ed) => (
-              <li
-                key={ed.id}
-                className="flex items-center justify-between rounded border p-3"
-              >
-                <span>
-                  {ed.institution}
-                  {ed.degree ? ` — ${ed.degree}` : ''}
-                </span>
-                <button
-                  className="rounded bg-red-600 px-3 py-1 text-white disabled:opacity-50"
-                  onClick={async () => {
-                    await deleteEducation.mutateAsync({ id: ed.id })
-                  }}
-                  disabled={deleteEducation.isPending}
-                >
-                  {deleteEducation.isPending ? 'Deleting…' : 'Delete'}
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-    </AppShell>
+    <CrudList
+      title="Resume education"
+      path="Admin / Resume / Education"
+      items={data}
+      isLoading={isLoading}
+      isError={isError}
+      fields={fields}
+      schema={schema}
+      emptyValues={empty}
+      toValues={toValues}
+      describe={(e) =>
+        [e.institution, e.degree, e.field].filter(Boolean).join(' — ')
+      }
+      onCreate={(body) => create.mutateAsync(body)}
+      onUpdate={(id, body) => update.mutateAsync({ id, body })}
+      onDelete={(id) => remove.mutateAsync({ id })}
+    />
   )
 }
 
@@ -93,6 +110,5 @@ export const Route = createFileRoute({
     await ensureKeycloakAuth()
     return null
   },
-  path: '/admin/resume/education',
   component: AdminResumeEducation,
 })

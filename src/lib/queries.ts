@@ -42,9 +42,16 @@ export type Meta = {
 
 export type Project = {
   id: string
-  name: string
-  description: string
+  slug: string
+  title: string
+  summary: string
+  content_mdx: string
+  /** JSON object as a string, e.g. {"github":"https://…"} */
+  links: string
+  order: number
 }
+
+export type ProjectUpsertBody = Omit<Project, 'id'>
 
 export type Testimonial = {
   id: string
@@ -92,6 +99,30 @@ export type ResumeEducation = {
   thesisTitle?: string
   thesisDescription?: string
   status?: string
+}
+
+/** Request bodies for the resume admin endpoints, in the backend's field names. */
+export type LanguageBody = { name: string; level: string }
+
+export type EducationBody = {
+  institution: string
+  field: string | null
+  degree: string | null
+  since: string
+  expectedUntil: string | null
+  thesisTitle: string | null
+  thesisDescription: string | null
+  status: 'studying' | 'graduated'
+}
+
+export type CertificateBody = {
+  name: string
+  issuer: string | null
+  from: string | null
+  to: string | null
+  description: string | null
+  certificateId: string | null
+  url: string | null
 }
 
 export type ResumeCertificate = {
@@ -169,38 +200,72 @@ export function usePost(slug: string) {
   })
 }
 
+/** Body of PUT /api/posts/{id} and POST /api/posts (snake_case, as the backend expects). */
+export type PostUpsertBody = {
+  slug: string
+  title: string
+  excerpt: string
+  content_mdx: string
+  cover_url: string | null
+  tags: string[]
+  status: 'draft' | 'published'
+  published_at: string | null
+}
+
+export type AdminPostListItem = {
+  id: string
+  slug: string
+  title: string
+  excerpt: string
+  tags: string[]
+  status: string
+  published_at: string | null
+  updated_at: string
+}
+
+export type AdminPost = AdminPostListItem & {
+  content_mdx: string
+  cover_url: string | null
+}
+
+/** Every post, drafts included (admin only). */
+export function useAdminPosts() {
+  return useQuery({
+    queryKey: ['admin', 'posts'],
+    queryFn: async () =>
+      apiAuth<AdminPostListItem[]>('/api/admin/posts', await authHeader()),
+  })
+}
+
+/** One post in any status, with the id needed to save it (admin only). */
+export function useAdminPost(slug: string) {
+  return useQuery({
+    queryKey: ['admin', 'post', slug],
+    queryFn: async () =>
+      apiAuth<AdminPost>(
+        `/api/admin/posts/${encodeURIComponent(slug)}`,
+        await authHeader(),
+      ),
+    enabled: !!slug,
+  })
+}
+
+function invalidatePosts(qc: ReturnType<typeof useQueryClient>) {
+  qc.invalidateQueries({ queryKey: ['admin'] })
+  qc.invalidateQueries({ queryKey: ['posts'] })
+  qc.invalidateQueries({ queryKey: ['post'] })
+}
+
 export function useUpdatePost() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: async (input: {
-      slug: string
-      title: string
-      excerpt: string
-      mdx: string
-      cover_url?: string | null
-      tags?: string[]
-      status?: string
-      published_at?: Date | null
-    }) => {
-      const postApi = getPostApi()
-      await postApi.update2({
-        id: input.slug,
-        postUpsertRequest: {
-          slug: input.slug,
-          title: input.title,
-          excerpt: input.excerpt,
-          contentMdx: input.mdx,
-          coverUrl: input.cover_url ?? undefined,
-          tags: input.tags,
-          status: input.status,
-          publishedAt: input.published_at ?? undefined,
-        },
+    mutationFn: async (input: { id: string; body: PostUpsertBody }) => {
+      await apiAuth(`/api/posts/${input.id}`, await authHeader(), {
+        method: 'PUT',
+        body: JSON.stringify(input.body),
       })
     },
-    onSuccess: (_data, variables) => {
-      qc.invalidateQueries({ queryKey: ['post', variables.slug] })
-      qc.invalidateQueries({ queryKey: ['posts'] })
-    },
+    onSuccess: () => invalidatePosts(qc),
   })
 }
 
@@ -231,24 +296,20 @@ export function useCreatePost() {
         },
       })
     },
-    onSuccess: (_data, _variables) => {
-      qc.invalidateQueries({ queryKey: ['posts'] })
-    },
+    onSuccess: () => invalidatePosts(qc),
   })
 }
 
 export function useDeletePost() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: async (input: { slug: string }) => {
-      const postApi = getPostApi()
-      await postApi.delete2({ id: input.slug })
-      return input.slug
+    mutationFn: async (input: { id: string }) => {
+      await apiAuth(`/api/posts/${input.id}`, await authHeader(), {
+        method: 'DELETE',
+      })
+      return input.id
     },
-    onSuccess: (slug) => {
-      qc.removeQueries({ queryKey: ['post', slug] })
-      qc.invalidateQueries({ queryKey: ['posts'] })
-    },
+    onSuccess: () => invalidatePosts(qc),
   })
 }
 
@@ -269,12 +330,8 @@ export function useProjects() {
 export function useCreateProject() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: async (input: {
-      id: string
-      name: string
-      description: string
-    }) => {
-      return apiAuth<Project>('/api/projects', await authHeader(), {
+    mutationFn: async (input: ProjectUpsertBody) => {
+      return apiAuth<{ id: string }>('/api/projects', await authHeader(), {
         method: 'POST',
         body: JSON.stringify(input),
       })
@@ -288,17 +345,10 @@ export function useCreateProject() {
 export function useUpdateProject() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: async (input: {
-      id: string
-      name: string
-      description: string
-    }) => {
-      return apiAuth<Project>(`/projects/${input.id}`, await authHeader(), {
+    mutationFn: async (input: { id: string; body: ProjectUpsertBody }) => {
+      await apiAuth(`/api/projects/${input.id}`, await authHeader(), {
         method: 'PUT',
-        body: JSON.stringify({
-          name: input.name,
-          description: input.description,
-        }),
+        body: JSON.stringify(input.body),
       })
     },
     onSuccess: () => {
@@ -333,14 +383,13 @@ export function useCreateTestimonial() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: async (input: {
-      id: string
       author: string
       quote: string
-      role?: string
+      role: string
       avatar_url?: string
       order?: number
     }) => {
-      return apiAuth<Testimonial>('/api/testimonials', await authHeader(), {
+      return apiAuth<{ id: string }>('/api/testimonials', await authHeader(), {
         method: 'POST',
         body: JSON.stringify(input),
       })
@@ -358,24 +407,20 @@ export function useUpdateTestimonial() {
       id: string
       author: string
       quote: string
-      role?: string
+      role: string
       avatar_url?: string
       order?: number
     }) => {
-      return apiAuth<Testimonial>(
-        `/testimonials/${input.id}`,
-        await authHeader(),
-        {
-          method: 'PUT',
-          body: JSON.stringify({
-            author: input.author,
-            quote: input.quote,
-            role: input.role,
-            avatar_url: input.avatar_url,
-            order: input.order,
-          }),
-        },
-      )
+      return apiAuth(`/api/testimonials/${input.id}`, await authHeader(), {
+        method: 'PUT',
+        body: JSON.stringify({
+          author: input.author,
+          quote: input.quote,
+          role: input.role,
+          avatar_url: input.avatar_url,
+          order: input.order,
+        }),
+      })
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['testimonials'] })
@@ -502,7 +547,7 @@ export function useDeleteResumeProject() {
 export function useCreateResumeLanguage() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: async (input: Omit<ResumeLanguage, 'id'>) => {
+    mutationFn: async (input: LanguageBody) => {
       return apiAuth<string>('/api/resume/languages', await authHeader(), {
         method: 'POST',
         body: JSON.stringify(input),
@@ -517,11 +562,10 @@ export function useCreateResumeLanguage() {
 export function useUpdateResumeLanguage() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: async (input: ResumeLanguage) => {
-      if (!input.id) throw new Error('id is required')
-      await apiAuth(`/resume/languages/${input.id}`, await authHeader(), {
+    mutationFn: async (input: { id: string; body: LanguageBody }) => {
+      await apiAuth(`/api/resume/languages/${input.id}`, await authHeader(), {
         method: 'PUT',
-        body: JSON.stringify({ name: input.name, level: input.level }),
+        body: JSON.stringify(input.body),
       })
       return input.id
     },
@@ -549,7 +593,7 @@ export function useDeleteResumeLanguage() {
 export function useCreateResumeEducation() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: async (input: Omit<ResumeEducation, 'id'>) => {
+    mutationFn: async (input: EducationBody) => {
       return apiAuth<string>('/api/resume/education', await authHeader(), {
         method: 'POST',
         body: JSON.stringify(input),
@@ -564,20 +608,10 @@ export function useCreateResumeEducation() {
 export function useUpdateResumeEducation() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: async (input: ResumeEducation) => {
-      if (!input.id) throw new Error('id is required')
-      await apiAuth(`/resume/education/${input.id}`, await authHeader(), {
+    mutationFn: async (input: { id: string; body: EducationBody }) => {
+      await apiAuth(`/api/resume/education/${input.id}`, await authHeader(), {
         method: 'PUT',
-        body: JSON.stringify({
-          institution: input.institution,
-          field: input.field,
-          degree: input.degree,
-          since: input.since,
-          expectedUntil: input.expectedUntil,
-          thesisTitle: input.thesisTitle,
-          thesisDescription: input.thesisDescription,
-          status: input.status,
-        }),
+        body: JSON.stringify(input.body),
       })
       return input.id
     },
@@ -605,7 +639,7 @@ export function useDeleteResumeEducation() {
 export function useCreateResumeCertificate() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: async (input: Omit<ResumeCertificate, 'id'>) => {
+    mutationFn: async (input: CertificateBody) => {
       return apiAuth<string>('/api/resume/certificates', await authHeader(), {
         method: 'POST',
         body: JSON.stringify(input),
@@ -620,20 +654,15 @@ export function useCreateResumeCertificate() {
 export function useUpdateResumeCertificate() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: async (input: ResumeCertificate) => {
-      if (!input.id) throw new Error('id is required')
-      await apiAuth(`/resume/certificates/${input.id}`, await authHeader(), {
-        method: 'PUT',
-        body: JSON.stringify({
-          name: input.name,
-          issuer: input.issuer,
-          from: input.startAt,
-          to: input.endAt,
-          description: input.description,
-          certificateId: input.certificateId,
-          url: input.url,
-        }),
-      })
+    mutationFn: async (input: { id: string; body: CertificateBody }) => {
+      await apiAuth(
+        `/api/resume/certificates/${input.id}`,
+        await authHeader(),
+        {
+          method: 'PUT',
+          body: JSON.stringify(input.body),
+        },
+      )
       return input.id
     },
     onSuccess: () => {

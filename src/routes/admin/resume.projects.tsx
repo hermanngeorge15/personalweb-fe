@@ -131,8 +131,8 @@ function AdminResumeProjects() {
                       month: 'short',
                     })
                   : ''
-              const start = fmt(p.from)
-              const end = p.until ? fmt(p.until) : 'Present'
+              const start = fmt(p.startAt)
+              const end = p.endAt ? fmt(p.endAt) : 'Present'
               const range =
                 start || end ? `${start}${start ? ' – ' : ''}${end}` : ''
               return (

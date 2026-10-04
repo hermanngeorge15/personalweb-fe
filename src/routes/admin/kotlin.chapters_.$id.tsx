@@ -1,11 +1,11 @@
 import { useEffect, useMemo } from 'react'
-import { Link, useParams } from '@tanstack/react-router'
+import { Link } from '@tanstack/react-router'
 import { ensureKeycloakAuth } from '@/lib/keycloak'
 import AppShell from '@/components/AppShell'
 import { useKotlinChaptersAdmin, useUpdateKotlinChapter } from '@/lib/queries'
 
 function AdminKotlinChapterEdit() {
-  const { id } = useParams({ from: '/admin/kotlin/chapters/$id' })
+  const { id } = Route.useParams()
   const list = useKotlinChaptersAdmin()
   const update = useUpdateKotlinChapter()
 
@@ -25,7 +25,9 @@ function AdminKotlinChapterEdit() {
           <Link to="/admin/kotlin/chapters" className="text-blue-600 underline">
             &larr; Back to Chapters
           </Link>
-          <h1 className="text-2xl font-semibold tracking-tight">Edit Chapter</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">
+            Edit Chapter
+          </h1>
         </div>
 
         {!chapter && (list.isLoading || list.isFetching) && <div>Loading…</div>}
@@ -49,13 +51,13 @@ function AdminKotlinChapterEdit() {
                 introduction: String(fd.get('introduction') ?? '') || undefined,
                 implementationSteps:
                   String(fd.get('implementationSteps') ?? '') || undefined,
-                codeSnippets:
-                  String(fd.get('codeSnippets') ?? '') || undefined,
+                codeSnippets: String(fd.get('codeSnippets') ?? '') || undefined,
                 summary: String(fd.get('summary') ?? '') || undefined,
                 difficulty: String(fd.get('difficulty') ?? chapter.difficulty),
                 estimatedTimeMinutes: parseInt(
                   String(
-                    fd.get('estimatedTimeMinutes') ?? chapter.estimatedTimeMinutes,
+                    fd.get('estimatedTimeMinutes') ??
+                      chapter.estimatedTimeMinutes,
                   ),
                   10,
                 ),
@@ -91,7 +93,9 @@ function AdminKotlinChapterEdit() {
 
             <div className="grid gap-3 md:grid-cols-2">
               <label className="grid gap-1">
-                <span className="text-muted-foreground text-sm">Difficulty</span>
+                <span className="text-muted-foreground text-sm">
+                  Difficulty
+                </span>
                 <select
                   name="difficulty"
                   className="w-full rounded border p-2"

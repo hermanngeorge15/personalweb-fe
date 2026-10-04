@@ -1,15 +1,81 @@
+import { useState } from 'react'
+import { z } from 'zod'
 import { ensureKeycloakAuth } from '@/lib/keycloak'
 import AppShell from '@/components/AppShell'
 import {
+  AdminForm,
+  DeleteButton,
+  type AdminField,
+  type AdminFormValues,
+} from '@/components/admin/AdminForm'
+import { intText, requiredText } from '@/lib/adminFormat'
+import {
   useTestimonials,
   useCreateTestimonial,
+  useUpdateTestimonial,
   useDeleteTestimonial,
+  type Testimonial,
 } from '@/lib/queries'
+
+const fields: AdminField[] = [
+  { name: 'author', label: 'Author name', placeholder: 'John Doe' },
+  {
+    name: 'role',
+    label: 'Role / title',
+    placeholder: 'Senior Developer at Company',
+  },
+  {
+    name: 'avatar_url',
+    label: 'Avatar URL',
+    type: 'url',
+    hint: 'Tip: right-click the LinkedIn profile picture → Copy image address',
+  },
+  {
+    name: 'order',
+    label: 'Order',
+    type: 'number',
+    hint: 'Lower numbers show first',
+  },
+  { name: 'quote', label: 'Quote / recommendation', type: 'textarea', rows: 4 },
+]
+
+const schema = z.object({
+  author: requiredText('Author'),
+  role: z.string().trim(),
+  avatar_url: z
+    .string()
+    .trim()
+    .refine(
+      (value) => value === '' || /^https?:\/\//.test(value),
+      'Must start with http:// or https://',
+    )
+    .transform((value) => value || undefined),
+  order: intText('Order'),
+  quote: requiredText('Quote'),
+})
+
+const empty: AdminFormValues = {
+  author: '',
+  role: '',
+  avatar_url: '',
+  order: '0',
+  quote: '',
+}
+
+const toValues = (t: Testimonial): AdminFormValues => ({
+  author: t.author,
+  role: t.role ?? '',
+  avatar_url: t.avatar_url ?? '',
+  order: String(t.order ?? 0),
+  quote: t.quote,
+})
 
 function AdminTestimonials() {
   const { data, isLoading, isError } = useTestimonials()
   const createTestimonial = useCreateTestimonial()
+  const updateTestimonial = useUpdateTestimonial()
   const deleteTestimonial = useDeleteTestimonial()
+  const [editing, setEditing] = useState<string | null>(null)
   return (
     <AppShell path="Admin / Testimonials">
       <section className="grid gap-6 md:gap-8">
@@ -25,96 +91,14 @@ function AdminTestimonials() {
 
         <div className="rounded-xl border bg-white/60 p-6 shadow-sm">
           <h2 className="mb-4 text-lg font-semibold">Add New Testimonial</h2>
-          <form
-            className="grid gap-4"
-            onSubmit={async (e) => {
-              e.preventDefault()
-              const fd = new FormData(e.currentTarget as HTMLFormElement)
-              const id = String(fd.get('id') ?? '')
-              const author = String(fd.get('author') ?? '')
-              const quote = String(fd.get('quote') ?? '')
-              const role = String(fd.get('role') ?? '')
-              const avatar_url = String(fd.get('avatar_url') ?? '')
-              if (!id || !author || !quote) return
-              await createTestimonial.mutateAsync({
-                id,
-                author,
-                quote,
-                role: role || undefined,
-                avatar_url: avatar_url || undefined,
-              })
-              ;(e.currentTarget as HTMLFormElement).reset()
-            }}
-          >
-            <div className="grid gap-4 md:grid-cols-2">
-              <div>
-                <label className="mb-1 block text-sm font-medium">
-                  ID <span className="text-red-500">*</span>
-                </label>
-                <input
-                  name="id"
-                  placeholder="unique-id"
-                  className="w-full rounded border p-2"
-                  required
-                />
-              </div>
-              <div>
-                <label className="mb-1 block text-sm font-medium">
-                  Author Name <span className="text-red-500">*</span>
-                </label>
-                <input
-                  name="author"
-                  placeholder="John Doe"
-                  className="w-full rounded border p-2"
-                  required
-                />
-              </div>
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium">
-                Role / Title
-              </label>
-              <input
-                name="role"
-                placeholder="Senior Developer at Company"
-                className="w-full rounded border p-2"
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium">
-                Avatar URL
-              </label>
-              <input
-                name="avatar_url"
-                type="url"
-                placeholder="https://example.com/avatar.jpg"
-                className="w-full rounded border p-2"
-              />
-              <p className="text-muted-foreground mt-1 text-xs">
-                Tip: Right-click on LinkedIn profile picture → Copy image
-                address
-              </p>
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium">
-                Quote / Recommendation <span className="text-red-500">*</span>
-              </label>
-              <textarea
-                name="quote"
-                placeholder="Enter the testimonial text..."
-                className="w-full rounded border p-2"
-                rows={4}
-                required
-              />
-            </div>
-            <button
-              type="submit"
-              className="rounded bg-indigo-600 px-6 py-2 text-white transition-colors hover:bg-indigo-700 disabled:opacity-50"
-              disabled={createTestimonial.isPending}
-            >
-              {createTestimonial.isPending ? 'Creating…' : 'Add Testimonial'}
-            </button>
-          </form>
+          <AdminForm
+            schema={schema}
+            fields={fields}
+            defaultValues={empty}
+            submitLabel="Add testimonial"
+            resetOnSuccess
+            onSubmit={(values) => createTestimonial.mutateAsync(values)}
+          />
         </div>
         <div className="rounded-xl border bg-white/60 p-6 shadow-sm">
           <h2 className="mb-4 text-lg font-semibold">Existing Testimonials</h2>
@@ -127,45 +111,60 @@ function AdminTestimonials() {
               {data.map((t) => (
                 <li
                   key={t.id}
-                  className="flex items-start gap-4 rounded-lg border bg-white p-4"
+                  className="grid gap-3 rounded-lg border bg-white p-4"
                 >
-                  {t.avatar_url ? (
-                    <img
-                      src={t.avatar_url}
-                      alt={t.author}
-                      className="h-12 w-12 rounded-full object-cover ring-2 ring-indigo-100"
-                    />
-                  ) : (
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-fuchsia-500 text-lg font-semibold text-white">
-                      {t.author.charAt(0).toUpperCase()}
-                    </div>
-                  )}
-                  <div className="flex-1">
-                    <div className="font-semibold">{t.author}</div>
-                    {t.role && (
-                      <div className="text-muted-foreground text-sm">
-                        {t.role}
+                  <div className="flex items-start gap-4">
+                    {t.avatar_url ? (
+                      <img
+                        src={t.avatar_url}
+                        alt={t.author}
+                        className="h-12 w-12 rounded-full object-cover ring-2 ring-indigo-100"
+                      />
+                    ) : (
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-fuchsia-500 text-lg font-semibold text-white">
+                        {t.author.charAt(0).toUpperCase()}
                       </div>
                     )}
-                    <p className="text-muted-foreground mt-2 text-sm italic">
-                      "{t.quote}"
-                    </p>
+                    <div className="flex-1">
+                      <div className="font-semibold">{t.author}</div>
+                      {t.role && (
+                        <div className="text-muted-foreground text-sm">
+                          {t.role}
+                        </div>
+                      )}
+                      <p className="text-muted-foreground mt-2 text-sm italic">
+                        &ldquo;{t.quote}&rdquo;
+                      </p>
+                    </div>
+                    <div className="flex shrink-0 items-center gap-3">
+                      <button
+                        type="button"
+                        className="underline"
+                        onClick={() =>
+                          setEditing(editing === t.id ? null : t.id)
+                        }
+                      >
+                        {editing === t.id ? 'Close' : 'Edit'}
+                      </button>
+                      <DeleteButton
+                        onDelete={() =>
+                          deleteTestimonial.mutateAsync({ id: t.id })
+                        }
+                      />
+                    </div>
                   </div>
-                  <button
-                    className="rounded bg-red-600 px-3 py-1 text-sm text-white transition-colors hover:bg-red-700 disabled:opacity-50"
-                    onClick={async () => {
-                      if (
-                        confirm(
-                          'Are you sure you want to delete this testimonial?',
-                        )
-                      ) {
-                        await deleteTestimonial.mutateAsync({ id: t.id })
+                  {editing === t.id && (
+                    <AdminForm
+                      schema={schema}
+                      fields={fields}
+                      defaultValues={toValues(t)}
+                      submitLabel="Save"
+                      onCancel={() => setEditing(null)}
+                      onSubmit={(values) =>
+                        updateTestimonial.mutateAsync({ id: t.id, ...values })
                       }
-                    }}
-                    disabled={deleteTestimonial.isPending}
-                  >
-                    {deleteTestimonial.isPending ? 'Deleting…' : 'Delete'}
-                  </button>
+                    />
+                  )}
                 </li>
               ))}
             </ul>

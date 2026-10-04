@@ -1,84 +1,87 @@
+import { z } from 'zod'
 import { ensureKeycloakAuth } from '@/lib/keycloak'
-import AppShell from '@/components/AppShell'
+import { CrudList } from '@/components/admin/CrudList'
+import type {
+  AdminField,
+  AdminFormValues,
+  AdminSchema,
+} from '@/components/admin/AdminForm'
+import {
+  fromDateInput,
+  optionalText,
+  requiredText,
+  toDateInput,
+} from '@/lib/adminFormat'
 import {
   useResumeCertificates,
   useCreateResumeCertificate,
+  useUpdateResumeCertificate,
   useDeleteResumeCertificate,
+  type CertificateBody,
+  type ResumeCertificate,
 } from '@/lib/queries'
+
+const fields: AdminField[] = [
+  { name: 'name', label: 'Name' },
+  { name: 'issuer', label: 'Issuer' },
+  { name: 'from', label: 'Issued', type: 'date' },
+  { name: 'to', label: 'Expires', type: 'date' },
+  { name: 'certificateId', label: 'Certificate ID' },
+  { name: 'url', label: 'URL', type: 'url' },
+  { name: 'description', label: 'Description', type: 'textarea', rows: 3 },
+]
+
+const schema: AdminSchema<CertificateBody> = z.object({
+  name: requiredText('Name'),
+  issuer: optionalText,
+  from: z.string().transform(fromDateInput),
+  to: z.string().transform(fromDateInput),
+  certificateId: optionalText,
+  url: optionalText,
+  description: optionalText,
+})
+
+const empty: AdminFormValues = {
+  name: '',
+  issuer: '',
+  from: '',
+  to: '',
+  certificateId: '',
+  url: '',
+  description: '',
+}
+
+const toValues = (c: ResumeCertificate): AdminFormValues => ({
+  name: c.name ?? '',
+  issuer: c.issuer ?? '',
+  from: toDateInput(c.startAt),
+  to: toDateInput(c.endAt),
+  certificateId: c.certificateId ?? '',
+  url: c.url ?? '',
+  description: c.description ?? '',
+})
 
 function AdminResumeCertificates() {
   const { data, isLoading, isError } = useResumeCertificates()
-  const createCertificate = useCreateResumeCertificate()
-  const deleteCertificate = useDeleteResumeCertificate()
+  const create = useCreateResumeCertificate()
+  const update = useUpdateResumeCertificate()
+  const remove = useDeleteResumeCertificate()
   return (
-    <AppShell path="Admin / Resume / Certificates">
-      <section className="grid gap-6 md:gap-8">
-        <h1 className="text-2xl font-semibold tracking-tight">
-          Resume Certificates
-        </h1>
-        <form
-          className="grid gap-2 rounded border p-3"
-          onSubmit={async (e) => {
-            e.preventDefault()
-            const fd = new FormData(e.currentTarget as HTMLFormElement)
-            const name = String(fd.get('name') ?? '')
-            const issuer = String(fd.get('issuer') ?? '')
-            if (!name) return
-            await createCertificate.mutateAsync({ name, issuer })
-            ;(e.currentTarget as HTMLFormElement).reset()
-          }}
-        >
-          <div className="grid gap-2 md:grid-cols-2">
-            <input
-              name="name"
-              placeholder="name"
-              className="rounded border p-2"
-              required
-            />
-            <input
-              name="issuer"
-              placeholder="issuer"
-              className="rounded border p-2"
-            />
-          </div>
-          <div>
-            <button
-              type="submit"
-              className="rounded bg-blue-600 px-3 py-2 text-white disabled:opacity-50"
-              disabled={createCertificate.isPending}
-            >
-              {createCertificate.isPending ? 'Creating…' : 'Create'}
-            </button>
-          </div>
-        </form>
-        {isLoading && <div>Loading…</div>}
-        {isError && <div>Failed to load resume certificates.</div>}
-        {data && (
-          <ul className="grid gap-2">
-            {data.map((c) => (
-              <li
-                key={c.id}
-                className="flex items-center justify-between rounded border p-3"
-              >
-                <span>
-                  {c.name}
-                  {c.issuer ? ` — ${c.issuer}` : ''}
-                </span>
-                <button
-                  className="rounded bg-red-600 px-3 py-1 text-white disabled:opacity-50"
-                  onClick={async () => {
-                    await deleteCertificate.mutateAsync({ id: c.id })
-                  }}
-                  disabled={deleteCertificate.isPending}
-                >
-                  {deleteCertificate.isPending ? 'Deleting…' : 'Delete'}
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-    </AppShell>
+    <CrudList
+      title="Resume certificates"
+      path="Admin / Resume / Certificates"
+      items={data}
+      isLoading={isLoading}
+      isError={isError}
+      fields={fields}
+      schema={schema}
+      emptyValues={empty}
+      toValues={toValues}
+      describe={(c) => `${c.name ?? ''}${c.issuer ? ` — ${c.issuer}` : ''}`}
+      onCreate={(body) => create.mutateAsync(body)}
+      onUpdate={(id, body) => update.mutateAsync({ id, body })}
+      onDelete={(id) => remove.mutateAsync({ id })}
+    />
   )
 }
 
@@ -87,6 +90,5 @@ export const Route = createFileRoute({
     await ensureKeycloakAuth()
     return null
   },
-  path: '/admin/resume/certificates',
   component: AdminResumeCertificates,
 })

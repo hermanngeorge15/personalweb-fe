@@ -1,11 +1,12 @@
 import { useEffect, useMemo } from 'react'
 import { ensureKeycloakAuth } from '@/lib/keycloak'
 import AppShell from '@/components/AppShell'
-import { useParams } from '@tanstack/react-router'
 import { useResumeProjects, useUpdateResumeProject } from '@/lib/queries'
+// Shown in local time, because the save below reads the input as local time.
+import { toDateTimeInput } from '@/lib/adminFormat'
 
 function AdminResumeProjectEdit() {
-  const { id } = useParams({ from: '/admin/resume/projects/$id' })
+  const { id } = Route.useParams()
   const list = useResumeProjects()
   const update = useUpdateResumeProject()
 
@@ -78,9 +79,7 @@ function AdminResumeProjectEdit() {
                   name="from"
                   type="datetime-local"
                   defaultValue={
-                    project.startAt
-                      ? new Date(project.startAt).toISOString().slice(0, 16)
-                      : ''
+                    project.startAt ? toDateTimeInput(project.startAt) : ''
                   }
                   className="rounded border p-2"
                 />
@@ -91,9 +90,7 @@ function AdminResumeProjectEdit() {
                   name="until"
                   type="datetime-local"
                   defaultValue={
-                    project.endAt
-                      ? new Date(project.endAt).toISOString().slice(0, 16)
-                      : ''
+                    project.endAt ? toDateTimeInput(project.endAt) : ''
                   }
                   className="rounded border p-2"
                 />
