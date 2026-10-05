@@ -86,7 +86,13 @@ export function AdminForm<Out>({
   })
 
   return (
-    <form className="grid gap-3" onSubmit={submit} noValidate>
+    <form
+      className="grid gap-3"
+      onSubmit={submit}
+      // "Saved." describes the last submit; once a field changes it no longer holds.
+      onChange={() => setSaved(false)}
+      noValidate
+    >
       <div className="grid gap-3 md:grid-cols-2">
         {fields.map((field) => {
           const error = errors[field.name]?.message

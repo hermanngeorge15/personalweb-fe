@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { Link } from '@tanstack/react-router'
 import { ensureKeycloakAuth } from '@/lib/keycloak'
 import AppShell from '@/components/AppShell'
-import { MutationStatus } from '@/components/admin/MutationStatus'
+import { MutationStatus, clearSaved } from '@/components/admin/MutationStatus'
 import { formInt } from '@/lib/adminFormat'
 import { useKotlinTopicsAdmin, useUpdateKotlinTopic } from '@/lib/queries'
 
@@ -34,6 +34,7 @@ function AdminKotlinTopicEdit() {
 
         {topic && (
           <form
+            onChange={() => clearSaved(update)}
             className="grid gap-3 rounded border p-4"
             onSubmit={async (e) => {
               e.preventDefault()

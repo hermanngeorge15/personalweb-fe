@@ -1,7 +1,7 @@
 import { Link } from '@tanstack/react-router'
 import { ensureKeycloakAuth } from '@/lib/keycloak'
 import AppShell from '@/components/AppShell'
-import { MutationStatus } from '@/components/admin/MutationStatus'
+import { MutationStatus, clearSaved } from '@/components/admin/MutationStatus'
 import { formInt } from '@/lib/adminFormat'
 import {
   useKotlinChaptersAdmin,
@@ -22,6 +22,7 @@ function AdminKotlinChapters() {
         </h1>
 
         <form
+          onChange={() => clearSaved(createChapter)}
           className="grid gap-2 rounded border p-3"
           onSubmit={async (e) => {
             e.preventDefault()

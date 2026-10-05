@@ -1,7 +1,7 @@
 import { Link } from '@tanstack/react-router'
 import { ensureKeycloakAuth } from '@/lib/keycloak'
 import AppShell from '@/components/AppShell'
-import { MutationStatus } from '@/components/admin/MutationStatus'
+import { MutationStatus, clearSaved } from '@/components/admin/MutationStatus'
 import { fromDateTimeInput } from '@/lib/adminFormat'
 import {
   useResumeProjects,
@@ -20,6 +20,7 @@ function AdminResumeProjects() {
           Resume Projects
         </h1>
         <form
+          onChange={() => clearSaved(createProject)}
           className="grid gap-2 rounded border p-3"
           onSubmit={async (e) => {
             e.preventDefault()

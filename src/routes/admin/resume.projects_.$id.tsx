@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { ensureKeycloakAuth } from '@/lib/keycloak'
 import AppShell from '@/components/AppShell'
-import { MutationStatus } from '@/components/admin/MutationStatus'
+import { MutationStatus, clearSaved } from '@/components/admin/MutationStatus'
 import { useResumeProjects, useUpdateResumeProject } from '@/lib/queries'
 // Shown in local time, because the save below reads the input as local time.
 import { fromDateTimeInput, toDateTimeInput } from '@/lib/adminFormat'
@@ -27,6 +27,7 @@ function AdminResumeProjectEdit() {
         )}
         {project && (
           <form
+            onChange={() => clearSaved(update)}
             className="grid gap-2 rounded border p-3"
             onSubmit={async (e) => {
               e.preventDefault()
