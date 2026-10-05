@@ -1,9 +1,10 @@
-import { useEffect, useMemo } from 'react'
+import { useMemo } from 'react'
 import { ensureKeycloakAuth } from '@/lib/keycloak'
 import AppShell from '@/components/AppShell'
+import { MutationStatus } from '@/components/admin/MutationStatus'
 import { useResumeProjects, useUpdateResumeProject } from '@/lib/queries'
 // Shown in local time, because the save below reads the input as local time.
-import { toDateTimeInput } from '@/lib/adminFormat'
+import { fromDateTimeInput, toDateTimeInput } from '@/lib/adminFormat'
 
 function AdminResumeProjectEdit() {
   const { id } = Route.useParams()
@@ -15,47 +16,46 @@ function AdminResumeProjectEdit() {
     [list.data, id],
   )
 
-  useEffect(() => {
-    // ensure list is fetched
-    if (!list.data && !list.isFetching) list.refetch()
-  }, [list])
-
   return (
     <AppShell path="Admin / Resume / Projects / Edit">
       <section className="grid gap-6 md:gap-8">
         <h1 className="text-2xl font-semibold tracking-tight">Edit Project</h1>
         {!project && (list.isLoading || list.isFetching) && <div>Loading…</div>}
         {!project && list.isError && <div>Failed to load project.</div>}
+        {!project && list.isSuccess && !list.isFetching && (
+          <div>No project with id {id}.</div>
+        )}
         {project && (
           <form
             className="grid gap-2 rounded border p-3"
             onSubmit={async (e) => {
               e.preventDefault()
               const fd = new FormData(e.currentTarget as HTMLFormElement)
-              await update.mutateAsync({
-                id: project.id,
-                company: String(fd.get('company') ?? ''),
-                projectName: String(fd.get('projectName') ?? ''),
-                description: String(fd.get('description') ?? ''),
-                startAt: (() => {
-                  const v = String(fd.get('from') ?? '')
-                  return v ? new Date(v).toISOString() : undefined
-                })(),
-                endAt: (() => {
-                  const v = String(fd.get('until') ?? '')
-                  return v ? new Date(v).toISOString() : undefined
-                })(),
-                responsibilities: String(fd.get('responsibilities') ?? '')
-                  .split(',')
-                  .map((s) => s.trim())
-                  .filter(Boolean),
-                techStack: String(fd.get('techStack') ?? '')
-                  .split(',')
-                  .map((s) => s.trim())
-                  .filter(Boolean),
-                repoUrl: String(fd.get('repoUrl') ?? '') || undefined,
-                demoUrl: String(fd.get('demoUrl') ?? '') || undefined,
-              })
+              // The API requires a start date; the input is required too.
+              const startAt = fromDateTimeInput(String(fd.get('from') ?? ''))
+              if (!startAt) return
+              await update
+                .mutateAsync({
+                  id: project.id,
+                  company: String(fd.get('company') ?? ''),
+                  projectName: String(fd.get('projectName') ?? ''),
+                  description: String(fd.get('description') ?? ''),
+                  startAt,
+                  endAt:
+                    fromDateTimeInput(String(fd.get('until') ?? '')) ??
+                    undefined,
+                  responsibilities: String(fd.get('responsibilities') ?? '')
+                    .split(',')
+                    .map((s) => s.trim())
+                    .filter(Boolean),
+                  techStack: String(fd.get('techStack') ?? '')
+                    .split(',')
+                    .map((s) => s.trim())
+                    .filter(Boolean),
+                  repoUrl: String(fd.get('repoUrl') ?? '') || undefined,
+                  demoUrl: String(fd.get('demoUrl') ?? '') || undefined,
+                })
+                .catch(() => undefined) // shown by MutationStatus
             }}
           >
             <div className="grid gap-2 md:grid-cols-2">
@@ -82,6 +82,7 @@ function AdminResumeProjectEdit() {
                     project.startAt ? toDateTimeInput(project.startAt) : ''
                   }
                   className="rounded border p-2"
+                  required
                 />
               </label>
               <label className="grid gap-1">
@@ -135,7 +136,11 @@ function AdminResumeProjectEdit() {
                 disabled={update.isPending}
               >
                 {update.isPending ? 'Saving…' : 'Save'}
-              </button>
+              </button>{' '}
+              <MutationStatus
+                isSuccess={update.isSuccess}
+                error={update.error}
+              />
             </div>
           </form>
         )}

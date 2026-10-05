@@ -487,13 +487,29 @@ export function useResumeHobbies() {
 }
 
 // Admin mutations for split resume
+
+/** The API names the dates from/until, while ResumeProject (as listed) has startAt/endAt. */
+function resumeProjectBody(input: Omit<ResumeProject, 'id'>) {
+  return JSON.stringify({
+    company: input.company,
+    projectName: input.projectName,
+    from: input.startAt,
+    until: input.endAt,
+    description: input.description,
+    responsibilities: input.responsibilities,
+    techStack: input.techStack,
+    repoUrl: input.repoUrl,
+    demoUrl: input.demoUrl,
+  })
+}
+
 export function useCreateResumeProject() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: async (input: Omit<ResumeProject, 'id'> & { id?: string }) => {
+    mutationFn: async (input: Omit<ResumeProject, 'id'>) => {
       return apiAuth<string>('/api/resume/projects', await authHeader(), {
         method: 'POST',
-        body: JSON.stringify(input),
+        body: resumeProjectBody(input),
       })
     },
     onSuccess: () => {
@@ -509,17 +525,7 @@ export function useUpdateResumeProject() {
       if (!input.id) throw new Error('id is required')
       await apiAuth(`/api/resume/projects/${input.id}`, await authHeader(), {
         method: 'PUT',
-        body: JSON.stringify({
-          company: input.company,
-          projectName: input.projectName,
-          from: input.startAt,
-          until: input.endAt,
-          description: input.description,
-          responsibilities: input.responsibilities,
-          techStack: input.techStack,
-          repoUrl: input.repoUrl,
-          demoUrl: input.demoUrl,
-        }),
+        body: resumeProjectBody(input),
       })
       return input.id
     },
@@ -1020,15 +1026,22 @@ export type ExpenseTrackerChapterUpsertRequest = {
 export function useKotlinTopicsAdmin() {
   return useQuery({
     queryKey: ['kotlin-learning', 'admin', 'topics'],
-    queryFn: () => api<KotlinTopicAdmin[]>('/api/learn-kotlin/admin/topics'),
+    queryFn: async () =>
+      apiAuth<KotlinTopicAdmin[]>(
+        '/api/learn-kotlin/admin/topics',
+        await authHeader(),
+      ),
   })
 }
 
 export function useKotlinTopicAdmin(id: string) {
   return useQuery({
     queryKey: ['kotlin-learning', 'admin', 'topic', id],
-    queryFn: () =>
-      api<KotlinTopicAdmin>(`/api/learn-kotlin/admin/topics/${id}`),
+    queryFn: async () =>
+      apiAuth<KotlinTopicAdmin>(
+        `/api/learn-kotlin/admin/topics/${id}`,
+        await authHeader(),
+      ),
     enabled: !!id,
   })
 }
@@ -1099,16 +1112,22 @@ export function useDeleteKotlinTopic() {
 export function useKotlinChaptersAdmin() {
   return useQuery({
     queryKey: ['kotlin-learning', 'admin', 'chapters'],
-    queryFn: () =>
-      api<ExpenseTrackerChapterAdmin[]>('/api/learn-kotlin/admin/chapters'),
+    queryFn: async () =>
+      apiAuth<ExpenseTrackerChapterAdmin[]>(
+        '/api/learn-kotlin/admin/chapters',
+        await authHeader(),
+      ),
   })
 }
 
 export function useKotlinChapterAdmin(id: number) {
   return useQuery({
     queryKey: ['kotlin-learning', 'admin', 'chapter', id],
-    queryFn: () =>
-      api<ExpenseTrackerChapterAdmin>(`/api/learn-kotlin/admin/chapters/${id}`),
+    queryFn: async () =>
+      apiAuth<ExpenseTrackerChapterAdmin>(
+        `/api/learn-kotlin/admin/chapters/${id}`,
+        await authHeader(),
+      ),
     enabled: id > 0,
   })
 }

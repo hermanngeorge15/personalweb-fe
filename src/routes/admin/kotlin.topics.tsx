@@ -1,6 +1,8 @@
 import { Link } from '@tanstack/react-router'
 import { ensureKeycloakAuth } from '@/lib/keycloak'
 import AppShell from '@/components/AppShell'
+import { MutationStatus } from '@/components/admin/MutationStatus'
+import { formInt } from '@/lib/adminFormat'
 import {
   useKotlinTopicsAdmin,
   useCreateKotlinTopic,
@@ -42,31 +44,33 @@ function AdminKotlinTopics() {
             const description = String(fd.get('description') ?? '')
             const kotlinExplanation = String(fd.get('kotlinExplanation') ?? '')
             const kotlinCode = String(fd.get('kotlinCode') ?? '')
-            const readingTimeMinutes = parseInt(
-              String(fd.get('readingTimeMinutes') ?? '10'),
-              10,
-            )
-            const orderIndex = parseInt(String(fd.get('orderIndex') ?? '0'), 10)
+            const readingTimeMinutes = formInt(fd, 'readingTimeMinutes')
+            const orderIndex = formInt(fd, 'orderIndex')
 
             if (!id || !title || !module || !kotlinExplanation || !kotlinCode)
               return
+            if (readingTimeMinutes === null || orderIndex === null) return
 
-            await createTopic.mutateAsync({
-              id,
-              title,
-              module,
-              difficulty,
-              description: description || undefined,
-              kotlinExplanation,
-              kotlinCode,
-              readingTimeMinutes,
-              orderIndex,
-              // The backend reads missing fields as null rather than using its defaults
-              // (no Jackson Kotlin module), so send them explicitly.
-              contentStructure: 'tiered',
-              maxTierLevel: 2,
-            })
-            form.reset()
+            try {
+              await createTopic.mutateAsync({
+                id,
+                title,
+                module,
+                difficulty,
+                description: description || undefined,
+                kotlinExplanation,
+                kotlinCode,
+                readingTimeMinutes,
+                orderIndex,
+                // The backend reads missing fields as null rather than using its defaults
+                // (no Jackson Kotlin module), so send them explicitly.
+                contentStructure: 'tiered',
+                maxTierLevel: 2,
+              })
+              form.reset()
+            } catch {
+              // shown by MutationStatus
+            }
           }}
         >
           <div className="grid gap-2 md:grid-cols-3">
@@ -100,14 +104,20 @@ function AdminKotlinTopics() {
               type="number"
               placeholder="Reading time (min)"
               defaultValue={10}
+              min={1}
+              step={1}
               className="rounded border p-2"
+              required
             />
             <input
               name="orderIndex"
               type="number"
               placeholder="Order index"
               defaultValue={0}
+              min={0}
+              step={1}
               className="rounded border p-2"
+              required
             />
           </div>
           <input
@@ -134,7 +144,11 @@ function AdminKotlinTopics() {
               disabled={createTopic.isPending}
             >
               {createTopic.isPending ? 'Creating…' : 'Create Topic'}
-            </button>
+            </button>{' '}
+            <MutationStatus
+              isSuccess={createTopic.isSuccess}
+              error={createTopic.error}
+            />
           </div>
         </form>
 

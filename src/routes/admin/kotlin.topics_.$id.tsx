@@ -1,7 +1,9 @@
-import { useEffect, useMemo } from 'react'
+import { useMemo } from 'react'
 import { Link } from '@tanstack/react-router'
 import { ensureKeycloakAuth } from '@/lib/keycloak'
 import AppShell from '@/components/AppShell'
+import { MutationStatus } from '@/components/admin/MutationStatus'
+import { formInt } from '@/lib/adminFormat'
 import { useKotlinTopicsAdmin, useUpdateKotlinTopic } from '@/lib/queries'
 
 function AdminKotlinTopicEdit() {
@@ -13,10 +15,6 @@ function AdminKotlinTopicEdit() {
     () => list.data?.find((t) => t.id === id),
     [list.data, id],
   )
-
-  useEffect(() => {
-    if (!list.data && !list.isFetching) list.refetch()
-  }, [list])
 
   return (
     <AppShell path="Admin / Kotlin Topics / Edit">
@@ -30,6 +28,9 @@ function AdminKotlinTopicEdit() {
 
         {!topic && (list.isLoading || list.isFetching) && <div>Loading…</div>}
         {!topic && list.isError && <div>Failed to load topic.</div>}
+        {!topic && list.isSuccess && !list.isFetching && (
+          <div>No topic with id {id}.</div>
+        )}
 
         {topic && (
           <form
@@ -37,38 +38,36 @@ function AdminKotlinTopicEdit() {
             onSubmit={async (e) => {
               e.preventDefault()
               const fd = new FormData(e.currentTarget as HTMLFormElement)
+              const readingTimeMinutes = formInt(fd, 'readingTimeMinutes')
+              const orderIndex = formInt(fd, 'orderIndex')
+              const maxTierLevel = formInt(fd, 'maxTierLevel')
+              if (
+                readingTimeMinutes === null ||
+                orderIndex === null ||
+                maxTierLevel === null
+              )
+                return
 
-              await update.mutateAsync({
-                id: topic.id,
-                title: String(fd.get('title') ?? topic.title),
-                module: String(fd.get('module') ?? topic.module),
-                difficulty: String(fd.get('difficulty') ?? topic.difficulty),
-                description: String(fd.get('description') ?? '') || undefined,
-                kotlinExplanation: String(
-                  fd.get('kotlinExplanation') ?? topic.kotlinExplanation,
-                ),
-                kotlinCode: String(fd.get('kotlinCode') ?? topic.kotlinCode),
-                readingTimeMinutes: parseInt(
-                  String(
-                    fd.get('readingTimeMinutes') ?? topic.readingTimeMinutes,
+              await update
+                .mutateAsync({
+                  id: topic.id,
+                  title: String(fd.get('title') ?? topic.title),
+                  module: String(fd.get('module') ?? topic.module),
+                  difficulty: String(fd.get('difficulty') ?? topic.difficulty),
+                  description: String(fd.get('description') ?? '') || undefined,
+                  kotlinExplanation: String(
+                    fd.get('kotlinExplanation') ?? topic.kotlinExplanation,
                   ),
-                  10,
-                ),
-                orderIndex: parseInt(
-                  String(fd.get('orderIndex') ?? topic.orderIndex),
-                  10,
-                ),
-                partNumber: fd.get('partNumber')
-                  ? parseInt(String(fd.get('partNumber')), 10)
-                  : undefined,
-                partName: String(fd.get('partName') ?? '') || undefined,
-                contentStructure:
-                  String(fd.get('contentStructure') ?? '') || 'tiered',
-                maxTierLevel: parseInt(
-                  String(fd.get('maxTierLevel') ?? topic.maxTierLevel),
-                  10,
-                ),
-              })
+                  kotlinCode: String(fd.get('kotlinCode') ?? topic.kotlinCode),
+                  readingTimeMinutes,
+                  orderIndex,
+                  partNumber: formInt(fd, 'partNumber') ?? undefined,
+                  partName: String(fd.get('partName') ?? '') || undefined,
+                  contentStructure:
+                    String(fd.get('contentStructure') ?? '') || 'tiered',
+                  maxTierLevel,
+                })
+                .catch(() => undefined) // shown by MutationStatus
             }}
           >
             <label className="grid gap-1">
@@ -125,8 +124,11 @@ function AdminKotlinTopicEdit() {
                 <input
                   name="readingTimeMinutes"
                   type="number"
+                  min={1}
+                  step={1}
                   className="w-full rounded border p-2"
                   defaultValue={topic.readingTimeMinutes}
+                  required
                 />
               </label>
               <label className="grid gap-1">
@@ -136,8 +138,11 @@ function AdminKotlinTopicEdit() {
                 <input
                   name="orderIndex"
                   type="number"
+                  min={0}
+                  step={1}
                   className="w-full rounded border p-2"
                   defaultValue={topic.orderIndex}
+                  required
                 />
               </label>
               <label className="grid gap-1">
@@ -151,6 +156,7 @@ function AdminKotlinTopicEdit() {
                   max={4}
                   className="w-full rounded border p-2"
                   defaultValue={topic.maxTierLevel}
+                  required
                 />
               </label>
             </div>
@@ -237,6 +243,10 @@ function AdminKotlinTopicEdit() {
               >
                 Cancel
               </Link>
+              <MutationStatus
+                isSuccess={update.isSuccess}
+                error={update.error}
+              />
             </div>
           </form>
         )}

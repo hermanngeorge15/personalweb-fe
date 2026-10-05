@@ -34,6 +34,20 @@ export function splitList(value: string): string[] {
     .filter(Boolean)
 }
 
+/**
+ * A whole number from a form field, or null when the field is empty or not a whole number.
+ * parseInt would turn "" into NaN, which JSON.stringify sends as null.
+ */
+export function formInt(form: FormData, name: string): number | null {
+  const raw = String(form.get(name) ?? '').trim()
+  return /^-?\d+$/.test(raw) ? Number(raw) : null
+}
+
+/** A positive integer route param, or null for anything else ("1junk", "0", "-1"). */
+export function routeInt(param: string): number | null {
+  return /^[1-9]\d*$/.test(param) ? Number(param) : null
+}
+
 /** Optional text: "" becomes null so the API stores "no value", not an empty string. */
 export const optionalText = z
   .string()

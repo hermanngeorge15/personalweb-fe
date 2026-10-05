@@ -1,6 +1,8 @@
 import { Link } from '@tanstack/react-router'
 import { ensureKeycloakAuth } from '@/lib/keycloak'
 import AppShell from '@/components/AppShell'
+import { MutationStatus } from '@/components/admin/MutationStatus'
+import { fromDateTimeInput } from '@/lib/adminFormat'
 import {
   useResumeProjects,
   useCreateResumeProject,
@@ -21,7 +23,9 @@ function AdminResumeProjects() {
           className="grid gap-2 rounded border p-3"
           onSubmit={async (e) => {
             e.preventDefault()
-            const fd = new FormData(e.currentTarget as HTMLFormElement)
+            // currentTarget is null after an await, so keep the form for reset().
+            const form = e.currentTarget as HTMLFormElement
+            const fd = new FormData(form)
             const company = String(fd.get('company') ?? '')
             const projectName = String(fd.get('projectName') ?? '')
             const description = String(fd.get('description') ?? '')
@@ -31,25 +35,31 @@ function AdminResumeProjects() {
             const techStackRaw = String(fd.get('techStack') ?? '')
             const repoUrl = String(fd.get('repoUrl') ?? '')
             const demoUrl = String(fd.get('demoUrl') ?? '')
-            if (!projectName && !company) return
-            await createProject.mutateAsync({
-              company,
-              projectName,
-              description,
-              from: fromStr ? new Date(fromStr).toISOString() : undefined,
-              until: untilStr ? new Date(untilStr).toISOString() : undefined,
-              responsibilities: responsibilitiesRaw
-                .split(',')
-                .map((s) => s.trim())
-                .filter(Boolean),
-              techStack: techStackRaw
-                .split(',')
-                .map((s) => s.trim())
-                .filter(Boolean),
-              repoUrl: repoUrl || undefined,
-              demoUrl: demoUrl || undefined,
-            })
-            ;(e.currentTarget as HTMLFormElement).reset()
+            // The API requires a start date; the input is required too.
+            const startAt = fromDateTimeInput(fromStr)
+            if ((!projectName && !company) || !startAt) return
+            try {
+              await createProject.mutateAsync({
+                company,
+                projectName,
+                description,
+                startAt,
+                endAt: fromDateTimeInput(untilStr) ?? undefined,
+                responsibilities: responsibilitiesRaw
+                  .split(',')
+                  .map((s) => s.trim())
+                  .filter(Boolean),
+                techStack: techStackRaw
+                  .split(',')
+                  .map((s) => s.trim())
+                  .filter(Boolean),
+                repoUrl: repoUrl || undefined,
+                demoUrl: demoUrl || undefined,
+              })
+              form.reset()
+            } catch {
+              // shown by MutationStatus
+            }
           }}
         >
           <div className="grid gap-2 md:grid-cols-2">
@@ -71,6 +81,7 @@ function AdminResumeProjects() {
                 name="from"
                 type="datetime-local"
                 className="rounded border p-2"
+                required
               />
             </label>
             <label className="grid gap-1">
@@ -116,7 +127,11 @@ function AdminResumeProjects() {
               disabled={createProject.isPending}
             >
               {createProject.isPending ? 'Creating…' : 'Create'}
-            </button>
+            </button>{' '}
+            <MutationStatus
+              isSuccess={createProject.isSuccess}
+              error={createProject.error}
+            />
           </div>
         </form>
         {isLoading && <div>Loading…</div>}

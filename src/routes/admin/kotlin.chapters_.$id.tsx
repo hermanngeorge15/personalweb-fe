@@ -1,7 +1,9 @@
-import { useEffect, useMemo } from 'react'
+import { useMemo } from 'react'
 import { Link } from '@tanstack/react-router'
 import { ensureKeycloakAuth } from '@/lib/keycloak'
 import AppShell from '@/components/AppShell'
+import { MutationStatus } from '@/components/admin/MutationStatus'
+import { formInt, routeInt } from '@/lib/adminFormat'
 import { useKotlinChaptersAdmin, useUpdateKotlinChapter } from '@/lib/queries'
 
 function AdminKotlinChapterEdit() {
@@ -9,14 +11,11 @@ function AdminKotlinChapterEdit() {
   const list = useKotlinChaptersAdmin()
   const update = useUpdateKotlinChapter()
 
+  const chapterId = routeInt(id)
   const chapter = useMemo(
-    () => list.data?.find((c) => c.id === parseInt(id, 10)),
-    [list.data, id],
+    () => list.data?.find((c) => c.id === chapterId),
+    [list.data, chapterId],
   )
-
-  useEffect(() => {
-    if (!list.data && !list.isFetching) list.refetch()
-  }, [list])
 
   return (
     <AppShell path="Admin / Kotlin Chapters / Edit">
@@ -32,6 +31,9 @@ function AdminKotlinChapterEdit() {
 
         {!chapter && (list.isLoading || list.isFetching) && <div>Loading…</div>}
         {!chapter && list.isError && <div>Failed to load chapter.</div>}
+        {!chapter && list.isSuccess && !list.isFetching && (
+          <div>No chapter with id {id}.</div>
+        )}
 
         {chapter && (
           <form
@@ -39,31 +41,31 @@ function AdminKotlinChapterEdit() {
             onSubmit={async (e) => {
               e.preventDefault()
               const fd = new FormData(e.currentTarget as HTMLFormElement)
+              const estimatedTimeMinutes = formInt(fd, 'estimatedTimeMinutes')
+              if (estimatedTimeMinutes === null) return
 
-              await update.mutateAsync({
-                id: chapter.id,
-                chapterNumber: parseInt(
-                  String(fd.get('chapterNumber') ?? chapter.chapterNumber),
-                  10,
-                ),
-                title: String(fd.get('title') ?? chapter.title),
-                description: String(fd.get('description') ?? '') || undefined,
-                introduction: String(fd.get('introduction') ?? '') || undefined,
-                implementationSteps:
-                  String(fd.get('implementationSteps') ?? '') || undefined,
-                codeSnippets: String(fd.get('codeSnippets') ?? '') || undefined,
-                summary: String(fd.get('summary') ?? '') || undefined,
-                difficulty: String(fd.get('difficulty') ?? chapter.difficulty),
-                estimatedTimeMinutes: parseInt(
-                  String(
-                    fd.get('estimatedTimeMinutes') ??
-                      chapter.estimatedTimeMinutes,
+              await update
+                .mutateAsync({
+                  id: chapter.id,
+                  // Read-only here: the API refuses a new number (see the field below).
+                  chapterNumber: chapter.chapterNumber,
+                  title: String(fd.get('title') ?? chapter.title),
+                  description: String(fd.get('description') ?? '') || undefined,
+                  introduction:
+                    String(fd.get('introduction') ?? '') || undefined,
+                  implementationSteps:
+                    String(fd.get('implementationSteps') ?? '') || undefined,
+                  codeSnippets:
+                    String(fd.get('codeSnippets') ?? '') || undefined,
+                  summary: String(fd.get('summary') ?? '') || undefined,
+                  difficulty: String(
+                    fd.get('difficulty') ?? chapter.difficulty,
                   ),
-                  10,
-                ),
-                previousChapter: chapter.previousChapter,
-                nextChapter: chapter.nextChapter,
-              })
+                  estimatedTimeMinutes,
+                  previousChapter: chapter.previousChapter,
+                  nextChapter: chapter.nextChapter,
+                })
+                .catch(() => undefined) // shown by MutationStatus
             }}
           >
             <div className="grid gap-3 md:grid-cols-3">
@@ -71,13 +73,14 @@ function AdminKotlinChapterEdit() {
                 <span className="text-muted-foreground text-sm">
                   Chapter Number
                 </span>
+                {/* Previous/next links of the neighbours point at this number, so it
+                    cannot be changed here. */}
                 <input
-                  name="chapterNumber"
                   type="number"
-                  min={1}
-                  className="w-full rounded border p-2"
-                  defaultValue={chapter.chapterNumber}
-                  required
+                  className="w-full rounded border bg-gray-50 p-2"
+                  value={chapter.chapterNumber}
+                  readOnly
+                  aria-readonly
                 />
               </label>
               <label className="grid gap-1 md:col-span-2">
@@ -113,8 +116,11 @@ function AdminKotlinChapterEdit() {
                 <input
                   name="estimatedTimeMinutes"
                   type="number"
+                  min={1}
+                  step={1}
                   className="w-full rounded border p-2"
                   defaultValue={chapter.estimatedTimeMinutes}
+                  required
                 />
               </label>
             </div>
@@ -188,6 +194,10 @@ function AdminKotlinChapterEdit() {
               >
                 Cancel
               </Link>
+              <MutationStatus
+                isSuccess={update.isSuccess}
+                error={update.error}
+              />
             </div>
           </form>
         )}
