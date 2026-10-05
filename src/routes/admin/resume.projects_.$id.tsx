@@ -1,11 +1,13 @@
-import { useEffect, useMemo } from 'react'
+import { useMemo } from 'react'
 import { ensureKeycloakAuth } from '@/lib/keycloak'
 import AppShell from '@/components/AppShell'
-import { useParams } from '@tanstack/react-router'
+import { MutationStatus, clearSaved } from '@/components/admin/MutationStatus'
 import { useResumeProjects, useUpdateResumeProject } from '@/lib/queries'
+// Shown in local time, because the save below reads the input as local time.
+import { fromDateTimeInput, toDateTimeInput } from '@/lib/adminFormat'
 
 function AdminResumeProjectEdit() {
-  const { id } = useParams({ from: '/admin/resume/projects/$id' })
+  const { id } = Route.useParams()
   const list = useResumeProjects()
   const update = useUpdateResumeProject()
 
@@ -14,47 +16,47 @@ function AdminResumeProjectEdit() {
     [list.data, id],
   )
 
-  useEffect(() => {
-    // ensure list is fetched
-    if (!list.data && !list.isFetching) list.refetch()
-  }, [list])
-
   return (
     <AppShell path="Admin / Resume / Projects / Edit">
       <section className="grid gap-6 md:gap-8">
         <h1 className="text-2xl font-semibold tracking-tight">Edit Project</h1>
         {!project && (list.isLoading || list.isFetching) && <div>Loading…</div>}
         {!project && list.isError && <div>Failed to load project.</div>}
+        {!project && list.isSuccess && !list.isFetching && (
+          <div>No project with id {id}.</div>
+        )}
         {project && (
           <form
+            onChange={() => clearSaved(update)}
             className="grid gap-2 rounded border p-3"
             onSubmit={async (e) => {
               e.preventDefault()
               const fd = new FormData(e.currentTarget as HTMLFormElement)
-              await update.mutateAsync({
-                id: project.id,
-                company: String(fd.get('company') ?? ''),
-                projectName: String(fd.get('projectName') ?? ''),
-                description: String(fd.get('description') ?? ''),
-                startAt: (() => {
-                  const v = String(fd.get('from') ?? '')
-                  return v ? new Date(v).toISOString() : undefined
-                })(),
-                endAt: (() => {
-                  const v = String(fd.get('until') ?? '')
-                  return v ? new Date(v).toISOString() : undefined
-                })(),
-                responsibilities: String(fd.get('responsibilities') ?? '')
-                  .split(',')
-                  .map((s) => s.trim())
-                  .filter(Boolean),
-                techStack: String(fd.get('techStack') ?? '')
-                  .split(',')
-                  .map((s) => s.trim())
-                  .filter(Boolean),
-                repoUrl: String(fd.get('repoUrl') ?? '') || undefined,
-                demoUrl: String(fd.get('demoUrl') ?? '') || undefined,
-              })
+              // The API requires a start date; the input is required too.
+              const startAt = fromDateTimeInput(String(fd.get('from') ?? ''))
+              if (!startAt) return
+              await update
+                .mutateAsync({
+                  id: project.id,
+                  company: String(fd.get('company') ?? ''),
+                  projectName: String(fd.get('projectName') ?? ''),
+                  description: String(fd.get('description') ?? ''),
+                  startAt,
+                  endAt:
+                    fromDateTimeInput(String(fd.get('until') ?? '')) ??
+                    undefined,
+                  responsibilities: String(fd.get('responsibilities') ?? '')
+                    .split(',')
+                    .map((s) => s.trim())
+                    .filter(Boolean),
+                  techStack: String(fd.get('techStack') ?? '')
+                    .split(',')
+                    .map((s) => s.trim())
+                    .filter(Boolean),
+                  repoUrl: String(fd.get('repoUrl') ?? '') || undefined,
+                  demoUrl: String(fd.get('demoUrl') ?? '') || undefined,
+                })
+                .catch(() => undefined) // shown by MutationStatus
             }}
           >
             <div className="grid gap-2 md:grid-cols-2">
@@ -78,11 +80,10 @@ function AdminResumeProjectEdit() {
                   name="from"
                   type="datetime-local"
                   defaultValue={
-                    project.startAt
-                      ? new Date(project.startAt).toISOString().slice(0, 16)
-                      : ''
+                    project.startAt ? toDateTimeInput(project.startAt) : ''
                   }
                   className="rounded border p-2"
+                  required
                 />
               </label>
               <label className="grid gap-1">
@@ -91,9 +92,7 @@ function AdminResumeProjectEdit() {
                   name="until"
                   type="datetime-local"
                   defaultValue={
-                    project.endAt
-                      ? new Date(project.endAt).toISOString().slice(0, 16)
-                      : ''
+                    project.endAt ? toDateTimeInput(project.endAt) : ''
                   }
                   className="rounded border p-2"
                 />
@@ -138,7 +137,11 @@ function AdminResumeProjectEdit() {
                 disabled={update.isPending}
               >
                 {update.isPending ? 'Saving…' : 'Save'}
-              </button>
+              </button>{' '}
+              <MutationStatus
+                isSuccess={update.isSuccess}
+                error={update.error}
+              />
             </div>
           </form>
         )}

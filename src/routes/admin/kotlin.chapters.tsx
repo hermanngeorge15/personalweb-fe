@@ -1,6 +1,8 @@
 import { Link } from '@tanstack/react-router'
 import { ensureKeycloakAuth } from '@/lib/keycloak'
 import AppShell from '@/components/AppShell'
+import { MutationStatus, clearSaved } from '@/components/admin/MutationStatus'
+import { formInt } from '@/lib/adminFormat'
 import {
   useKotlinChaptersAdmin,
   useCreateKotlinChapter,
@@ -20,32 +22,38 @@ function AdminKotlinChapters() {
         </h1>
 
         <form
+          onChange={() => clearSaved(createChapter)}
           className="grid gap-2 rounded border p-3"
           onSubmit={async (e) => {
             e.preventDefault()
-            const fd = new FormData(e.currentTarget as HTMLFormElement)
-            const chapterNumber = parseInt(
-              String(fd.get('chapterNumber') ?? '1'),
-              10,
-            )
+            // currentTarget is null after an await, so keep the form for reset().
+            const form = e.currentTarget as HTMLFormElement
+            const fd = new FormData(form)
+            const chapterNumber = formInt(fd, 'chapterNumber')
             const title = String(fd.get('title') ?? '')
             const description = String(fd.get('description') ?? '')
             const difficulty = String(fd.get('difficulty') ?? 'beginner')
-            const estimatedTimeMinutes = parseInt(
-              String(fd.get('estimatedTimeMinutes') ?? '30'),
-              10,
+            const estimatedTimeMinutes = formInt(fd, 'estimatedTimeMinutes')
+
+            if (
+              !title ||
+              chapterNumber === null ||
+              estimatedTimeMinutes === null
             )
+              return
 
-            if (!title) return
-
-            await createChapter.mutateAsync({
-              chapterNumber,
-              title,
-              description: description || undefined,
-              difficulty,
-              estimatedTimeMinutes,
-            })
-            ;(e.currentTarget as HTMLFormElement).reset()
+            try {
+              await createChapter.mutateAsync({
+                chapterNumber,
+                title,
+                description: description || undefined,
+                difficulty,
+                estimatedTimeMinutes,
+              })
+              form.reset()
+            } catch {
+              // shown by MutationStatus
+            }
           }}
         >
           <div className="grid gap-2 md:grid-cols-2">
@@ -81,7 +89,10 @@ function AdminKotlinChapters() {
               type="number"
               placeholder="Estimated time (min)"
               defaultValue={30}
+              min={1}
+              step={1}
               className="rounded border p-2"
+              required
             />
           </div>
           <div>
@@ -91,7 +102,11 @@ function AdminKotlinChapters() {
               disabled={createChapter.isPending}
             >
               {createChapter.isPending ? 'Creating…' : 'Create Chapter'}
-            </button>
+            </button>{' '}
+            <MutationStatus
+              isSuccess={createChapter.isSuccess}
+              error={createChapter.error}
+            />
           </div>
         </form>
 
