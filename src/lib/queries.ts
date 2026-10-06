@@ -7,6 +7,7 @@ import {
 import { api, apiAuth } from './api'
 import { authHeader } from './keycloak'
 import { getPostApi } from './client'
+import { ResponseError } from '@/generated/runtime'
 
 export type PostSummary = {
   slug: string
@@ -183,6 +184,11 @@ export function usePosts(params?: {
 export function usePost(slug: string) {
   return useQuery({
     queryKey: ['post', slug],
+    // A 404 (unknown slug, or a draft for a signed-out reader) will not change on retry; show
+    // "Failed to load post" at once instead of after three retries (about 7 seconds).
+    retry: (failureCount, error) =>
+      !(error instanceof ResponseError && error.response.status === 404) &&
+      failureCount < 3,
     queryFn: async () => {
       const postApi = getPostApi()
       const res = await postApi.get({ slug })
