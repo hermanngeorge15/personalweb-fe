@@ -1,16 +1,104 @@
 import AppShell from '@/components/AppShell'
 import { usePosts } from '@/lib/queries'
-import { Link } from '@tanstack/react-router'
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { SEO_DEFAULTS, setHead } from '@/lib/seo'
-import { Skeleton } from '@heroui/react'
-import { MotionSection } from '@/components/MotionSection'
-import { Card, CardBody, CardHeader } from '@/components/ui/Card'
-import { H1 } from '@/components/ui/Typography'
-import { formatDate } from '@/lib/blog-utils'
+import { sortByPublishedDesc } from '@/lib/blog-utils'
+import { RSS_URL, SOCIAL_LINKS } from '@/config/site'
+import { FeaturedPostCard, PostCard } from '@/components/blog/PostCards'
+
+const section = 'relative mx-auto max-w-[1200px] px-4 sm:px-8'
+
+function Hero() {
+  return (
+    <section
+      className={`${section} pt-16 pb-8 text-center sm:pt-[88px] sm:pb-10`}
+    >
+      <span className="border-line-strong bg-chip/60 text-body inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-[13px]">
+        <span aria-hidden="true" className="bg-brand-b size-1.5 rounded-full" />
+        Blog · Securing AI agents
+      </span>
+      <h1 className="text-heading mx-auto mt-6 max-w-[860px] text-[40px] leading-[1.04] font-semibold tracking-[-0.035em] sm:text-[52px] lg:text-[64px]">
+        Building secure tooling{' '}
+        <span className="text-brand-gradient">for AI agents</span>
+      </h1>
+      <p className="text-muted mx-auto mt-5 max-w-[620px] text-[17px] leading-[1.55] sm:text-[19px]">
+        Prompt injection, SSRF, agent tooling and backend engineering in Kotlin
+        and Rust — with the code, the numbers, and the gaps I find red-teaming
+        my own work.
+      </p>
+    </section>
+  )
+}
+
+function StatusBox({ title, detail }: { title: string; detail: string }) {
+  return (
+    <div className="border-line bg-subtle rounded-[20px] border px-6 py-14 text-center">
+      <p className="text-heading text-lg font-semibold">{title}</p>
+      <p className="text-faint mt-2 text-sm">{detail}</p>
+    </div>
+  )
+}
+
+function LoadingSkeleton() {
+  return (
+    <div aria-busy="true" aria-label="Loading posts">
+      <div className="border-line bg-card flex min-h-[380px] animate-pulse flex-wrap overflow-hidden rounded-[20px] border motion-reduce:animate-none">
+        <div className="bg-subtle min-h-[240px] flex-[1_1_520px]" />
+        <div className="flex flex-[1_1_420px] flex-col justify-center gap-4 p-6 sm:p-12">
+          <div className="bg-chip h-5 w-24 rounded-full" />
+          <div className="bg-chip h-9 w-11/12 rounded-lg" />
+          <div className="bg-chip h-5 w-4/5 rounded-lg" />
+          <div className="bg-chip h-5 w-2/5 rounded-lg" />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function FollowCta() {
+  return (
+    <section className={`${section} pt-16 pb-24 sm:pt-[72px]`}>
+      <div className="border-line bg-cta-glow flex flex-wrap items-center justify-between gap-6 overflow-hidden rounded-[20px] border p-6 sm:p-12">
+        <div className="flex-[1_1_420px]">
+          <h2 className="text-heading text-[26px] leading-[1.15] font-semibold tracking-[-0.02em] sm:text-[30px]">
+            Follow the series
+          </h2>
+          <p className="text-muted mt-2.5 max-w-[520px] text-base leading-relaxed">
+            A new post every week on securing AI agents — follow along on
+            LinkedIn.
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-3">
+          <a
+            href={SOCIAL_LINKS.linkedin}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-brand-gradient-x text-on-brand rounded-[10px] px-5 py-3 text-[15px] font-medium transition-opacity hover:opacity-90"
+          >
+            Follow on LinkedIn
+          </a>
+          {RSS_URL && (
+            <a
+              href={RSS_URL}
+              className="border-window-line text-ink hover:bg-chip rounded-[10px] border px-5 py-3 text-[15px] font-medium transition-colors"
+            >
+              RSS
+            </a>
+          )}
+        </div>
+      </div>
+    </section>
+  )
+}
 
 function BlogList() {
   const { data, isLoading, isError } = usePosts({ limit: 20 })
+  const posts = useMemo(
+    () => (data ? sortByPublishedDesc(data.items) : []),
+    [data],
+  )
+  const [featured, ...rest] = posts
+
   useEffect(() => {
     setHead({
       title: `Blog — ${SEO_DEFAULTS.siteName}`,
@@ -30,170 +118,56 @@ function BlogList() {
       },
     })
   }, [])
+
   return (
-    <AppShell path="Blog">
-      <MotionSection variant="slide-up">
-        <section className="relative overflow-hidden rounded-3xl border border-blue-200/50 bg-white/40 p-6 shadow-lg ring-1 ring-blue-500/10 backdrop-blur md:p-10">
-          <div className="pointer-events-none absolute -left-24 -top-24 h-64 w-64 rounded-full bg-gradient-to-br from-blue-400/30 via-cyan-400/20 to-teal-400/20 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-24 -right-24 h-64 w-64 rounded-full bg-gradient-to-tr from-green-400/20 via-emerald-400/20 to-teal-400/20 blur-3xl" />
-          <div className="relative grid gap-6 md:gap-8">
-            <div className="flex items-center gap-4">
-              <H1 className="bg-gradient-to-br from-blue-600 via-cyan-500 to-green-500 bg-clip-text text-transparent">
-                Blog
-              </H1>
-              <span className="h-[2px] flex-1 bg-gradient-to-r from-blue-500/50 via-cyan-500/30 to-transparent" />
-            </div>
-            <p className="text-muted-foreground -mt-2">
-              Thoughts on software development, design, and technology
-            </p>
-            {isLoading && (
-              <div className="grid gap-6 md:grid-cols-2">
-                {Array.from({ length: 4 }).map((_, i) => (
-                  <Card key={i}>
-                    <CardHeader>
-                      <Skeleton className="h-6 w-3/4" />
-                    </CardHeader>
-                    <CardBody>
-                      <Skeleton className="h-4 w-full" />
-                      <Skeleton className="mt-2 h-4 w-5/6" />
-                      <div className="mt-4 flex items-center gap-4">
-                        <Skeleton className="h-4 w-24" />
-                        <Skeleton className="h-4 w-20" />
-                      </div>
-                    </CardBody>
-                  </Card>
-                ))}
-              </div>
-            )}
-            {isError && (
-              <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-center">
-                <p className="font-medium text-red-600">Failed to load posts</p>
-                <p className="mt-2 text-sm text-red-500">
-                  Please try again later
-                </p>
-              </div>
-            )}
-            {data && data.items.length === 0 && (
-              <div className="rounded-lg border border-gray-200 bg-gray-50 p-12 text-center">
-                <svg
-                  className="mx-auto h-12 w-12 text-gray-400"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"
-                  />
-                </svg>
-                <h3 className="mt-4 text-lg font-semibold text-gray-900">
-                  No posts yet
-                </h3>
-                <p className="text-muted-foreground mt-2 text-sm">
-                  Check back soon for new content!
-                </p>
-              </div>
-            )}
-            {data && data.items.length > 0 && (
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
-                {data.items.map((p) => (
-                  <Link
-                    key={p.slug}
-                    to="/blog/$slug"
-                    params={{ slug: p.slug }}
-                    className="group"
-                  >
-                    <Card className="h-full cursor-pointer transition-all hover:-translate-y-1 hover:border-blue-200 hover:shadow-xl">
-                      <CardHeader>
-                        <div className="flex items-start justify-between gap-2">
-                          <h2 className="flex-1 text-xl font-semibold leading-tight transition-colors group-hover:text-blue-600">
-                            {p.title}
-                          </h2>
-                          <svg
-                            className="h-5 w-5 shrink-0 text-gray-400 transition-all group-hover:translate-x-1 group-hover:text-blue-600"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M9 5l7 7-7 7"
-                            />
-                          </svg>
-                        </div>
-                      </CardHeader>
-                      <CardBody>
-                        <p className="text-muted-foreground line-clamp-3">
-                          {p.excerpt}
-                        </p>
+    <AppShell path="Blog" fullBleed>
+      <div
+        aria-hidden="true"
+        className="bg-glow-hero pointer-events-none absolute -top-[260px] left-1/2 h-[620px] w-[1100px] -translate-x-1/2"
+      />
+      <Hero />
 
-                        <div className="text-muted-foreground mt-4 flex flex-wrap items-center gap-3 text-sm">
-                          {p.publishedAt && (
-                            <div className="flex items-center gap-1.5">
-                              <svg
-                                className="h-4 w-4"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                                />
-                              </svg>
-                              <span>{formatDate(p.publishedAt)}</span>
-                            </div>
-                          )}
-                          <div className="flex items-center gap-1.5">
-                            <svg
-                              className="h-4 w-4"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-                              />
-                            </svg>
-                            <span>5 min read</span>
-                          </div>
-                        </div>
+      <section className={`${section} pt-6 sm:pt-8`}>
+        {isLoading && <LoadingSkeleton />}
+        {isError && (
+          <StatusBox
+            title="Failed to load posts"
+            detail="Please try again later"
+          />
+        )}
+        {data && posts.length === 0 && (
+          <StatusBox
+            title="No posts yet"
+            detail="Check back soon for new content!"
+          />
+        )}
+        {featured && <FeaturedPostCard post={featured} />}
+      </section>
 
-                        {p.tags && p.tags.length > 0 && (
-                          <div className="mt-4 flex flex-wrap gap-2">
-                            {p.tags.slice(0, 3).map((tag) => (
-                              <span
-                                key={tag}
-                                className="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10"
-                              >
-                                {tag}
-                              </span>
-                            ))}
-                            {p.tags.length > 3 && (
-                              <span className="inline-flex items-center rounded-full bg-gray-50 px-2.5 py-0.5 text-xs font-medium text-gray-600">
-                                +{p.tags.length - 3}
-                              </span>
-                            )}
-                          </div>
-                        )}
-                      </CardBody>
-                    </Card>
-                  </Link>
-                ))}
-              </div>
+      {rest.length > 0 && (
+        <section className={`${section} pt-16 sm:pt-[72px]`}>
+          <div className="flex flex-wrap items-baseline justify-between gap-3">
+            <h2 className="text-heading text-[26px] font-semibold tracking-[-0.02em]">
+              Latest
+            </h2>
+            {RSS_URL && (
+              <a
+                href={RSS_URL}
+                className="text-muted hover:text-ink text-sm transition-colors"
+              >
+                RSS feed
+              </a>
             )}
           </div>
+          <div className="mt-6 grid grid-cols-[repeat(auto-fill,minmax(min(100%,320px),1fr))] gap-5">
+            {rest.map((post) => (
+              <PostCard key={post.slug} post={post} />
+            ))}
+          </div>
         </section>
-      </MotionSection>
+      )}
+
+      <FollowCta />
     </AppShell>
   )
 }

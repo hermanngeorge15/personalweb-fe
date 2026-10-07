@@ -27,6 +27,48 @@ export function formatDate(date: Date | string | undefined): string {
 }
 
 /**
+ * Short date for cards and bylines, e.g. "Oct 7, 2026". Empty string when missing/invalid.
+ */
+export function formatShortDate(date: Date | string | undefined): string {
+  if (!date) return ''
+  const dateObj = typeof date === 'string' ? new Date(date) : date
+  if (isNaN(dateObj.getTime())) return ''
+  return dateObj.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  })
+}
+
+/** ISO date (YYYY-MM-DD) for a <time dateTime>; undefined when missing/invalid. */
+export function isoDate(date: Date | string | undefined): string | undefined {
+  if (!date) return undefined
+  const dateObj = typeof date === 'string' ? new Date(date) : date
+  if (isNaN(dateObj.getTime())) return undefined
+  return dateObj.toISOString().slice(0, 10)
+}
+
+function timeOf(date: Date | string | undefined): number {
+  if (!date) return 0
+  const t = (typeof date === 'string' ? new Date(date) : date).getTime()
+  return isNaN(t) ? 0 : t
+}
+
+/** Newest first by publishedAt; posts without a date go last, original order otherwise kept. */
+export function sortByPublishedDesc<T extends { publishedAt?: Date | string }>(
+  posts: readonly T[],
+): T[] {
+  return posts
+    .map((post, index) => ({ post, index }))
+    .sort(
+      (a, b) =>
+        timeOf(b.post.publishedAt) - timeOf(a.post.publishedAt) ||
+        a.index - b.index,
+    )
+    .map(({ post }) => post)
+}
+
+/**
  * Format date to relative time (e.g., "2 days ago")
  */
 export function formatRelativeTime(date: Date | string | undefined): string {
