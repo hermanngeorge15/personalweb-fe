@@ -39,10 +39,13 @@ export function PostCover({
   post,
   size,
   className,
+  path,
 }: {
   post: CoverPost
   size: CoverSize
   className?: string
+  /** First line of the window; defaults to the post's blog path. */
+  path?: string
 }) {
   if (post.coverUrl) {
     return (
@@ -89,7 +92,9 @@ export function PostCover({
           </div>
         )}
         <div className="text-body px-4 py-3.5 sm:px-5 sm:py-4">
-          <div className="text-faint truncate">~/blog/{post.slug}</div>
+          <div className="text-faint truncate">
+            {path ?? `~/blog/${post.slug}`}
+          </div>
           {tags.map((tag) => (
             <div key={tag} className="truncate">
               <span className="text-brand-b">›</span> {tag}

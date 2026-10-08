@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router'
-import { AUTHOR, PROJECT_LINKS, RSS_URL, SOCIAL_LINKS } from '@/config/site'
+import { AUTHOR, RSS_URL, SOCIAL_LINKS } from '@/config/site'
 import { LogoTile } from './Brand'
 
 const columnTitle = 'text-ink text-[13px] font-semibold'
@@ -43,6 +43,9 @@ export default function Footer() {
             <Link to="/about" className={footerLink}>
               About
             </Link>
+            <Link to="/projects" className={footerLink}>
+              Projects
+            </Link>
             <Link to="/resume" className={footerLink}>
               Resume
             </Link>
@@ -53,15 +56,18 @@ export default function Footer() {
               Contact
             </Link>
           </nav>
-          <nav aria-label="Projects" className="flex flex-col gap-2.5">
-            <span className={columnTitle}>Projects</span>
-            {PROJECT_LINKS.map((project) => (
-              <ExternalLink
-                key={project.href}
-                href={project.href}
-                label={project.label}
-              />
-            ))}
+          <nav aria-label="Learn" className="flex flex-col gap-2.5">
+            <span className={columnTitle}>Learn</span>
+            <Link to="/learn-kotlin" className={footerLink}>
+              Learn Kotlin
+            </Link>
+            <Link to="/dispatchers" className={footerLink}>
+              Dispatcher Visualizer
+            </Link>
+            <ExternalLink
+              href={SOCIAL_LINKS.kotlinServerSquad}
+              label="Kotlin Server Squad"
+            />
           </nav>
           <nav aria-label="Connect" className="flex flex-col gap-2.5">
             <span className={columnTitle}>Connect</span>

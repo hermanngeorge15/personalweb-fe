@@ -92,3 +92,77 @@ export function MoonIcon(props: IconProps) {
     </StrokeIcon>
   )
 }
+
+export function MenuIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props}>
+      <path d="M4 7h16M4 12h16M4 17h16" />
+    </StrokeIcon>
+  )
+}
+
+export function CloseIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props}>
+      <path d="M6 6l12 12M18 6L6 18" />
+    </StrokeIcon>
+  )
+}
+
+export function CodeIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props}>
+      <path d="M8 6l-6 6 6 6M16 6l6 6-6 6" />
+    </StrokeIcon>
+  )
+}
+
+export function PlugIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props}>
+      <path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3M8 12h8" />
+    </StrokeIcon>
+  )
+}
+
+export function DatabaseIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props}>
+      <ellipse cx="12" cy="5" rx="8" ry="3" />
+      <path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3" />
+    </StrokeIcon>
+  )
+}
+
+export function LockIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props}>
+      <rect x="3" y="11" width="18" height="10" rx="2" />
+      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+    </StrokeIcon>
+  )
+}
+
+export function ChartIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props}>
+      <path d="M3 3v18h18M7 15l4-4 3 3 5-6" />
+    </StrokeIcon>
+  )
+}
+
+export function BoltIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props}>
+      <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+    </StrokeIcon>
+  )
+}
+
+export function ArrowUpRightIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props}>
+      <path d="M7 17L17 7M8 7h9v9" />
+    </StrokeIcon>
+  )
+}
