@@ -13,13 +13,20 @@ const dotByLanguage: Record<ProjectLanguage, string> = {
 }
 
 /** Small coloured dot that marks a project's language. Decorative. */
-export function LanguageDot({ language }: { language: ProjectLanguage }) {
+export function LanguageDot({
+  language,
+  className,
+}: {
+  language: ProjectLanguage
+  className?: string
+}) {
   return (
     <span
       aria-hidden="true"
       className={twMerge(
         'size-2 shrink-0 rounded-full',
         dotByLanguage[language],
+        className,
       )}
     />
   )
