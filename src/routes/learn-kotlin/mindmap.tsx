@@ -1,124 +1,107 @@
-import { useCallback, useMemo } from 'react'
+import { useEffect, useId, useState } from 'react'
 import AppShell from '@/components/AppShell'
-import { Link, useNavigate } from '@tanstack/react-router'
-import { useKotlinMindMap } from '@/lib/queries'
-import { useEffect } from 'react'
+import { Link } from '@tanstack/react-router'
+import { useKotlinMindMap, type SourceLanguage } from '@/lib/queries'
 import { SEO_DEFAULTS, setHead } from '@/lib/seo'
-import { MotionSection } from '@/components/MotionSection'
-import { Button } from '@heroui/react'
-import { H1 } from '@/components/ui/Typography'
-import ReactFlow, {
-  Background,
-  Controls,
-  MiniMap,
-  useNodesState,
-  useEdgesState,
-  Node,
-  Edge,
-  ConnectionMode,
-  MarkerType,
-} from 'reactflow'
-import 'reactflow/dist/style.css'
+import { ArrowLeftIcon, SearchIcon } from '@/components/icons'
+import { KotlinMindMap } from '@/components/KotlinMindMap'
+import { MindMapGraph } from '@/components/learn/MindMapGraph'
+import {
+  DIFFICULTY_LEVELS,
+  difficultyDotClass,
+} from '@/components/learn/Difficulty'
+import { readStoredLanguage } from '@/components/learn/language'
 
-// Difficulty colors
-const difficultyColors: Record<string, { bg: string; border: string; text: string }> = {
-  beginner: {
-    bg: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-    border: '#059669',
-    text: '#ffffff',
-  },
-  intermediate: {
-    bg: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-    border: '#d97706',
-    text: '#ffffff',
-  },
-  advanced: {
-    bg: 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)',
-    border: '#ea580c',
-    text: '#ffffff',
-  },
-  expert: {
-    bg: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
-    border: '#dc2626',
-    text: '#ffffff',
-  },
-}
+type View = 'modules' | 'graph'
 
-// Module colors for grouping
-const moduleColors: Record<string, string> = {
-  'OOP Fundamentals': '#8b5cf6',
-  'Class Types': '#3b82f6',
-  'Variables & Properties': '#10b981',
-  'Functions': '#f59e0b',
-  'Collections': '#ec4899',
-  'Advanced Topics': '#ef4444',
-}
+const VIEWS: { value: View; label: string }[] = [
+  { value: 'modules', label: 'By module' },
+  { value: 'graph', label: 'Graph' },
+]
 
-// Custom bubble node component
-function BubbleNode({ data }: { data: { label: string; difficulty: string; module: string; id: string } }) {
-  const colors = difficultyColors[data.difficulty] || difficultyColors.beginner
-  const moduleColor = moduleColors[data.module] || '#6b7280'
+const section = 'relative mx-auto max-w-[1200px] px-4 sm:px-8'
 
+function ViewToggle({
+  view,
+  onChange,
+}: {
+  view: View
+  onChange: (view: View) => void
+}) {
+  const name = useId()
   return (
-    <div
-      className="group cursor-pointer transition-all duration-300 hover:scale-110"
-      style={{
-        width: 140,
-        height: 140,
-        borderRadius: '50%',
-        background: colors.bg,
-        border: `4px solid ${colors.border}`,
-        boxShadow: `0 8px 32px ${colors.border}40, 0 0 0 3px ${moduleColor}30`,
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '12px',
-        textAlign: 'center',
-      }}
-    >
-      <div
-        className="text-xs font-medium uppercase tracking-wide opacity-80"
-        style={{ color: colors.text }}
-      >
-        {data.difficulty}
+    <fieldset>
+      <legend className="sr-only">View</legend>
+      <div className="border-line bg-subtle flex gap-1 rounded-xl border p-1">
+        {VIEWS.map((option) => (
+          <label key={option.value} className="relative">
+            <input
+              type="radio"
+              name={name}
+              value={option.value}
+              checked={view === option.value}
+              onChange={() => onChange(option.value)}
+              className="peer sr-only"
+            />
+            <span className="text-muted hover:text-ink peer-checked:bg-invert peer-checked:text-on-invert peer-focus-visible:outline-brand-a flex min-h-11 cursor-pointer items-center rounded-[9px] px-4 text-sm font-medium transition-colors peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2">
+              {option.label}
+            </span>
+          </label>
+        ))}
       </div>
-      <div
-        className="mt-1 line-clamp-3 text-sm font-bold leading-tight"
-        style={{ color: colors.text }}
-      >
-        {data.label}
-      </div>
+    </fieldset>
+  )
+}
+
+function Legend({ view }: { view: View }) {
+  return (
+    <div className="text-muted flex flex-wrap items-center gap-x-5 gap-y-2 text-[13px]">
+      <span className="text-heading font-medium">Difficulty:</span>
+      {DIFFICULTY_LEVELS.map((level) => (
+        <span
+          key={level}
+          className="inline-flex items-center gap-1.5 capitalize"
+        >
+          <span
+            aria-hidden="true"
+            className={`size-2.5 rounded-full ${difficultyDotClass(level)}`}
+          />
+          {level}
+        </span>
+      ))}
+      {view === 'graph' && (
+        <>
+          <span aria-hidden="true" className="bg-line-strong h-4 w-px" />
+          <span className="inline-flex items-center gap-1.5">
+            <span aria-hidden="true" className="bg-brand-a h-0.5 w-5 rounded" />
+            Prerequisite
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <span aria-hidden="true" className="bg-brand-b h-0.5 w-5 rounded" />
+            Suggested next
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <span
+              aria-hidden="true"
+              className="border-fainter w-5 border-t-2 border-dashed"
+            />
+            Related
+          </span>
+        </>
+      )}
     </div>
   )
 }
 
-// Node types registration
-const nodeTypes = {
-  bubble: BubbleNode,
-}
-
-// Edge styles
-const edgeStyles = {
-  prerequisite: {
-    stroke: '#8b5cf6',
-    strokeWidth: 3,
-    animated: true,
-  },
-  related: {
-    stroke: '#6b7280',
-    strokeWidth: 2,
-    strokeDasharray: '5,5',
-  },
-  'next-suggested': {
-    stroke: '#3b82f6',
-    strokeWidth: 2,
-  },
-}
-
-function KotlinMindMap() {
-  const navigate = useNavigate()
+function KotlinMindMapPage() {
   const { data: mindMapData, isLoading, error } = useKotlinMindMap()
+  const [view, setView] = useState<View>('modules')
+  const [search, setSearch] = useState('')
+  const [lang, setLang] = useState<SourceLanguage>(null)
+  const query = search.trim().toLowerCase()
+
+  // Topic links keep the background chosen on /learn-kotlin.
+  useEffect(() => setLang(readStoredLanguage()), [])
 
   useEffect(() => {
     setHead({
@@ -135,241 +118,131 @@ function KotlinMindMap() {
     })
   }, [])
 
-  // Convert API data to React Flow nodes
-  const { initialNodes, initialEdges } = useMemo(() => {
-    if (!mindMapData) return { initialNodes: [], initialEdges: [] }
-
-    // Group topics by module for layout
-    const moduleGroups: Record<string, typeof mindMapData.topics> = {}
-    mindMapData.topics.forEach((topic) => {
-      if (!moduleGroups[topic.module]) {
-        moduleGroups[topic.module] = []
-      }
-      moduleGroups[topic.module].push(topic)
-    })
-
-    const nodes: Node[] = []
-    const moduleNames = Object.keys(moduleGroups)
-
-    // Layout nodes in a circular/grid pattern by module
-    let moduleIndex = 0
-    const modulesPerRow = 3
-    const moduleSpacingX = 500
-    const moduleSpacingY = 400
-    const topicSpacingX = 200
-    const topicSpacingY = 200
-
-    moduleNames.forEach((moduleName) => {
-      const topics = moduleGroups[moduleName]
-      const moduleRow = Math.floor(moduleIndex / modulesPerRow)
-      const moduleCol = moduleIndex % modulesPerRow
-      const moduleBaseX = moduleCol * moduleSpacingX
-      const moduleBaseY = moduleRow * moduleSpacingY * 2
-
-      // Arrange topics in a grid within each module
-      const topicsPerRow = Math.ceil(Math.sqrt(topics.length))
-
-      topics.forEach((topic, topicIndex) => {
-        const topicRow = Math.floor(topicIndex / topicsPerRow)
-        const topicCol = topicIndex % topicsPerRow
-
-        nodes.push({
-          id: topic.id,
-          type: 'bubble',
-          position: {
-            x: moduleBaseX + topicCol * topicSpacingX,
-            y: moduleBaseY + topicRow * topicSpacingY,
-          },
-          data: {
-            label: topic.title,
-            difficulty: topic.difficulty,
-            module: topic.module,
-            id: topic.id,
-          },
-        })
-      })
-
-      moduleIndex++
-    })
-
-    // Convert dependencies to edges
-    const edges: Edge[] = mindMapData.dependencies.map((dep, index) => {
-      const style = edgeStyles[dep.type as keyof typeof edgeStyles] || edgeStyles.related
-      return {
-        id: `e-${index}`,
-        source: dep.from,
-        target: dep.to,
-        type: 'smoothstep',
-        animated: dep.type === 'prerequisite',
-        style: {
-          stroke: style.stroke,
-          strokeWidth: style.strokeWidth,
-        },
-        markerEnd: {
-          type: MarkerType.ArrowClosed,
-          color: style.stroke,
-        },
-      }
-    })
-
-    return { initialNodes: nodes, initialEdges: edges }
-  }, [mindMapData])
-
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes)
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges)
-
-  // Update nodes when data loads
-  useEffect(() => {
-    if (initialNodes.length > 0) {
-      setNodes(initialNodes)
-      setEdges(initialEdges)
-    }
-  }, [initialNodes, initialEdges, setNodes, setEdges])
-
-  // Handle node click - navigate to topic
-  const onNodeClick = useCallback(
-    (_: React.MouseEvent, node: Node) => {
-      navigate({
-        to: '/learn-kotlin/$topicId',
-        params: { topicId: node.id },
-      })
-    },
-    [navigate]
-  )
+  const hasTopics = !!mindMapData && mindMapData.topics.length > 0
 
   return (
-    <AppShell path="Learn Kotlin / Mind Map">
-      <MotionSection variant="slide-up">
-        <section className="relative overflow-hidden rounded-3xl border border-purple-200/50 bg-white/40 p-6 shadow-lg ring-1 ring-purple-500/10 backdrop-blur md:p-8">
-          <div className="pointer-events-none absolute -left-24 -top-24 h-64 w-64 rounded-full bg-gradient-to-br from-purple-400/30 via-blue-400/20 to-cyan-400/20 blur-3xl" />
+    <AppShell path="Learn Kotlin / Mind Map" fullBleed>
+      <div
+        aria-hidden="true"
+        className="bg-glow-hero pointer-events-none absolute -top-[300px] left-1/2 h-[600px] w-[1100px] -translate-x-1/2 opacity-80"
+      />
 
-          <div className="relative">
-            {/* Header */}
-            <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-              <div>
-                <H1 className="bg-gradient-to-br from-purple-600 via-blue-500 to-cyan-500 bg-clip-text text-transparent">
-                  Learning Mind Map
-                </H1>
-                <p className="text-muted-foreground mt-2">
-                  Click any topic bubble to start learning. Arrows show prerequisites.
-                </p>
-              </div>
-              <Link to="/learn-kotlin">
-                <Button variant="bordered" size="sm">
-                  ← Back to Topics
-                </Button>
-              </Link>
-            </div>
+      <section
+        className={`${section} flex flex-wrap items-end justify-between gap-5 pt-10 sm:pt-14`}
+      >
+        <div className="min-w-0 flex-[1_1_460px]">
+          <Link
+            to="/learn-kotlin"
+            className="text-muted hover:text-ink inline-flex min-h-11 items-center gap-1.5 text-[14px] transition-colors"
+          >
+            <ArrowLeftIcon size={15} />
+            Back to Topics
+          </Link>
+          <h1 className="text-heading mt-2 text-[34px] leading-[1.08] font-semibold tracking-[-0.03em] sm:text-[44px]">
+            Learning Mind Map
+          </h1>
+          <p className="text-muted mt-3 text-[16px] leading-relaxed sm:text-[17px]">
+            {view === 'graph'
+              ? 'Click any topic bubble to start learning. Arrows show prerequisites.'
+              : 'Hover a topic to highlight what it needs and what it unlocks. Click to open it.'}
+          </p>
+        </div>
+        <div className="flex w-full flex-wrap items-center gap-3 sm:w-auto">
+          <ViewToggle view={view} onChange={setView} />
+          <label className="border-line-strong bg-card text-faint focus-within:outline-brand-a flex min-h-11 flex-[1_1_200px] items-center gap-2 rounded-[10px] border px-3 focus-within:outline-2 focus-within:outline-offset-2 sm:flex-none">
+            <SearchIcon size={16} />
+            <span className="sr-only">Find a topic</span>
+            <input
+              type="search"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Find a topic"
+              className="text-ink placeholder:text-faint w-full min-w-0 bg-transparent text-[15px] outline-none sm:w-[170px]"
+            />
+          </label>
+        </div>
+      </section>
 
-            {/* Legend */}
-            <div className="mb-4 flex flex-wrap items-center gap-6 rounded-lg border border-gray-200 bg-white/60 p-3">
-              <span className="text-sm font-medium text-gray-700">Difficulty:</span>
-              <div className="flex items-center gap-1.5">
-                <div className="h-4 w-4 rounded-full bg-gradient-to-br from-green-500 to-green-600" />
-                <span className="text-xs text-gray-600">Beginner</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <div className="h-4 w-4 rounded-full bg-gradient-to-br from-yellow-500 to-yellow-600" />
-                <span className="text-xs text-gray-600">Intermediate</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <div className="h-4 w-4 rounded-full bg-gradient-to-br from-orange-500 to-orange-600" />
-                <span className="text-xs text-gray-600">Advanced</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <div className="h-4 w-4 rounded-full bg-gradient-to-br from-red-500 to-red-600" />
-                <span className="text-xs text-gray-600">Expert</span>
-              </div>
-            </div>
-
-            {/* Mind Map Canvas */}
-            <div
-              className="overflow-hidden rounded-xl border border-gray-200 bg-gradient-to-br from-gray-50 to-white"
-              style={{ height: '70vh', minHeight: 500 }}
-            >
-              {isLoading && (
-                <div className="flex h-full items-center justify-center">
-                  <div className="h-12 w-12 animate-spin rounded-full border-4 border-purple-600 border-r-transparent" />
-                </div>
-              )}
-
-              {error && (
-                <div className="flex h-full items-center justify-center">
-                  <div className="text-center">
-                    <p className="text-red-600">Failed to load mind map</p>
-                    <Button
-                      variant="bordered"
-                      size="sm"
-                      className="mt-4"
-                      onClick={() => window.location.reload()}
-                    >
-                      Retry
-                    </Button>
-                  </div>
-                </div>
-              )}
-
-              {!isLoading && !error && nodes.length > 0 && (
-                <ReactFlow
-                  nodes={nodes}
-                  edges={edges}
-                  onNodesChange={onNodesChange}
-                  onEdgesChange={onEdgesChange}
-                  onNodeClick={onNodeClick}
-                  nodeTypes={nodeTypes}
-                  connectionMode={ConnectionMode.Loose}
-                  fitView
-                  fitViewOptions={{ padding: 0.2 }}
-                  minZoom={0.2}
-                  maxZoom={2}
-                  attributionPosition="bottom-left"
-                >
-                  <Background color="#e5e7eb" gap={20} />
-                  <Controls
-                    className="rounded-lg border border-gray-200 bg-white shadow-lg"
-                    showInteractive={false}
-                  />
-                  <MiniMap
-                    className="rounded-lg border border-gray-200 bg-white shadow-lg"
-                    nodeColor={(node) => {
-                      const colors = difficultyColors[node.data?.difficulty] || difficultyColors.beginner
-                      return colors.border
-                    }}
-                    maskColor="rgba(255, 255, 255, 0.8)"
-                  />
-                </ReactFlow>
-              )}
-
-              {!isLoading && !error && nodes.length === 0 && (
-                <div className="flex h-full items-center justify-center">
-                  <div className="text-center">
-                    <p className="text-gray-600">No topics available yet</p>
-                    <Link to="/learn-kotlin">
-                      <Button variant="bordered" size="sm" className="mt-4">
-                        View Topics List
-                      </Button>
-                    </Link>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Tips */}
-            <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-gray-500">
-              <span>💡 Tips:</span>
-              <span>Scroll to zoom</span>
-              <span>•</span>
-              <span>Drag to pan</span>
-              <span>•</span>
-              <span>Click bubble to learn</span>
-            </div>
+      <section className={`${section} pt-6 pb-24`}>
+        {hasTopics && (
+          <div className="mb-5">
+            <Legend view={view} />
           </div>
-        </section>
-      </MotionSection>
+        )}
+
+        {isLoading && (
+          <div
+            aria-busy="true"
+            aria-label="Loading mind map"
+            className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,280px),1fr))] gap-4"
+          >
+            {Array.from({ length: 6 }, (_, index) => (
+              <div
+                key={index}
+                className="border-line bg-card h-[220px] animate-pulse rounded-2xl border motion-reduce:animate-none"
+              />
+            ))}
+          </div>
+        )}
+
+        {error && (
+          <div
+            role="alert"
+            className="border-line bg-subtle rounded-[20px] border px-6 py-14 text-center"
+          >
+            <p className="text-heading text-lg font-semibold">
+              Failed to load mind map
+            </p>
+            <button
+              type="button"
+              onClick={() => window.location.reload()}
+              className="border-line-strong text-ink hover:bg-chip mt-6 inline-flex min-h-11 items-center rounded-[10px] border px-5 text-[15px] font-medium transition-colors"
+            >
+              Retry
+            </button>
+          </div>
+        )}
+
+        {!isLoading && !error && mindMapData && !hasTopics && (
+          <div className="border-line bg-subtle rounded-[20px] border px-6 py-14 text-center">
+            <p className="text-heading text-lg font-semibold">
+              No topics available yet
+            </p>
+            <Link
+              to="/learn-kotlin"
+              className="border-line-strong text-ink hover:bg-chip mt-6 inline-flex min-h-11 items-center rounded-[10px] border px-5 text-[15px] font-medium transition-colors"
+            >
+              View Topics List
+            </Link>
+          </div>
+        )}
+
+        {hasTopics && view === 'modules' && (
+          <KotlinMindMap
+            data={mindMapData}
+            selectedLanguage={lang}
+            query={query}
+          />
+        )}
+
+        {hasTopics && view === 'graph' && (
+          <>
+            <MindMapGraph data={mindMapData} query={query} lang={lang} />
+            <p className="text-faint mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-[14px]">
+              <span className="text-muted font-medium">Tips:</span>
+              <span>Scroll to zoom</span>
+              <span aria-hidden="true">·</span>
+              <span>Drag to pan</span>
+              <span aria-hidden="true">·</span>
+              <span>Click bubble to learn</span>
+            </p>
+          </>
+        )}
+      </section>
     </AppShell>
   )
 }
 
 export const Route = createFileRoute({
-  component: KotlinMindMap,
+  component: KotlinMindMapPage,
 })

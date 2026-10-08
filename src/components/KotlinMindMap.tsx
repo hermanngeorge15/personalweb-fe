@@ -1,58 +1,39 @@
 import { Link } from '@tanstack/react-router'
-import { useKotlinMindMap, type MindMapData, type SourceLanguage } from '@/lib/queries'
+import { type MindMapData, type SourceLanguage } from '@/lib/queries'
 import { useMemo, useState } from 'react'
+import { ArrowRightIcon } from '@/components/icons'
+import { difficultyDotClass } from '@/components/learn/Difficulty'
 
 type ModuleGroup = {
   name: string
-  color: string
   topics: { id: string; title: string; difficulty: string }[]
 }
 
-const MODULE_COLORS: Record<string, string> = {
-  'Classes & Objects Fundamentals': 'from-blue-500 to-blue-600',
-  'Class Types & Data Modeling': 'from-purple-500 to-purple-600',
-  'Variables & Properties': 'from-green-500 to-green-600',
-  Functions: 'from-orange-500 to-orange-600',
-  'Collections & Sequences': 'from-cyan-500 to-cyan-600',
-  'Advanced Topics': 'from-red-500 to-red-600',
-}
-
-const MODULE_BG_COLORS: Record<string, string> = {
-  'Classes & Objects Fundamentals': 'bg-blue-50 border-blue-200 hover:bg-blue-100',
-  'Class Types & Data Modeling': 'bg-purple-50 border-purple-200 hover:bg-purple-100',
-  'Variables & Properties': 'bg-green-50 border-green-200 hover:bg-green-100',
-  Functions: 'bg-orange-50 border-orange-200 hover:bg-orange-100',
-  'Collections & Sequences': 'bg-cyan-50 border-cyan-200 hover:bg-cyan-100',
-  'Advanced Topics': 'bg-red-50 border-red-200 hover:bg-red-100',
-}
-
-const DIFFICULTY_COLORS: Record<string, string> = {
-  beginner: 'bg-green-500',
-  intermediate: 'bg-yellow-500',
-  advanced: 'bg-orange-500',
-  expert: 'bg-red-500',
-}
-
 type KotlinMindMapProps = {
+  data: MindMapData
   selectedLanguage: SourceLanguage
+  /** Lower-cased search text; topics that don't match are hidden. */
+  query?: string
 }
 
-export function KotlinMindMap({ selectedLanguage }: KotlinMindMapProps) {
-  const { data: mindMapData, isLoading } = useKotlinMindMap()
-  const [hoveredTopic, setHoveredTopic] = useState<string | null>(null)
+/**
+ * "By module" view of the learning map: one card per module, each topic
+ * linking to its lesson. Hovering or focusing a topic highlights the topics it
+ * depends on or unlocks and fades the rest.
+ */
+export function KotlinMindMap({
+  data,
+  selectedLanguage,
+  query = '',
+}: KotlinMindMapProps) {
+  const [activeTopic, setActiveTopic] = useState<string | null>(null)
 
   const moduleGroups = useMemo(() => {
-    if (!mindMapData) return []
-
     const groups: Record<string, ModuleGroup> = {}
-
-    mindMapData.topics.forEach((topic) => {
+    data.topics.forEach((topic) => {
+      if (query && !topic.title.toLowerCase().includes(query)) return
       if (!groups[topic.module]) {
-        groups[topic.module] = {
-          name: topic.module,
-          color: MODULE_COLORS[topic.module] || 'from-gray-500 to-gray-600',
-          topics: [],
-        }
+        groups[topic.module] = { name: topic.module, topics: [] }
       }
       groups[topic.module].topics.push({
         id: topic.id,
@@ -60,170 +41,128 @@ export function KotlinMindMap({ selectedLanguage }: KotlinMindMapProps) {
         difficulty: topic.difficulty,
       })
     })
-
     return Object.values(groups)
-  }, [mindMapData])
+  }, [data, query])
 
+  const titleById = useMemo(
+    () => new Map(data.topics.map((topic) => [topic.id, topic.title])),
+    [data],
+  )
+
+  // Prerequisites of each topic (dependency `from` needs `to`, as the page always read it).
   const dependencyMap = useMemo(() => {
-    if (!mindMapData) return new Map<string, string[]>()
-
     const map = new Map<string, string[]>()
-    mindMapData.dependencies.forEach((dep) => {
+    data.dependencies.forEach((dep) => {
       const existing = map.get(dep.from) || []
       existing.push(dep.to)
       map.set(dep.from, existing)
     })
     return map
-  }, [mindMapData])
+  }, [data])
 
-  const getConnectedTopics = (topicId: string): Set<string> => {
-    const connected = new Set<string>()
-    connected.add(topicId)
-
-    // Add topics this one depends on
-    mindMapData?.dependencies.forEach((dep) => {
-      if (dep.from === topicId) {
-        connected.add(dep.to)
-      }
-      if (dep.to === topicId) {
-        connected.add(dep.from)
-      }
+  const connectedTopics = useMemo(() => {
+    if (!activeTopic) return null
+    const connected = new Set<string>([activeTopic])
+    data.dependencies.forEach((dep) => {
+      if (dep.from === activeTopic) connected.add(dep.to)
+      if (dep.to === activeTopic) connected.add(dep.from)
     })
-
     return connected
-  }
+  }, [activeTopic, data])
 
-  if (isLoading) {
+  if (moduleGroups.length === 0) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-purple-600 border-r-transparent"></div>
+      <div className="border-line bg-subtle rounded-2xl border px-6 py-14 text-center">
+        <p className="text-heading font-semibold">No topic matches “{query}”</p>
+        <p className="text-faint mt-2 text-sm">Try a shorter search.</p>
       </div>
     )
   }
-
-  if (!mindMapData || mindMapData.topics.length === 0) {
-    return (
-      <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center">
-        <p className="text-gray-600">Mind map data not available.</p>
-      </div>
-    )
-  }
-
-  const connectedTopics = hoveredTopic ? getConnectedTopics(hoveredTopic) : null
 
   return (
-    <div className="space-y-6">
-      {/* Legend */}
-      <div className="flex flex-wrap items-center gap-4 rounded-lg border border-gray-200 bg-gray-50 p-4">
-        <span className="text-sm font-medium text-gray-700">Difficulty:</span>
-        <div className="flex flex-wrap gap-3">
-          {Object.entries(DIFFICULTY_COLORS).map(([level, color]) => (
-            <div key={level} className="flex items-center gap-1.5">
-              <div className={`h-3 w-3 rounded-full ${color}`}></div>
-              <span className="text-xs text-gray-600 capitalize">{level}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Mind Map Grid */}
-      <div className="grid gap-6 lg:grid-cols-2">
-        {moduleGroups.map((group) => (
-          <div
-            key={group.name}
-            className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm"
-          >
-            {/* Module Header */}
-            <div
-              className={`mb-4 rounded-lg bg-gradient-to-r ${group.color} px-4 py-2`}
+    <div>
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,280px),1fr))] items-start gap-4">
+        {moduleGroups.map((group) => {
+          const moduleActive =
+            !connectedTopics ||
+            group.topics.some((topic) => connectedTopics.has(topic.id))
+          return (
+            <section
+              key={group.name}
+              aria-label={group.name}
+              className={`border-line bg-card rounded-2xl border p-[18px] transition-opacity duration-200 ${
+                moduleActive ? '' : 'opacity-50'
+              }`}
             >
-              <h3 className="font-semibold text-white">{group.name}</h3>
-            </div>
-
-            {/* Topics */}
-            <div className="space-y-2">
-              {group.topics.map((topic) => {
-                const isHighlighted =
-                  !connectedTopics || connectedTopics.has(topic.id)
-                const prerequisites = dependencyMap.get(topic.id) || []
-
-                return (
-                  <Link
-                    key={topic.id}
-                    to="/learn-kotlin/$topicId"
-                    params={{ topicId: topic.id }}
-                    search={{ lang: selectedLanguage }}
-                    className={`block rounded-lg border p-3 transition-all ${
-                      MODULE_BG_COLORS[group.name] ||
-                      'bg-gray-50 border-gray-200 hover:bg-gray-100'
-                    } ${
-                      !isHighlighted ? 'opacity-30' : ''
-                    }`}
-                    onMouseEnter={() => setHoveredTopic(topic.id)}
-                    onMouseLeave={() => setHoveredTopic(null)}
-                  >
-                    <div className="flex items-start gap-3">
-                      {/* Difficulty indicator */}
-                      <div
-                        className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${
-                          DIFFICULTY_COLORS[topic.difficulty] || 'bg-gray-400'
-                        }`}
-                        title={topic.difficulty}
-                      ></div>
-
-                      <div className="min-w-0 flex-1">
-                        <h4 className="font-medium text-gray-900 truncate">
-                          {topic.title}
-                        </h4>
-
-                        {/* Prerequisites */}
-                        {prerequisites.length > 0 && (
-                          <div className="mt-1 flex flex-wrap gap-1">
-                            <span className="text-xs text-gray-500">
-                              Requires:
-                            </span>
-                            {prerequisites.map((prereq) => {
-                              const prereqTopic = mindMapData.topics.find(
-                                (t) => t.id === prereq
-                              )
-                              return (
-                                <span
-                                  key={prereq}
-                                  className="inline-flex items-center rounded bg-gray-200 px-1.5 py-0.5 text-xs text-gray-700"
-                                >
-                                  {prereqTopic?.title || prereq}
-                                </span>
-                              )
-                            })}
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Arrow */}
-                      <svg
-                        className="h-5 w-5 shrink-0 text-gray-400"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
+              <h2 className="text-heading text-base font-semibold">
+                {group.name}
+              </h2>
+              <ul className="mt-3 flex flex-col gap-1.5">
+                {group.topics.map((topic) => {
+                  const isActive = topic.id === activeTopic
+                  const isConnected =
+                    !!connectedTopics && connectedTopics.has(topic.id)
+                  const isFaded = !!connectedTopics && !isConnected
+                  const prerequisites = dependencyMap.get(topic.id) || []
+                  return (
+                    <li key={topic.id}>
+                      <Link
+                        to="/learn-kotlin/$topicId"
+                        params={{ topicId: topic.id }}
+                        search={{ lang: selectedLanguage || undefined }}
+                        onMouseEnter={() => setActiveTopic(topic.id)}
+                        onMouseLeave={() => setActiveTopic(null)}
+                        onFocus={() => setActiveTopic(topic.id)}
+                        onBlur={() => setActiveTopic(null)}
+                        className={`group flex min-h-11 items-start gap-2.5 rounded-[10px] border px-3 py-2.5 text-[14px] transition-all duration-150 ${
+                          isActive
+                            ? 'bg-invert text-on-invert border-transparent'
+                            : isConnected
+                              ? 'border-brand-a/60 bg-brand-a/5 text-ink'
+                              : 'border-line-strong text-body hover:text-ink'
+                        } ${isFaded ? 'opacity-40' : ''}`}
                       >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M9 5l7 7-7 7"
+                        <span
+                          aria-hidden="true"
+                          title={topic.difficulty}
+                          className={`mt-[7px] size-2 shrink-0 rounded-full ${difficultyDotClass(topic.difficulty)}`}
                         />
-                      </svg>
-                    </div>
-                  </Link>
-                )
-              })}
-            </div>
-          </div>
-        ))}
+                        <span className="min-w-0 flex-1">
+                          <span className="block leading-snug font-medium">
+                            {topic.title}
+                            <span className="sr-only">
+                              , {topic.difficulty}
+                            </span>
+                          </span>
+                          {prerequisites.length > 0 && (
+                            <span
+                              className={`mt-1 block text-[13px] leading-snug ${
+                                isActive ? 'text-on-invert/80' : 'text-faint'
+                              }`}
+                            >
+                              Requires:{' '}
+                              {prerequisites
+                                .map((id) => titleById.get(id) || id)
+                                .join(', ')}
+                            </span>
+                          )}
+                        </span>
+                        <span
+                          className={`mt-0.5 shrink-0 ${isActive ? '' : 'text-fainter'}`}
+                        >
+                          <ArrowRightIcon size={15} />
+                        </span>
+                      </Link>
+                    </li>
+                  )
+                })}
+              </ul>
+            </section>
+          )
+        })}
       </div>
 
-      {/* Instructions */}
-      <p className="text-center text-sm text-gray-500">
+      <p className="text-faint mt-5 text-center text-[14px]">
         Hover over a topic to see its connections. Click to view the lesson.
       </p>
     </div>
