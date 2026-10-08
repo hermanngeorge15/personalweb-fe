@@ -11,8 +11,8 @@ import {
 import { SOCIAL_LINKS } from '@/config/site'
 import { PROJECTS } from '@/config/projects'
 import profilePhoto from '@/assets/images/profile.jpg'
+import { PostCover } from '@/components/blog/PostCover'
 import {
-  Eyebrow,
   PageGlow,
   SectionHeading,
   primaryButtonClass,
@@ -65,10 +65,30 @@ function Languages() {
 
 const strong = 'text-heading font-semibold'
 
+/** Centred page header in the blog's style: pill label, gradient headline. */
+function Hero() {
+  return (
+    <section
+      className={`${sectionClass} pt-16 pb-4 text-center sm:pt-[88px] sm:pb-6`}
+    >
+      <span className="border-line-strong bg-chip/60 text-body inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-[13px]">
+        <span aria-hidden="true" className="bg-brand-b size-1.5 rounded-full" />
+        About · Prague, Czech Republic
+      </span>
+      <h1 className="text-heading mx-auto mt-6 max-w-[900px] text-[40px] leading-[1.04] font-semibold tracking-[-0.035em] sm:text-[52px] lg:text-[64px]">
+        Hi, I&apos;m Jiří.{' '}
+        <span className="text-brand-gradient">
+          Backend engineer and community builder.
+        </span>
+      </h1>
+    </section>
+  )
+}
+
 function Intro() {
   return (
     <section
-      className={`${sectionClass} grid gap-10 pt-12 sm:pt-[88px] lg:grid-cols-[minmax(0,400px)_minmax(0,1fr)] lg:gap-16`}
+      className={`${sectionClass} grid gap-10 pt-10 sm:pt-14 lg:grid-cols-[minmax(0,400px)_minmax(0,1fr)] lg:items-start lg:gap-16`}
     >
       <div className="order-2 lg:order-none">
         <img
@@ -84,11 +104,7 @@ function Intro() {
       </div>
 
       <div className="order-1 min-w-0 lg:order-none">
-        <Eyebrow>About</Eyebrow>
-        <h1 className="text-heading mt-3 text-[40px] leading-[1.05] font-semibold tracking-[-0.03em] sm:text-[56px] sm:tracking-[-0.035em]">
-          Hi, I&apos;m Jiří.
-        </h1>
-        <div className="text-body mt-6 max-w-[720px] space-y-5 text-[17px] leading-[1.75] sm:mt-7 sm:text-lg">
+        <div className="text-body max-w-[720px] space-y-5 text-[17px] leading-[1.75] sm:text-lg">
           <p>
             My name is <strong className={strong}>Jiří Hermann</strong>, and
             I&apos;m a{' '}
@@ -132,25 +148,36 @@ function Intro() {
   )
 }
 
+/** Same frame as the blog's post cards. */
 const nowCardClass =
-  'border-line bg-card hover:border-line-strong group flex flex-col rounded-2xl border p-6 transition-colors'
+  'border-line bg-card hover:border-line-strong group flex flex-col overflow-hidden rounded-2xl border transition-colors'
 
+/** Card body under a blog-style generated cover: `cover` names the window's path and lines. */
 function NowCard({
   label,
   title,
   body,
+  cover,
 }: {
   label: string
   title: string
   body: string
+  cover: { slug: string; path: string; lines: string[] }
 }) {
   return (
     <>
-      <div className="text-faint text-[13px]">{label}</div>
-      <h3 className="text-heading mt-2 text-[17px] font-semibold group-hover:underline group-hover:decoration-1 group-hover:underline-offset-4">
-        {title}
-      </h3>
-      <p className="text-muted mt-2 text-sm leading-[1.6]">{body}</p>
+      <PostCover
+        post={{ slug: cover.slug, tags: cover.lines }}
+        path={cover.path}
+        size="card"
+      />
+      <div className="flex flex-1 flex-col p-6">
+        <span className="text-faint text-[13px]">{label}</span>
+        <h3 className="text-heading mt-2.5 text-[19px] leading-tight font-semibold tracking-[-0.015em] group-hover:underline group-hover:decoration-1 group-hover:underline-offset-4">
+          {title}
+        </h3>
+        <p className="text-muted mt-2.5 text-[15px] leading-relaxed">{body}</p>
+      </div>
     </>
   )
 }
@@ -168,7 +195,7 @@ function Now() {
         title="What I’m working on"
         titleId="now-title"
       />
-      <div className="mt-6 grid grid-cols-[repeat(auto-fill,minmax(min(100%,260px),1fr))] gap-4 sm:mt-7">
+      <div className="mt-6 grid grid-cols-[repeat(auto-fill,minmax(min(100%,260px),1fr))] gap-5 sm:mt-7">
         {role && (
           <Link to="/resume" className={nowCardClass}>
             <NowCard
@@ -177,6 +204,11 @@ function Now() {
                 .filter(Boolean)
                 .join(' at ')}
               body={role.description ?? ''}
+              cover={{
+                slug: 'day-job',
+                path: `~/now/${(role.company ?? 'day-job').toLowerCase()}`,
+                lines: role.techStack ?? [],
+              }}
             />
           </Link>
         )}
@@ -191,6 +223,11 @@ function Now() {
               label="Community"
               title="Founder, Kotlin Server Squad"
               body="A community for developers who share a passion for building, learning, and helping each other grow."
+              cover={{
+                slug: 'kotlin-server-squad',
+                path: '~/community/kotlin-server-squad',
+                lines: ['kotlin', 'jvm'],
+              }}
             />
           </a>
         )}
@@ -199,6 +236,11 @@ function Now() {
             label="Open source"
             title="UnityInFlow"
             body={`${PROJECTS.length} tools released for the AI agent stack, from injection-scanner to kore-runtime.`}
+            cover={{
+              slug: 'unityinflow',
+              path: '~/projects/unityinflow',
+              lines: ['injection-scanner', 'kore-runtime'],
+            }}
           />
         </Link>
         <Link to="/blog" className={nowCardClass}>
@@ -206,6 +248,11 @@ function Now() {
             label="Writing"
             title="Securing AI agents"
             body="A weekly series on prompt injection, SSRF and agent tooling."
+            cover={{
+              slug: 'writing',
+              path: '~/blog',
+              lines: ['prompt-injection', 'ssrf'],
+            }}
           />
         </Link>
       </div>
@@ -340,7 +387,8 @@ function AboutPage() {
 
   return (
     <AppShell path="About" fullBleed>
-      <PageGlow className="left-[30%] h-[700px]" />
+      <PageGlow />
+      <Hero />
       <Intro />
       <Now />
       <Path />
