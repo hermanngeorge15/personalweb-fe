@@ -1,17 +1,539 @@
 import AppShell from '@/components/AppShell'
-import { useEffect } from 'react'
-import { SEO_DEFAULTS, setHead, setJsonLd } from '@/lib/seo'
-import { MotionSection } from '@/components/MotionSection'
-import { H1 } from '@/components/ui/Typography'
-import { Card, CardBody } from '@/components/ui/Card'
-import { Button } from '@heroui/react'
+import { useEffect, useMemo, type ReactNode } from 'react'
 import { Link } from '@tanstack/react-router'
-import { usePosts } from '@/lib/queries'
+import { twMerge } from 'tailwind-merge'
+import { SEO_DEFAULTS, setHead, setJsonLd } from '@/lib/seo'
+import { usePosts, useKotlinTopics, useResumeProjects } from '@/lib/queries'
+import { sortByPublishedDesc } from '@/lib/blog-utils'
 import { SOCIAL_LINKS } from '@/config/site'
+import { FEATURED_PROJECT_NAMES, PROJECTS } from '@/config/projects'
 import profilePhoto from '@/assets/images/profile.jpg'
+import {
+  BoltIcon,
+  ChartIcon,
+  CodeIcon,
+  DatabaseIcon,
+  GitHubIcon,
+  InstagramIcon,
+  LinkedInIcon,
+  LockIcon,
+  PlugIcon,
+} from '@/components/icons'
+import {
+  PageGlow,
+  SectionHeading,
+  primaryButtonClass,
+  secondaryButtonClass,
+  sectionClass,
+  sectionLinkClass,
+} from '@/components/home/Section'
+import { ProjectCard } from '@/components/home/ProjectCard'
+import { HomePostCard } from '@/components/home/HomePostCard'
+
+const socialButtonClass =
+  'border-line-strong text-body hover:bg-chip hover:text-ink flex size-11 items-center justify-center rounded-[10px] border transition-colors'
+
+/** The role in the resume with no end date (latest start wins). */
+function useCurrentRole() {
+  const { data } = useResumeProjects()
+  return useMemo(() => {
+    const current = (data ?? [])
+      .filter((item) => !item.endAt && item.startAt)
+      .sort((a, b) => (b.startAt ?? '').localeCompare(a.startAt ?? ''))[0]
+    if (!current) return null
+    return [current.projectName, current.company].filter(Boolean).join(' · ')
+  }, [data])
+}
+
+function FloatingBadge({
+  label,
+  value,
+  className,
+}: {
+  label: string
+  value: string
+  className: string
+}) {
+  return (
+    <div
+      className={`border-window-line bg-window shadow-window absolute hidden max-w-[320px] rounded-xl border px-4 py-3 backdrop-blur sm:block ${className}`}
+    >
+      <div className="text-faint text-xs">{label}</div>
+      <div className="text-ink mt-0.5 text-sm font-medium">{value}</div>
+    </div>
+  )
+}
+
+function Hero() {
+  const currentRole = useCurrentRole()
+  return (
+    <section
+      className={`${sectionClass} flex flex-wrap items-center gap-x-16 gap-y-7 pt-8 sm:pt-[88px] sm:pb-16`}
+    >
+      <div className="min-w-0 flex-[999_1_560px]">
+        <span className="border-line-strong bg-chip/60 text-body inline-flex items-center gap-2 rounded-full border px-3 py-[5px] text-[13px] sm:px-3.5 sm:py-1.5">
+          <span
+            aria-hidden="true"
+            className="bg-brand-b ring-brand-b/20 size-[7px] shrink-0 rounded-full ring-4"
+          />
+          Available for selected projects · Prague, CZ
+        </span>
+        <h1 className="text-heading mt-[18px] text-[38px] leading-[1.06] font-semibold tracking-[-0.03em] sm:mt-6 sm:text-[52px] sm:leading-[1.04] sm:tracking-[-0.035em] lg:text-[62px]">
+          Backend engineer. <br className="hidden sm:block" />
+          Building secure tooling{' '}
+          <span className="text-brand-gradient">for AI agents.</span>
+        </h1>
+        <p className="text-muted mt-4 max-w-[580px] text-base leading-[1.6] sm:mt-6 sm:text-[19px]">
+          I&apos;m Jiří Hermann — I design clean, reliable, scalable backend
+          systems in Kotlin and Java, founded the Kotlin Server Squad community,
+          and build open-source tools that keep AI agents safe.{' '}
+          <Link
+            to="/about"
+            className="text-link underline decoration-1 underline-offset-[3px]"
+          >
+            More about me
+          </Link>
+        </p>
+        <div className="mt-[22px] flex flex-col gap-2.5 sm:mt-8 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3">
+          <Link to="/contact" className={primaryButtonClass}>
+            Get in touch
+          </Link>
+          <Link to="/resume" className={secondaryButtonClass}>
+            Resume
+          </Link>
+          <span
+            aria-hidden="true"
+            className="bg-line-strong mx-2 hidden h-7 w-px sm:block"
+          />
+          <div className="mt-2 flex gap-3 sm:mt-0">
+            {SOCIAL_LINKS.linkedin && (
+              <a
+                href={SOCIAL_LINKS.linkedin}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="LinkedIn"
+                className={socialButtonClass}
+              >
+                <LinkedInIcon size={17} />
+              </a>
+            )}
+            {SOCIAL_LINKS.github && (
+              <a
+                href={SOCIAL_LINKS.github}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="GitHub"
+                className={socialButtonClass}
+              >
+                <GitHubIcon size={17} />
+              </a>
+            )}
+            {SOCIAL_LINKS.instagram && (
+              <a
+                href={SOCIAL_LINKS.instagram}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram"
+                className={socialButtonClass}
+              >
+                <InstagramIcon size={17} />
+              </a>
+            )}
+            {SOCIAL_LINKS.kotlinServerSquad && (
+              <a
+                href={SOCIAL_LINKS.kotlinServerSquad}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Kotlin Server Squad website"
+                className={twMerge(
+                  socialButtonClass,
+                  'w-auto px-3.5 text-[13px] font-medium',
+                )}
+              >
+                KSS
+              </a>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className="flex flex-[1_1_380px] justify-center">
+        <div className="relative w-full sm:w-[400px] sm:max-w-full">
+          <div
+            aria-hidden="true"
+            className="bg-brand-gradient absolute -inset-0.5 hidden rounded-[26px] opacity-35 blur-[18px] sm:block"
+          />
+          <img
+            src={profilePhoto}
+            alt="Jiří Hermann with his wire-haired dachshund"
+            decoding="async"
+            className="border-window-line relative block aspect-square w-full rounded-[20px] border object-cover object-[50%_30%] sm:aspect-[4/5] sm:rounded-3xl"
+          />
+          {currentRole && (
+            <FloatingBadge
+              label="Currently"
+              value={currentRole}
+              className="bottom-14 -left-9"
+            />
+          )}
+          <FloatingBadge
+            label="Founder"
+            value="Kotlin Server Squad"
+            className="top-12 -right-7"
+          />
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function Stat({
+  value,
+  label,
+  gradient = false,
+}: {
+  value: ReactNode
+  label: string
+  gradient?: boolean
+}) {
+  return (
+    <div className="bg-subtle px-4 py-4 sm:px-7 sm:py-6">
+      <div
+        className={`text-[26px] font-semibold tracking-[-0.03em] sm:text-[34px] ${gradient ? 'text-brand-gradient' : 'text-heading'}`}
+      >
+        {value}
+      </div>
+      <div className="text-faint mt-1 text-[13px] sm:text-sm">{label}</div>
+    </div>
+  )
+}
+
+function StatPlaceholder() {
+  return (
+    <span
+      aria-label="Loading"
+      className="bg-chip inline-block h-8 w-16 animate-pulse rounded-lg align-middle motion-reduce:animate-none"
+    />
+  )
+}
+
+/** Numbers from real sources only: the tool list, the resume API, the Learn Kotlin API. */
+function StatsBand() {
+  const resume = useResumeProjects()
+  const topics = useKotlinTopics()
+  const sinceYear = useMemo(() => {
+    const years = (resume.data ?? [])
+      .map((item) =>
+        item.startAt ? new Date(item.startAt).getFullYear() : NaN,
+      )
+      .filter((year) => !Number.isNaN(year))
+    return years.length > 0 ? Math.min(...years) : null
+  }, [resume.data])
+  const lessonCount = topics.data?.length ?? 0
+
+  return (
+    <section className={`${sectionClass} pt-6 sm:pt-0`}>
+      <div className="bg-line border-line grid grid-cols-2 gap-px overflow-hidden rounded-[14px] border sm:grid-cols-[repeat(auto-fit,minmax(220px,1fr))] sm:rounded-2xl">
+        <Stat value={PROJECTS.length} label="open-source tools released" />
+        {!resume.isError && (
+          <Stat
+            value={sinceYear ?? <StatPlaceholder />}
+            label="building JVM backends since"
+          />
+        )}
+        {!topics.isError && (
+          <Stat
+            value={topics.data ? lessonCount : <StatPlaceholder />}
+            label="interactive Kotlin lessons"
+          />
+        )}
+        <Stat value="KSS" label="community founder" gradient />
+      </div>
+    </section>
+  )
+}
+
+function Tools() {
+  const featured = FEATURED_PROJECT_NAMES.map((name) =>
+    PROJECTS.find((project) => project.name === name),
+  ).filter((project) => project !== undefined)
+
+  return (
+    <section
+      aria-labelledby="tools-title"
+      className={`${sectionClass} pt-12 sm:pt-[104px]`}
+    >
+      <SectionHeading
+        eyebrow="Open source · UnityInFlow"
+        title="Tools I build for the AI agent stack"
+        titleId="tools-title"
+        action={
+          <Link
+            to="/projects"
+            className={twMerge(sectionLinkClass, 'hidden sm:inline-flex')}
+          >
+            All {PROJECTS.length} projects →
+          </Link>
+        }
+      />
+      <div className="-mx-4 mt-[18px] flex snap-x snap-mandatory scroll-px-4 gap-3 overflow-x-auto px-4 pb-1.5 sm:mx-0 sm:mt-8 sm:grid sm:grid-cols-[repeat(auto-fill,minmax(320px,1fr))] sm:gap-5 sm:overflow-visible sm:px-0 sm:pb-0">
+        {featured.map((project) => (
+          <ProjectCard
+            key={project.name}
+            project={project}
+            variant="compact"
+            className="flex-[0_0_270px] snap-start sm:flex-auto"
+          />
+        ))}
+      </div>
+      <Link
+        to="/projects"
+        className={twMerge(sectionLinkClass, 'mt-2 sm:hidden')}
+      >
+        All {PROJECTS.length} projects →
+      </Link>
+    </section>
+  )
+}
+
+const SKILLS = [
+  {
+    title: 'Kotlin & Spring Boot',
+    body: 'Expert in building scalable backend services with Kotlin, Spring Boot, Coroutines, and reactive programming',
+    Icon: CodeIcon,
+    tone: 'text-brand-a',
+  },
+  {
+    title: 'System Integration & APIs',
+    body: 'Building seamless integrations with banking systems, payment gateways, and third-party services via REST and messaging',
+    Icon: PlugIcon,
+    tone: 'text-brand-a',
+  },
+  {
+    title: 'Database Design',
+    body: 'Working with PostgreSQL, MongoDB, Cassandra, Oracle, Redis, and Elasticsearch for diverse data needs',
+    Icon: DatabaseIcon,
+    tone: 'text-brand-a',
+  },
+  {
+    title: 'API Development',
+    body: 'Building robust REST APIs, PSD2 integrations, and banking-grade applications with high reliability',
+    Icon: LockIcon,
+    tone: 'text-brand-b',
+  },
+  {
+    title: 'Observability & Monitoring',
+    body: 'Implementing comprehensive monitoring with Grafana, Prometheus, Loki, ELK stack, and Kibana for system insights',
+    Icon: ChartIcon,
+    tone: 'text-brand-b',
+  },
+  {
+    title: 'Event-Driven Systems',
+    body: 'Implementing messaging solutions with Kafka, RabbitMQ, and asynchronous processing patterns',
+    Icon: BoltIcon,
+    tone: 'text-brand-b',
+  },
+] as const
+
+function CoreSkillset() {
+  return (
+    <section
+      id="core-skillset"
+      aria-labelledby="core-skillset-title"
+      className={`${sectionClass} scroll-mt-24 pt-12 sm:pt-[104px]`}
+    >
+      <SectionHeading
+        eyebrow="Core skillset"
+        title="Banking-grade backends, built to be observed"
+        titleId="core-skillset-title"
+      />
+      <ul className="bg-line border-line mt-[18px] grid grid-cols-[repeat(auto-fill,minmax(min(100%,320px),1fr))] gap-px overflow-hidden rounded-2xl border sm:mt-8">
+        {SKILLS.map(({ title, body, Icon, tone }) => (
+          <li key={title} className="bg-page p-6 sm:p-7">
+            <Icon size={22} className={tone} />
+            <h3 className="text-heading mt-4 text-[17px] font-semibold">
+              {title}
+            </h3>
+            <p className="text-muted mt-2 text-sm leading-[1.6]">{body}.</p>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}
+
+function LatestPosts() {
+  const { data, isLoading, isError } = usePosts({ limit: 4 })
+  const posts = useMemo(
+    () => (data ? sortByPublishedDesc(data.items) : []),
+    [data],
+  )
+  return (
+    <section
+      id="latest-blog-posts"
+      aria-labelledby="latest-blog-posts-title"
+      className={`${sectionClass} scroll-mt-24 pt-12 sm:pt-[104px]`}
+    >
+      <SectionHeading
+        eyebrow="Writing"
+        title="Latest from the blog"
+        titleId="latest-blog-posts-title"
+        action={
+          <Link to="/blog" className={sectionLinkClass}>
+            All posts →
+          </Link>
+        }
+      />
+      <div className="mt-[18px] sm:mt-8">
+        {isLoading && (
+          <div
+            aria-busy="true"
+            aria-label="Loading posts"
+            className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,440px),1fr))] gap-3 sm:gap-5"
+          >
+            {[0, 1].map((key) => (
+              <div
+                key={key}
+                className="border-line bg-card h-[90px] animate-pulse rounded-2xl border motion-reduce:animate-none sm:h-[162px]"
+              />
+            ))}
+          </div>
+        )}
+        {isError && (
+          <p className="border-line bg-subtle text-faint rounded-2xl border px-6 py-10 text-center text-sm">
+            Failed to load posts. Please try again later.
+          </p>
+        )}
+        {data && posts.length === 0 && (
+          <p className="border-line bg-subtle text-faint rounded-2xl border px-6 py-10 text-center text-sm">
+            No posts yet — check back soon.
+          </p>
+        )}
+        {posts.length > 0 && (
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,440px),1fr))] gap-3 sm:gap-5">
+            {posts.map((post) => (
+              <HomePostCard key={post.slug} post={post} />
+            ))}
+          </div>
+        )}
+      </div>
+    </section>
+  )
+}
+
+const communityCardClass =
+  'border-line bg-card hover:border-line-strong group flex flex-col rounded-2xl border p-6 transition-colors sm:p-7'
+
+function CommunityCard({
+  badge,
+  badgeFilled = false,
+  title,
+  body,
+  cta,
+}: {
+  badge: string
+  badgeFilled?: boolean
+  title: string
+  body: string
+  cta: string
+}) {
+  return (
+    <>
+      <span
+        className={`self-start rounded-full px-2.5 py-1 text-xs font-medium ${
+          badgeFilled
+            ? 'bg-brand-gradient-x text-on-brand'
+            : 'border-line-strong text-body border'
+        }`}
+      >
+        {badge}
+      </span>
+      <h3 className="text-heading mt-[18px] text-xl font-semibold group-hover:underline group-hover:decoration-1 group-hover:underline-offset-4">
+        {title}
+      </h3>
+      <p className="text-muted mt-2.5 flex-1 text-[15px] leading-[1.6]">
+        {body}
+      </p>
+      <span className="text-brand-a mt-[18px] text-sm font-medium">{cta}</span>
+    </>
+  )
+}
+
+function Community() {
+  return (
+    <section
+      aria-labelledby="community-title"
+      className={`${sectionClass} pt-12 sm:pt-[104px]`}
+    >
+      <SectionHeading
+        eyebrow="Community & teaching"
+        title="Helping JVM developers learn Kotlin"
+        titleId="community-title"
+      />
+      <div className="mt-[18px] grid grid-cols-[repeat(auto-fill,minmax(min(100%,320px),1fr))] gap-3 sm:mt-8 sm:gap-5">
+        {SOCIAL_LINKS.kotlinServerSquad && (
+          <a
+            href={SOCIAL_LINKS.kotlinServerSquad}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={communityCardClass}
+          >
+            <CommunityCard
+              badge="Community"
+              badgeFilled
+              title="Kotlin Server Squad"
+              body="A community for developers who share a passion for building, learning, and helping each other grow — across the whole JVM world."
+              cta="kotlinserversquad.com ↗"
+            />
+          </a>
+        )}
+        <Link to="/learn-kotlin" className={communityCardClass}>
+          <CommunityCard
+            badge="Interactive course"
+            title="Learn Kotlin"
+            body="Interactive Kotlin learning for experienced developers — tailored paths for Java and C# developers, with a learning mind map."
+            cta="Start learning →"
+          />
+        </Link>
+        <Link to="/dispatchers" className={communityCardClass}>
+          <CommunityCard
+            badge="Interactive tool"
+            title="Coroutine Dispatcher Visualizer"
+            body="Watch worker threads, global queues and work stealing in real time — from basics to advanced pitfalls."
+            cta="Open the visualizer →"
+          />
+        </Link>
+      </div>
+    </section>
+  )
+}
+
+function ContactCta() {
+  return (
+    <section
+      className={`${sectionClass} pt-12 pb-12 sm:pt-[104px] sm:pb-[104px]`}
+    >
+      <div className="border-line bg-cta-glow relative overflow-hidden rounded-[18px] border px-5 py-7 text-center sm:rounded-3xl sm:px-12 sm:py-16">
+        <h2 className="text-heading mx-auto max-w-[700px] text-[26px] leading-[1.15] font-semibold tracking-[-0.02em] sm:text-[42px] sm:leading-[1.1] sm:tracking-[-0.03em]">
+          Have a project in mind?{' '}
+          <span className="hidden sm:inline">
+            Let&apos;s build something great together.
+          </span>
+        </h2>
+        <p className="text-muted mx-auto mt-2.5 max-w-[520px] text-[15px] leading-[1.6] sm:mt-4 sm:text-[17px]">
+          I typically respond within 24–48 hours.
+        </p>
+        <div className="mt-[18px] flex flex-col justify-center gap-3 sm:mt-8 sm:flex-row">
+          <Link to="/contact" className={primaryButtonClass}>
+            Get in touch
+          </Link>
+        </div>
+      </div>
+    </section>
+  )
+}
 
 function HomePage() {
-  const posts = usePosts({ limit: 3 })
   useEffect(() => {
     setHead({
       title: `Home — ${SEO_DEFAULTS.siteName}`,
@@ -48,319 +570,17 @@ function HomePage() {
       ],
     })
   }, [])
+
   return (
-    <AppShell path="Home / Overview">
-      <div className="grid gap-12 md:gap-16 lg:gap-20">
-        {/* Hero: left photo, right about me */}
-        <MotionSection variant="fade-up">
-          <div className="relative overflow-hidden rounded-3xl border bg-white/60 p-6 shadow-sm ring-1 ring-black/5 backdrop-blur md:p-10">
-            {/* decorative blobs */}
-            <div className="pointer-events-none absolute -top-24 -left-24 h-64 w-64 rounded-full bg-gradient-to-br from-blue-400/30 via-cyan-400/20 to-teal-400/20 blur-3xl" />
-            <div className="pointer-events-none absolute -right-24 -bottom-24 h-64 w-64 rounded-full bg-gradient-to-tr from-green-400/20 via-emerald-400/20 to-teal-400/20 blur-3xl" />
-            <div className="relative grid items-center gap-10 md:grid-cols-2">
-              <div className="order-2 md:order-1">
-                <div className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-blue-500/10 to-cyan-500/10 px-3 py-1 text-sm text-blue-700 ring-1 ring-blue-500/20 ring-inset">
-                  <span className="inline-block h-2 w-2 animate-pulse rounded-full bg-emerald-500" />
-                  Available for new projects
-                </div>
-                <H1>
-                  <span className="bg-gradient-to-br from-blue-600 via-cyan-500 to-green-500 bg-clip-text text-transparent">
-                    Backend Software Engineer
-                  </span>
-                </H1>
-                <div className="text-muted-foreground mt-2 text-base">
-                  Based in Prague, CZ. Available for selected projects.
-                </div>
-                <div className="mt-4 grid gap-3">
-                  <p className="text-base leading-relaxed text-gray-700">
-                    Hi there! My name is{' '}
-                    <strong className="text-gray-900">Jiří Hermann</strong>, and
-                    I&apos;m a{' '}
-                    <strong className="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
-                      Backend Software Engineer
-                    </strong>{' '}
-                    and{' '}
-                    <strong className="bg-gradient-to-r from-cyan-600 to-green-600 bg-clip-text text-transparent">
-                      Community Builder
-                    </strong>{' '}
-                    passionate about designing clean, reliable, and scalable
-                    systems.
-                  </p>
-                  <p className="text-base leading-relaxed text-gray-700">
-                    I&apos;m based in{' '}
-                    <strong className="text-gray-900">
-                      Prague, Czech Republic
-                    </strong>
-                    , and I love turning complex ideas into well-structured
-                    backend solutions using{' '}
-                    <span className="font-semibold text-blue-700">Kotlin</span>{' '}
-                    and{' '}
-                    <span className="font-semibold text-blue-700">Java</span>.
-                    My work revolves around{' '}
-                    <span className="font-medium text-gray-800">
-                      Spring Boot
-                    </span>
-                    ,{' '}
-                    <span className="font-medium text-gray-800">Micronaut</span>
-                    ,{' '}
-                    <span className="font-medium text-gray-800">
-                      PostgreSQL
-                    </span>
-                    , <span className="font-medium text-gray-800">Redis</span>,{' '}
-                    <span className="font-medium text-gray-800">Kafka</span>,
-                    and{' '}
-                    <span className="font-medium text-gray-800">Docker</span>,
-                    always with a focus on clean architecture and automation.
-                  </p>
-                  <p className="text-base leading-relaxed text-gray-700">
-                    Beyond engineering, I&apos;m the founder of{' '}
-                    <a
-                      href="https://kotlinserversquad.com/"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-block bg-gradient-to-r from-blue-600 via-cyan-600 to-green-600 bg-clip-text font-bold text-transparent transition-all hover:from-blue-700 hover:via-cyan-700 hover:to-green-700 hover:underline"
-                    >
-                      Kotlin Server Squad
-                    </a>{' '}
-                    — a community for developers who share a passion for
-                    building, learning, and helping each other grow. It&apos;s
-                    not just about Kotlin; it&apos;s about connecting people
-                    across the JVM world and creating a space where ideas come
-                    to life.
-                  </p>
-                  <p className="text-base leading-relaxed text-gray-700">
-                    Recently, I&apos;ve been exploring{' '}
-                    <span className="font-semibold text-cyan-700">
-                      frontend development
-                    </span>{' '}
-                    with{' '}
-                    <span className="font-medium text-gray-800">React</span> and{' '}
-                    <span className="font-medium text-gray-800">
-                      TypeScript
-                    </span>{' '}
-                    to better understand full-stack workflows and bridge the gap
-                    between backend and user experience.
-                  </p>
-                  <p className="text-base leading-relaxed text-gray-700">
-                    If you&apos;re looking for a dedicated engineer who builds
-                    with purpose and fosters community, I&apos;d love to connect
-                    and see how we can collaborate.
-                  </p>
-                </div>
-                <div className="mt-6 flex flex-wrap gap-3">
-                  <Link to="/contact">
-                    <Button
-                      color="primary"
-                      variant="solid"
-                      className="shadow-lg shadow-blue-500/20 hover:shadow-blue-500/30"
-                    >
-                      Get in touch
-                    </Button>
-                  </Link>
-                  <Link to="/resume">
-                    <Button variant="bordered" className="hover:underline">
-                      Resume
-                    </Button>
-                  </Link>
-                </div>
-                <div className="mt-6 flex items-center gap-3">
-                  <a
-                    href={SOCIAL_LINKS.linkedin}
-                    target="_blank"
-                    rel="noreferrer"
-                    aria-label="LinkedIn"
-                    className="group inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/70 ring-1 ring-black/10 backdrop-blur transition hover:scale-105 hover:bg-gradient-to-br hover:from-blue-500/10 hover:to-cyan-500/10"
-                  >
-                    <svg
-                      viewBox="0 0 24 24"
-                      className="h-5 w-5 text-gray-700 group-hover:text-blue-600"
-                      fill="currentColor"
-                      aria-hidden="true"
-                    >
-                      <path d="M4.98 3.5C4.98 4.88 3.86 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zM.5 8h4V23h-4V8zM8 8h3.8v2.05h.05c.53-1 1.84-2.05 3.79-2.05 4.05 0 4.8 2.67 4.8 6.15V23h-4v-7.5c0-1.79-.03-4.1-2.5-4.1-2.5 0-2.88 1.95-2.88 3.98V23h-4V8z" />
-                    </svg>
-                  </a>
-                  <a
-                    href={SOCIAL_LINKS.github}
-                    target="_blank"
-                    rel="noreferrer"
-                    aria-label="GitHub"
-                    className="group inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/70 ring-1 ring-black/10 backdrop-blur transition hover:scale-105 hover:bg-gradient-to-br hover:from-blue-500/10 hover:to-cyan-500/10"
-                  >
-                    <svg
-                      viewBox="0 0 24 24"
-                      className="h-5 w-5 text-gray-700 group-hover:text-blue-600"
-                      fill="currentColor"
-                      aria-hidden="true"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        clipRule="evenodd"
-                        d="M12 2C6.48 2 2 6.58 2 12.26c0 4.52 2.87 8.35 6.84 9.71.5.09.68-.22.68-.49 0-.24-.01-.87-.01-1.71-2.78.62-3.37-1.37-3.37-1.37-.45-1.17-1.11-1.48-1.11-1.48-.91-.64.07-.63.07-.63 1 .07 1.53 1.05 1.53 1.05 .9 1.57 2.36 1.12 2.94.86.09-.67.35-1.12.63-1.38-2.22-.26-4.55-1.13-4.55-5 0-1.11.39-2.02 1.03-2.73-.1-.26-.45-1.3.1-2.71 0 0 .84-.27 2.75 1.04A9.27 9.27 0 0 1 12 7.49c.85 0 1.7.12 2.5.35 1.9-1.31 2.74-1.04 2.74-1.04 .55 1.41.2 2.45.1 2.71.64.71 1.02 1.62 1.02 2.73 0 3.88-2.34 4.73-4.57 4.99.36.32.68.95.68 1.92 0 1.39-.01 2.51-.01 2.85 0 .27.18.58.69.48A10.01 10.01 0 0 0 22 12.26C22 6.58 17.52 2 12 2z"
-                      />
-                    </svg>
-                  </a>
-                  {SOCIAL_LINKS.instagram && (
-                    <a
-                      href={SOCIAL_LINKS.instagram}
-                      target="_blank"
-                      rel="noreferrer"
-                      aria-label="Instagram"
-                      className="group inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/70 ring-1 ring-black/10 backdrop-blur transition hover:scale-105 hover:bg-gradient-to-br hover:from-blue-500/10 hover:to-cyan-500/10"
-                    >
-                      <svg
-                        viewBox="0 0 24 24"
-                        className="h-5 w-5 text-gray-700 group-hover:text-blue-600"
-                        fill="currentColor"
-                        aria-hidden="true"
-                      >
-                        <path d="M12 2.2c3.2 0 3.6 0 4.9.1 1.2.1 1.9.2 2.4.4.6.2 1 .4 1.5.9.5.5.7.9.9 1.5.2.5.3 1.2.4 2.4.1 1.3.1 1.7.1 4.9s0 3.6-.1 4.9c-.1 1.2-.2 1.9-.4 2.4-.2.6-.4 1-.9 1.5-.5.5-.9.7-1.5.9-.5.2-1.2.3-2.4.4-1.3.1-1.7.1-4.9.1s-3.6 0-4.9-.1c-1.2-.1-1.9-.2-2.4-.4-.6-.2-1-.4-1.5-.9-.5-.5-.7-.9-.9-1.5-.2-.5-.3-1.2-.4-2.4C2.2 15.6 2.2 15.2 2.2 12s0-3.6.1-4.9c.1-1.2.2-1.9.4-2.4.2-.6.4-1 .9-1.5.5-.5.9-.7 1.5-.9.5-.2 1.2-.3 2.4-.4C8.4 2.2 8.8 2.2 12 2.2m0 1.8c-3.1 0-3.5 0-4.7.1-1 .1-1.5.2-1.8.3-.5.2-.8.4-1.1.7-.3.3-.5.6-.7 1.1-.1.3-.3.8-.3 1.8-.1 1.2-.1 1.6-.1 4.7s0 3.5.1 4.7c.1 1 .2 1.5.3 1.8.2.5.4.8.7 1.1.3.3.6.5 1.1.7.3.1.8.3 1.8.3 1.2.1 1.6.1 4.7.1s3.5 0 4.7-.1c1 0 1.5-.2 1.8-.3.5-.2.8-.4 1.1-.7.3-.3.6-.6.7-1.1.1-.3.2-.8.3-1.8.1-1.2.1-1.6.1-4.7s0-3.5-.1-4.7c-.1-1-.2-1.5-.3-1.8-.2-.5-.4-.8-.7-1.1-.3-.3-.6-.5-1.1-.7-.3-.1-.8-.3-1.8-.3-1.2-.1-1.6-.1-4.7-.1zm0 2.9a6.2 6.2 0 1 1 0 12.4 6.2 6.2 0 0 1 0-12.4zm0 10.2a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm5-10.9a1.4 1.4 0 1 1 0 2.8 1.4 1.4 0 0 1 0-2.8z" />
-                      </svg>
-                    </a>
-                  )}
-                  <a
-                    href={SOCIAL_LINKS.kotlinServerSquad}
-                    target="_blank"
-                    rel="noreferrer"
-                    aria-label="Kotlin Server Squad website"
-                    className="group inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/70 ring-1 ring-black/10 backdrop-blur transition hover:scale-105 hover:bg-gradient-to-br hover:from-blue-500/10 hover:to-cyan-500/10"
-                  >
-                    <svg
-                      viewBox="0 0 24 24"
-                      className="h-5 w-5 text-gray-700 group-hover:text-blue-600"
-                      fill="currentColor"
-                      aria-hidden="true"
-                    >
-                      <path d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 2c1.7 0 3.3.6 4.5 1.6L12 10.1 7.5 5.6A8 8 0 0112 4zm-8 8c0-1.7.6-3.3 1.6-4.5L10.1 12l-4.5 4.5A8 8 0 014 12zm8 8a8 8 0 01-4.5-1.6L12 13.9l4.5 4.5A8 8 0 0112 20zm6.4-3.5L13.9 12l4.5-4.5A8 8 0 0120 12c0 1.7-.6 3.3-1.6 4.5z" />
-                    </svg>
-                  </a>
-                </div>
-              </div>
-              <div className="order-1 flex items-center justify-center md:order-2">
-                <div className="relative mx-auto aspect-square h-[280px] w-[280px] overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-lg md:h-[360px] md:w-[360px] lg:h-[420px] lg:w-[420px]">
-                  <img
-                    src={profilePhoto}
-                    alt="Jiří Hermann"
-                    className="h-full w-full object-cover"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        </MotionSection>
-
-        {/* Core skillset */}
-        <MotionSection variant="fade-up" id="core-skillset">
-          <div className="relative overflow-hidden rounded-3xl border border-cyan-200/50 bg-white/40 p-8 shadow-lg ring-1 ring-cyan-500/10 backdrop-blur md:p-12">
-            {/* Decorative gradient blob */}
-            <div className="pointer-events-none absolute -bottom-20 -left-20 h-48 w-48 rounded-full bg-gradient-to-tr from-cyan-400/20 via-teal-400/10 to-green-400/10 blur-3xl" />
-            <div className="relative grid gap-6 md:gap-8">
-              <div className="flex items-center gap-4">
-                <H1 className="bg-gradient-to-br from-blue-600 via-cyan-500 to-green-500 bg-clip-text text-transparent">
-                  Core skillset
-                </H1>
-                <span className="h-[2px] flex-1 bg-gradient-to-r from-blue-500/50 via-cyan-500/30 to-transparent" />
-              </div>
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {[
-                  {
-                    title: 'Kotlin & Spring Boot',
-                    body: 'Expert in building scalable backend services with Kotlin, Spring Boot, Coroutines, and reactive programming',
-                  },
-                  {
-                    title: 'System Integration & APIs',
-                    body: 'Building seamless integrations with banking systems, payment gateways, and third-party services via REST and messaging',
-                  },
-                  {
-                    title: 'Database Design',
-                    body: 'Working with PostgreSQL, MongoDB, Cassandra, Oracle, Redis, and Elasticsearch for diverse data needs',
-                  },
-                  {
-                    title: 'API Development',
-                    body: 'Building robust REST APIs, PSD2 integrations, and banking-grade applications with high reliability',
-                  },
-                  {
-                    title: 'Observability & Monitoring',
-                    body: 'Implementing comprehensive monitoring with Grafana, Prometheus, Loki, ELK stack, and Kibana for system insights',
-                  },
-                  {
-                    title: 'Event-Driven Systems',
-                    body: 'Implementing messaging solutions with Kafka, RabbitMQ, and asynchronous processing patterns',
-                  },
-                ].map((s) => (
-                  <Card
-                    key={s.title}
-                    className="transition-all hover:-translate-y-[2px] hover:shadow-lg"
-                  >
-                    <CardBody className="relative">
-                      <span className="pointer-events-none absolute -top-1 right-6 h-[2px] w-12 bg-gradient-to-r from-blue-500 to-cyan-500 opacity-70" />
-                      <div className="text-lg font-semibold">{s.title}</div>
-                      <div className="text-muted-foreground">{s.body}</div>
-                    </CardBody>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          </div>
-        </MotionSection>
-
-        {/* Latest blog posts */}
-        <MotionSection variant="fade-up" id="latest-blog-posts">
-          <div className="relative overflow-hidden rounded-3xl border border-green-200/50 bg-white/40 p-8 shadow-lg ring-1 ring-green-500/10 backdrop-blur md:p-12">
-            {/* Decorative gradient blob */}
-            <div className="pointer-events-none absolute top-1/2 -right-20 h-48 w-48 -translate-y-1/2 rounded-full bg-gradient-to-bl from-green-400/20 via-emerald-400/10 to-teal-400/10 blur-3xl" />
-            <div className="relative grid gap-6 md:gap-8">
-              <div className="flex items-center gap-4">
-                <H1 className="bg-gradient-to-br from-blue-600 via-cyan-500 to-green-500 bg-clip-text text-transparent">
-                  Latest blog posts
-                </H1>
-                <span className="h-[2px] flex-1 bg-gradient-to-r from-blue-500/50 via-cyan-500/30 to-transparent" />
-              </div>
-              {posts.isLoading && <div>Loading…</div>}
-              {posts.isError && <div>Failed to load posts.</div>}
-              {posts.data && (
-                <div className="grid gap-4 md:grid-cols-3">
-                  {posts.data.items.map((p) => (
-                    <Link
-                      key={p.slug}
-                      to="/blog/$slug"
-                      params={{ slug: p.slug }}
-                      className="group"
-                    >
-                      <Card className="h-full cursor-pointer transition-all hover:-translate-y-1 hover:shadow-xl">
-                        <CardBody>
-                          <div className="text-lg font-semibold transition-colors group-hover:text-blue-600">
-                            {p.title}
-                          </div>
-                          <div className="text-muted-foreground mt-2">
-                            {p.excerpt}
-                          </div>
-                          <div className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-blue-600">
-                            Read more
-                            <svg
-                              className="h-4 w-4 transition-transform group-hover:translate-x-1"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M9 5l7 7-7 7"
-                              />
-                            </svg>
-                          </div>
-                        </CardBody>
-                      </Card>
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        </MotionSection>
-      </div>
+    <AppShell path="Home / Overview" fullBleed>
+      <PageGlow className="-top-[220px] left-[40%] h-[760px] w-[1200px]" />
+      <Hero />
+      <StatsBand />
+      <Tools />
+      <CoreSkillset />
+      <LatestPosts />
+      <Community />
+      <ContactCta />
     </AppShell>
   )
 }
