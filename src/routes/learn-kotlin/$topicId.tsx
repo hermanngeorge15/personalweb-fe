@@ -1,55 +1,72 @@
 import AppShell from '@/components/AppShell'
-import { useParams, Link, useSearch } from '@tanstack/react-router'
+import { useParams, Link, useSearch, useNavigate } from '@tanstack/react-router'
 import {
   useKotlinTopicWithTiers,
+  useKotlinTopicsByModule,
   type SourceLanguage,
   type KotlinContentTier,
   type KotlinRunnableExample,
+  type KotlinTopicListItem,
+  type KotlinTopicWithTiers,
 } from '@/lib/queries'
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useId, useState, useMemo, type ReactNode } from 'react'
 import { SEO_DEFAULTS, setHead } from '@/lib/seo'
-import { MotionSection } from '@/components/MotionSection'
 import {
-  Button,
-  Card,
-  CardBody,
-  Accordion,
-  AccordionItem,
-  Tabs,
-  Tab,
-  Chip,
-} from '@heroui/react'
+  AlertIcon,
+  ArrowLeftIcon,
+  ArrowRightIcon,
+  BoltIcon,
+  BookIcon,
+  CheckIcon,
+  ClipboardIcon,
+  CodeIcon,
+  ExternalLinkIcon,
+  FolderIcon,
+  LayersIcon,
+  LightbulbIcon,
+  MessageIcon,
+  PlayIcon,
+  SproutIcon,
+  TargetIcon,
+  WrenchIcon,
+} from '@/components/icons'
+import { DifficultyBadge } from '@/components/learn/Difficulty'
+import { LanguageToggle } from '@/components/learn/LanguageToggle'
+import { LearnCode, LearnMarkdown } from '@/components/learn/LearnMarkdown'
+import {
+  isSourceLanguage,
+  readStoredLanguage,
+  storeLanguage,
+} from '@/components/learn/language'
 
-const STORAGE_KEY = 'kotlin-learning-source-language'
 const TIER_STORAGE_KEY = 'kotlin-learning-selected-tier'
 
-const TIER_CONFIG: Record<
-  number,
-  { name: string; icon: string; color: string }
-> = {
-  1: { name: 'TL;DR', icon: '⚡', color: 'warning' },
-  2: { name: 'Beginner', icon: '🌱', color: 'success' },
-  3: { name: 'Intermediate', icon: '🔧', color: 'primary' },
-  4: { name: 'Deep Dive', icon: '🔬', color: 'secondary' },
-}
+type IconComponent = (props: { size?: number }) => ReactNode
 
-function getStoredLanguage(): SourceLanguage {
-  if (typeof window === 'undefined') return null
-  const stored = localStorage.getItem(STORAGE_KEY)
-  if (stored === 'java' || stored === 'csharp') return stored
-  return null
+const TIER_CONFIG: Record<number, { name: string; Icon: IconComponent }> = {
+  1: { name: 'TL;DR', Icon: BoltIcon },
+  2: { name: 'Beginner', Icon: SproutIcon },
+  3: { name: 'Intermediate', Icon: WrenchIcon },
+  4: { name: 'Deep Dive', Icon: LayersIcon },
 }
 
 function getStoredTier(): number {
   if (typeof window === 'undefined') return 2
-  const stored = localStorage.getItem(TIER_STORAGE_KEY)
-  const parsed = stored ? parseInt(stored, 10) : 2
-  return parsed >= 1 && parsed <= 4 ? parsed : 2
+  try {
+    const stored = localStorage.getItem(TIER_STORAGE_KEY)
+    const parsed = stored ? parseInt(stored, 10) : 2
+    return parsed >= 1 && parsed <= 4 ? parsed : 2
+  } catch {
+    return 2
+  }
 }
 
 function setStoredTier(tier: number) {
-  if (typeof window !== 'undefined') {
+  if (typeof window === 'undefined') return
+  try {
     localStorage.setItem(TIER_STORAGE_KEY, tier.toString())
+  } catch {
+    // Remembering the tier is a convenience only.
   }
 }
 
@@ -68,18 +85,297 @@ function resolveTier(
   return below.length > 0 ? Math.max(...below) : Math.min(...available)
 }
 
+const EXPERIENCE: Record<
+  string,
+  { label: string; Icon: IconComponent; accent: string }
+> = {
+  story: {
+    label: "JIRI'S PRODUCTION STORY",
+    Icon: BookIcon,
+    accent: 'text-brand-a',
+  },
+  mistake: { label: "JIRI'S MISTAKE", Icon: AlertIcon, accent: 'text-danger' },
+  tip: { label: "JIRI'S TIP", Icon: LightbulbIcon, accent: 'text-brand-b' },
+  warning: { label: "JIRI'S WARNING", Icon: AlertIcon, accent: 'text-danger' },
+  opinion: {
+    label: "JIRI'S OPINION",
+    Icon: TargetIcon,
+    accent: 'text-brand-a',
+  },
+}
+const EXPERIENCE_FALLBACK = {
+  label: "JIRI'S NOTE",
+  Icon: MessageIcon,
+  accent: 'text-brand-a',
+}
+
+const DOC_LINK_LABEL: Record<string, string> = {
+  kotlin_official: 'Kotlin docs',
+  java_official: 'Java docs',
+  csharp_official: 'C# docs',
+}
+
+/** "nested-inner-classes" → "nested inner classes" (as the page always showed ids). */
+function idToLabel(id: string) {
+  return id.replace(/-/g, ' ')
+}
+
+const card = 'border-line bg-card rounded-2xl border'
+const sectionHeading =
+  'text-heading flex items-center gap-2.5 text-[22px] font-semibold tracking-[-0.015em] sm:text-[24px]'
+
+function SectionIcon({ children }: { children: ReactNode }) {
+  return (
+    <span className="bg-brand-a/10 text-brand-a inline-flex size-9 shrink-0 items-center justify-center rounded-[10px]">
+      {children}
+    </span>
+  )
+}
+
+function TierSelector({
+  topic,
+  selectedTier,
+  onChange,
+}: {
+  topic: KotlinTopicWithTiers
+  selectedTier: number
+  onChange: (tier: number) => void
+}) {
+  const name = useId()
+  return (
+    <fieldset className="min-w-0">
+      <legend className="text-heading text-sm font-semibold">
+        Choose your depth
+      </legend>
+      <p className="text-faint mt-0.5 text-[13px]">
+        Select how deep you want to dive into this topic
+      </p>
+      <div className="mt-2.5 grid grid-cols-2 gap-1 sm:flex sm:flex-wrap">
+        {topic.availableTiers.map((tier) => {
+          const config = TIER_CONFIG[tier]
+          const tierContent = topic.tiers.find((t) => t.tierLevel === tier)
+          const Icon = config?.Icon ?? BookIcon
+          return (
+            <label key={tier} className="relative">
+              <input
+                type="radio"
+                name={name}
+                value={tier}
+                checked={selectedTier === tier}
+                onChange={() => onChange(tier)}
+                className="peer sr-only"
+              />
+              <span className="text-muted hover:text-ink peer-checked:bg-card peer-checked:text-heading peer-checked:border-brand-a/60 peer-checked:[&_svg]:text-brand-a peer-focus-visible:outline-brand-a flex min-h-11 cursor-pointer items-center gap-2 rounded-[10px] border border-transparent px-3 text-sm font-medium transition-colors peer-checked:shadow-sm peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2">
+                <Icon size={16} />
+                <span>
+                  {tierContent?.tierName || config?.name || `Tier ${tier}`}
+                </span>
+                {tierContent && (
+                  <span className="text-faint text-[13px] font-normal">
+                    {tierContent.readingTimeMinutes}m
+                  </span>
+                )}
+              </span>
+            </label>
+          )
+        })}
+      </div>
+    </fieldset>
+  )
+}
+
+function ComparisonSection({
+  topic,
+  sourceLanguage,
+}: {
+  topic: KotlinTopicWithTiers
+  sourceLanguage: SourceLanguage
+}) {
+  const [index, setIndex] = useState(0)
+  const name = useId()
+  // A different topic or language brings a different list.
+  useEffect(() => setIndex(0), [topic.id, sourceLanguage])
+  const examples = topic.codeExamples
+  const example = examples[Math.min(index, examples.length - 1)]
+  if (!example) return null
+  const isJava = sourceLanguage === 'java'
+  return (
+    <section aria-labelledby="comparison-heading">
+      <h2 id="comparison-heading" className={sectionHeading}>
+        <SectionIcon>
+          <CodeIcon size={18} />
+        </SectionIcon>
+        {isJava ? 'Java Evolution Timeline' : 'How You Know It (C#)'}
+      </h2>
+      {examples.length > 1 && (
+        <fieldset className="mt-4">
+          <legend className="sr-only">
+            {isJava ? 'Java version' : 'C# version'}
+          </legend>
+          <div className="flex flex-wrap gap-2">
+            {examples.map((item, itemIndex) => (
+              <label key={itemIndex} className="relative">
+                <input
+                  type="radio"
+                  name={name}
+                  checked={itemIndex === index}
+                  onChange={() => setIndex(itemIndex)}
+                  className="peer sr-only"
+                />
+                <span className="border-line-strong text-body hover:text-ink peer-checked:bg-invert peer-checked:text-on-invert peer-focus-visible:outline-brand-a flex min-h-11 cursor-pointer items-center rounded-full border px-4 text-sm font-medium transition-colors peer-checked:border-transparent peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2">
+                  {item.versionLabel || item.language}
+                </span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+      )}
+      <div className={`${card} mt-4 p-4 sm:p-6`}>
+        {examples.length === 1 && (
+          <p className="text-heading mb-3 text-[15px] font-semibold">
+            {example.versionLabel || example.language}
+          </p>
+        )}
+        <LearnCode code={example.code} language={example.language} />
+        {example.explanation && (
+          <div className="mt-5">
+            <LearnMarkdown text={example.explanation} size="sm" />
+          </div>
+        )}
+      </div>
+    </section>
+  )
+}
+
+function RunnableExampleCard({ example }: { example: KotlinRunnableExample }) {
+  const tier = TIER_CONFIG[example.tierLevel]
+  const TierIcon = tier?.Icon ?? BookIcon
+  return (
+    <div className="border-window-line bg-card overflow-hidden rounded-2xl border">
+      <div className="border-line bg-subtle flex flex-wrap items-center justify-between gap-3 border-b px-4 py-3 sm:px-5">
+        <div className="flex min-w-0 flex-wrap items-center gap-2.5">
+          <h3 className="text-heading text-[16px] font-semibold">
+            {example.title}
+          </h3>
+          {tier && (
+            <span className="border-line-strong text-body inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[13px] leading-none">
+              <TierIcon size={13} />
+              {tier.name}
+            </span>
+          )}
+        </div>
+        <button
+          type="button"
+          onClick={() => {
+            // Open in Kotlin Playground
+            const encoded = encodeURIComponent(example.code)
+            window.open(
+              `https://play.kotlinlang.org/#code=${encoded}`,
+              '_blank',
+            )
+          }}
+          className="bg-brand-gradient-x text-on-brand focus-visible:outline-brand-a inline-flex min-h-11 items-center gap-2 rounded-[10px] px-4 text-sm font-medium transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2"
+        >
+          <PlayIcon size={15} />
+          Run in Kotlin Playground
+        </button>
+      </div>
+      <div className="p-4 sm:p-5">
+        {example.description && (
+          <p className="text-muted mb-4 text-[15px] leading-relaxed">
+            {example.description}
+          </p>
+        )}
+        <LearnCode code={example.code} />
+        {example.expectedOutput && (
+          <div className="border-brand-b/30 bg-brand-b/5 mt-4 rounded-xl border px-4 py-3">
+            <p className="text-faint text-[13px] font-medium">
+              Expected Output:
+            </p>
+            <pre className="text-ink mt-1.5 font-mono text-[14px] leading-relaxed break-words whitespace-pre-wrap">
+              {example.expectedOutput}
+            </pre>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function ModuleTopicList({
+  topics,
+  currentId,
+  lang,
+}: {
+  topics: KotlinTopicListItem[]
+  currentId: string
+  lang: string | undefined
+}) {
+  return (
+    <ul className="border-line flex flex-col border-l">
+      {topics.map((item) => {
+        const current = item.id === currentId
+        return (
+          <li key={item.id}>
+            <Link
+              to="/learn-kotlin/$topicId"
+              params={{ topicId: item.id }}
+              search={{ lang }}
+              aria-current={current ? 'page' : undefined}
+              className={`-ml-px flex min-h-10 items-center border-l-2 py-2 pl-3.5 text-[14px] leading-snug transition-colors ${
+                current
+                  ? 'border-brand-a text-heading font-medium'
+                  : 'text-muted hover:text-ink hover:border-line-strong border-transparent'
+              }`}
+            >
+              {item.title}
+            </Link>
+          </li>
+        )
+      })}
+    </ul>
+  )
+}
+
+function NavCard({
+  label,
+  title,
+  align,
+  children,
+}: {
+  label: string
+  title: string
+  align: 'left' | 'right'
+  children?: ReactNode
+}) {
+  return (
+    <span
+      className={`flex flex-col ${align === 'right' ? 'items-end text-right' : ''}`}
+    >
+      <span className="text-faint inline-flex items-center gap-1.5 text-[13px]">
+        {children}
+        {label}
+      </span>
+      <span className="text-heading mt-1 text-[17px] leading-snug font-semibold group-hover:underline group-hover:decoration-1 group-hover:underline-offset-4">
+        {title}
+      </span>
+    </span>
+  )
+}
+
 function KotlinTopicPage() {
   const { topicId } = useParams({ from: '/learn-kotlin/$topicId' })
   const search = useSearch({ from: '/learn-kotlin/$topicId' }) as {
     lang?: string
     tier?: string
   }
+  const navigate = useNavigate()
   const [sourceLanguage, setSourceLanguage] = useState<SourceLanguage>(null)
   const [preferredTier, setPreferredTier] = useState<number>(2)
 
   useEffect(() => {
     const lang =
-      (search.lang as SourceLanguage) || getStoredLanguage() || 'java'
+      (search.lang as SourceLanguage) || readStoredLanguage() || 'java'
     setSourceLanguage(lang)
 
     const tier = search.tier ? parseInt(search.tier, 10) : getStoredTier()
@@ -93,6 +389,18 @@ function KotlinTopicPage() {
     setStoredTier(tier)
   }
 
+  // Switching Java / C# here updates ?lang= (and remembers it), like the home page choice.
+  const handleLanguageChange = (language: 'java' | 'csharp') => {
+    storeLanguage(language)
+    void navigate({
+      to: '/learn-kotlin/$topicId',
+      params: { topicId },
+      search: { lang: language, tier: search.tier },
+      replace: true,
+      resetScroll: false,
+    })
+  }
+
   // Fetch every tier and filter here: with ?tier=N the API lists only tiers <= N in
   // availableTiers, so the deeper tiers could never be selected.
   const {
@@ -100,6 +408,7 @@ function KotlinTopicPage() {
     isLoading,
     isError,
   } = useKotlinTopicWithTiers(topicId, sourceLanguage)
+  const { data: modules } = useKotlinTopicsByModule()
 
   const selectedTier = useMemo(
     () => resolveTier(topic?.availableTiers, preferredTier),
@@ -126,6 +435,20 @@ function KotlinTopicPage() {
       .reduce((sum, t) => sum + t.readingTimeMinutes, 0)
   }, [topic?.tiers, selectedTier])
 
+  // Titles for linked topic ids, and this topic's module siblings, from the topic list.
+  const { titles, siblings } = useMemo(() => {
+    const map = new Map<string, string>()
+    let moduleTopics: KotlinTopicListItem[] = []
+    modules?.forEach((module) =>
+      module.topics.forEach((item) => {
+        map.set(item.id, item.title)
+        if (item.id === topicId) moduleTopics = module.topics
+      }),
+    )
+    return { titles: map, siblings: moduleTopics }
+  }, [modules, topicId])
+  const titleOf = (id: string) => titles.get(id) ?? idToLabel(id)
+
   useEffect(() => {
     if (topic?.title) {
       const canonicalUrl = `${SEO_DEFAULTS.siteUrl}/learn-kotlin/${topicId}`
@@ -141,663 +464,454 @@ function KotlinTopicPage() {
     }
   }, [topic?.title, topic?.description, topicId])
 
-  const getExperienceIcon = (type: string) => {
-    switch (type) {
-      case 'story':
-        return '📖'
-      case 'mistake':
-        return '⚠️'
-      case 'tip':
-        return '💡'
-      case 'warning':
-        return '🚨'
-      case 'opinion':
-        return '🎯'
-      default:
-        return '💬'
-    }
-  }
-
-  const getExperienceTitle = (type: string) => {
-    switch (type) {
-      case 'story':
-        return "JIRI'S PRODUCTION STORY"
-      case 'mistake':
-        return "JIRI'S MISTAKE"
-      case 'tip':
-        return "JIRI'S TIP"
-      case 'warning':
-        return "JIRI'S WARNING"
-      case 'opinion':
-        return "JIRI'S OPINION"
-      default:
-        return "JIRI'S NOTE"
-    }
-  }
-
-  const renderMarkdown = (text: string) => {
-    return text
-      .replace(/\n/g, '<br>')
-      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      .replace(/`(.*?)`/g, `<code>$1</code>`)
-  }
+  const lang = sourceLanguage ?? undefined
+  const languageValue = isSourceLanguage(sourceLanguage) ? sourceLanguage : null
+  const tierConfig = TIER_CONFIG[selectedTier]
+  const TierIcon = tierConfig?.Icon ?? BookIcon
 
   return (
-    <AppShell path="Learn Kotlin / Topic">
+    <AppShell path="Learn Kotlin / Topic" fullBleed>
+      <div
+        aria-hidden="true"
+        className="bg-glow-hero pointer-events-none absolute -top-[300px] left-1/2 h-[600px] w-[1100px] -translate-x-1/2 opacity-80"
+      />
+
       {isLoading && (
-        <div className="flex items-center justify-center py-20">
-          <div className="text-center">
-            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-purple-600 border-r-transparent"></div>
-            <p className="text-muted-foreground mt-4">Loading topic...</p>
+        <div
+          aria-busy="true"
+          aria-label="Loading topic"
+          className="relative mx-auto max-w-[1200px] animate-pulse px-4 pt-14 pb-24 motion-reduce:animate-none sm:px-8"
+        >
+          <div className="max-w-[780px] lg:ml-[288px]">
+            <div className="bg-chip h-4 w-48 rounded" />
+            <div className="bg-chip mt-5 h-12 w-3/4 rounded-lg" />
+            <div className="bg-chip mt-4 h-5 w-full rounded" />
+            <div className="bg-chip mt-8 h-24 w-full rounded-2xl" />
           </div>
         </div>
       )}
+
       {isError && (
-        <div className="rounded-lg border border-red-200 bg-red-50 p-8 text-center">
-          <h3 className="text-lg font-semibold text-red-900">
+        <section className="relative mx-auto max-w-[880px] px-4 py-24 text-center sm:px-8">
+          <h1 className="text-heading text-2xl font-semibold">
             Failed to load topic
-          </h3>
-          <p className="mt-2 text-sm text-red-600">
+          </h1>
+          <p className="text-muted mt-3">
             This topic may not exist or there was an error loading it.
           </p>
-          <Button
-            as={Link}
+          <Link
             to="/learn-kotlin"
-            className="mt-6"
-            variant="bordered"
+            className="border-line-strong text-ink hover:bg-chip mt-8 inline-flex min-h-11 items-center gap-2 rounded-[10px] border px-5 text-[15px] font-medium transition-colors"
           >
+            <ArrowLeftIcon size={16} />
             Back to Topics
-          </Button>
-        </div>
+          </Link>
+        </section>
       )}
+
       {topic && (
-        <div className="grid gap-8">
-          {/* Back Button */}
-          <div>
-            <Button
-              as={Link}
-              to="/learn-kotlin"
-              variant="light"
-              className="hover:underline"
-            >
-              <svg
-                className="h-4 w-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
+        <div className="relative mx-auto flex max-w-[1200px] items-start gap-12 px-4 pt-10 pb-24 sm:px-8 sm:pt-12">
+          <aside className="hidden w-[240px] shrink-0 lg:block">
+            <div className="sticky top-28 text-[14px]">
+              <Link
+                to="/learn-kotlin"
+                className="text-muted hover:text-ink inline-flex items-center gap-1.5 transition-colors"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 19l-7-7 7-7"
-                />
-              </svg>
-              Back to Topics
-            </Button>
-          </div>
-
-          {/* Header */}
-          <MotionSection variant="fade-up">
-            <div className="relative overflow-hidden rounded-3xl border border-purple-200/50 bg-white/40 p-8 shadow-lg ring-1 ring-purple-500/10 backdrop-blur md:p-12">
-              <div className="pointer-events-none absolute -top-24 -left-24 h-64 w-64 rounded-full bg-gradient-to-br from-purple-400/20 via-blue-400/10 to-cyan-400/10 blur-3xl" />
-
-              <div className="relative">
-                <div className="flex flex-wrap items-center gap-3">
-                  <span className="rounded-full bg-purple-100 px-3 py-1 text-sm font-medium text-purple-700">
+                <ArrowLeftIcon size={15} />
+                Back to Topics
+              </Link>
+              {siblings.length > 0 && (
+                <nav aria-label={`Topics in ${topic.module}`}>
+                  <p className="text-faint mt-6 mb-2.5 text-[12px] font-semibold tracking-[0.06em] uppercase">
                     {topic.module}
-                  </span>
-                  <span
-                    className={`rounded-full px-3 py-1 text-sm font-medium ${
-                      topic.difficulty === 'beginner'
-                        ? 'bg-green-100 text-green-700'
-                        : topic.difficulty === 'intermediate'
-                          ? 'bg-yellow-100 text-yellow-700'
-                          : topic.difficulty === 'advanced'
-                            ? 'bg-orange-100 text-orange-700'
-                            : 'bg-red-100 text-red-700'
-                    }`}
-                  >
-                    {topic.difficulty}
-                  </span>
-                  {topic.partNumber && (
-                    <span className="rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-700">
-                      Part {topic.partNumber}
-                      {topic.partName && `: ${topic.partName}`}
-                    </span>
-                  )}
-                  <span className="text-muted-foreground text-sm">
-                    {totalReadingTime} min read
-                  </span>
-                </div>
-
-                <h1 className="mt-4 text-3xl font-bold md:text-4xl">
-                  <span className="bg-gradient-to-br from-purple-600 via-blue-500 to-cyan-500 bg-clip-text text-transparent">
-                    {topic.title}
-                  </span>
-                </h1>
-
-                {topic.description && (
-                  <p className="text-muted-foreground mt-4 text-lg">
-                    {topic.description}
                   </p>
-                )}
+                  <ModuleTopicList
+                    topics={siblings}
+                    currentId={topic.id}
+                    lang={lang}
+                  />
+                </nav>
+              )}
+              <Link
+                to="/learn-kotlin/mindmap"
+                className="text-brand-a mt-6 inline-flex items-center gap-1.5 font-medium hover:underline"
+              >
+                View in the learning map
+                <ArrowRightIcon size={15} />
+              </Link>
+            </div>
+          </aside>
+
+          <article className="max-w-[780px] min-w-0 flex-1">
+            <Link
+              to="/learn-kotlin"
+              className="text-muted hover:text-ink inline-flex min-h-11 items-center gap-1.5 text-[14px] transition-colors lg:hidden"
+            >
+              <ArrowLeftIcon size={15} />
+              Back to Topics
+            </Link>
+
+            <p className="text-faint text-[13px] lg:mt-0">
+              {topic.partNumber && (
+                <>
+                  Part {topic.partNumber}
+                  {topic.partName && `: ${topic.partName}`}
+                  <span aria-hidden="true"> · </span>
+                </>
+              )}
+              {topic.module}
+            </p>
+            <h1 className="text-heading mt-3 text-[34px] leading-[1.08] font-semibold tracking-[-0.03em] sm:text-[44px] lg:text-[48px]">
+              {topic.title}
+            </h1>
+            {topic.description && (
+              <p className="text-muted mt-4 text-[17px] leading-[1.55] sm:text-[19px]">
+                {topic.description}
+              </p>
+            )}
+            <div className="mt-5 flex flex-wrap items-center gap-2">
+              <DifficultyBadge difficulty={topic.difficulty} />
+              <span className="border-line-strong text-body rounded-full border px-2.5 py-1 text-[13px] leading-none">
+                {totalReadingTime} min read
+              </span>
+              {topic.navigation?.next && (
+                <Link
+                  to="/learn-kotlin/$topicId"
+                  params={{ topicId: topic.navigation.next }}
+                  search={{ lang }}
+                  className="border-line-strong text-body hover:text-ink rounded-full border px-2.5 py-1 text-[13px] leading-none transition-colors"
+                >
+                  Next: {titleOf(topic.navigation.next)}
+                </Link>
+              )}
+            </div>
+
+            {/* Depth + language */}
+            <div className="border-line bg-subtle mt-7 flex flex-wrap items-end justify-between gap-x-6 gap-y-4 rounded-2xl border p-4">
+              {topic.availableTiers && topic.availableTiers.length > 1 ? (
+                <TierSelector
+                  topic={topic}
+                  selectedTier={selectedTier}
+                  onChange={handleTierChange}
+                />
+              ) : null}
+              <div className="w-full sm:w-auto">
+                <p
+                  aria-hidden="true"
+                  className="text-heading mb-2.5 text-sm font-semibold"
+                >
+                  Compare with
+                </p>
+                <LanguageToggle
+                  legend="Compare with"
+                  value={languageValue}
+                  onChange={handleLanguageChange}
+                  size="sm"
+                  className="sm:w-[200px]"
+                />
               </div>
             </div>
-          </MotionSection>
 
-          {/* Tier Selector */}
-          {topic.availableTiers && topic.availableTiers.length > 1 && (
-            <MotionSection variant="fade-up">
-              <Card>
-                <CardBody className="p-4">
-                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                      <h3 className="text-sm font-semibold text-gray-700">
-                        Choose your depth
-                      </h3>
-                      <p className="text-xs text-gray-500">
-                        Select how deep you want to dive into this topic
-                      </p>
-                    </div>
-                    <Tabs
-                      aria-label="Tier selection"
-                      selectedKey={selectedTier.toString()}
-                      onSelectionChange={(key) =>
-                        handleTierChange(parseInt(key as string, 10))
-                      }
-                      color="primary"
-                      variant="bordered"
-                      classNames={{
-                        tabList: 'gap-2',
-                      }}
-                    >
-                      {topic.availableTiers.map((tier) => {
-                        const config = TIER_CONFIG[tier]
-                        const tierContent = topic.tiers.find(
-                          (t) => t.tierLevel === tier,
-                        )
-                        return (
-                          <Tab
-                            key={tier.toString()}
-                            title={
-                              <div className="flex items-center gap-2">
-                                <span>{config?.icon}</span>
-                                <span className="hidden sm:inline">
-                                  {tierContent?.tierName || config?.name}
-                                </span>
-                                {tierContent && (
-                                  <Chip size="sm" variant="flat">
-                                    {tierContent.readingTimeMinutes}m
-                                  </Chip>
-                                )}
-                              </div>
-                            }
-                          />
-                        )
-                      })}
-                    </Tabs>
-                  </div>
-                </CardBody>
-              </Card>
-            </MotionSection>
-          )}
-
-          {/* Learning Objectives */}
-          {currentTierContent?.learningObjectives &&
-            currentTierContent.learningObjectives.length > 0 && (
-              <MotionSection variant="fade-up">
-                <Card className="border-l-4 border-l-green-500 bg-green-50/50">
-                  <CardBody className="p-6">
-                    <h3 className="flex items-center gap-2 font-bold text-green-800">
-                      <span className="text-xl">🎯</span>
-                      Learning Objectives
-                    </h3>
-                    <ul className="mt-3 space-y-2">
-                      {currentTierContent.learningObjectives.map((obj, idx) => (
-                        <li
-                          key={idx}
-                          className="flex items-start gap-2 text-green-700"
-                        >
-                          <svg
-                            className="mt-1 h-4 w-4 flex-shrink-0"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M5 13l4 4L19 7"
-                            />
-                          </svg>
-                          <span>{obj}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </CardBody>
-                </Card>
-              </MotionSection>
-            )}
-
-          {/* Prerequisites */}
-          {currentTierContent?.prerequisites &&
-            currentTierContent.prerequisites.length > 0 && (
-              <MotionSection variant="fade-up">
-                <Card className="border-l-4 border-l-amber-500 bg-amber-50/50">
-                  <CardBody className="p-6">
-                    <h3 className="flex items-center gap-2 font-bold text-amber-800">
-                      <span className="text-xl">📋</span>
-                      Prerequisites
-                    </h3>
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {currentTierContent.prerequisites.map((prereq, idx) => (
-                        <Link
-                          key={idx}
-                          to="/learn-kotlin/$topicId"
-                          params={{ topicId: prereq }}
-                          search={{ lang: sourceLanguage }}
-                          className="rounded-full bg-amber-100 px-3 py-1 text-sm font-medium text-amber-700 transition-colors hover:bg-amber-200"
-                        >
-                          {prereq.replace(/-/g, ' ')}
-                        </Link>
-                      ))}
-                    </div>
-                  </CardBody>
-                </Card>
-              </MotionSection>
-            )}
-
-          {/* Tier Content - Main Explanation */}
-          {currentTierContent && (
-            <MotionSection variant="fade-up">
-              <Card>
-                <CardBody className="p-6 md:p-8">
-                  <h2 className="flex items-center gap-2 text-xl font-bold text-purple-700">
-                    <span className="text-2xl">
-                      {TIER_CONFIG[selectedTier]?.icon || '📚'}
+            {/* Learning Objectives */}
+            {currentTierContent?.learningObjectives &&
+              currentTierContent.learningObjectives.length > 0 && (
+                <section className={`${card} mt-8 p-5 sm:p-6`}>
+                  <h2 className="text-heading flex items-center gap-2.5 text-[17px] font-semibold">
+                    <span className="text-brand-b">
+                      <TargetIcon size={18} />
                     </span>
-                    {currentTierContent.title || 'The Kotlin Way'}
+                    Learning Objectives
                   </h2>
-                  <div className="prose prose-gray mt-4 max-w-none">
-                    <div
-                      dangerouslySetInnerHTML={{
-                        __html: renderMarkdown(currentTierContent.explanation),
-                      }}
-                    />
-                  </div>
-
-                  {/* Tier Code Examples */}
-                  {currentTierContent.codeExamples &&
-                    currentTierContent.codeExamples.length > 0 && (
-                      <div className="mt-6 space-y-4">
-                        {currentTierContent.codeExamples.map((code, idx) => (
-                          <pre
-                            key={idx}
-                            className="overflow-x-auto rounded-lg bg-gray-900 p-4 text-sm text-gray-100"
-                          >
-                            <code>{code}</code>
-                          </pre>
-                        ))}
-                      </div>
-                    )}
-                </CardBody>
-              </Card>
-            </MotionSection>
-          )}
-
-          {/* Runnable Examples */}
-          {currentExamples.length > 0 && (
-            <MotionSection variant="fade-up">
-              <Card>
-                <CardBody className="p-6 md:p-8">
-                  <h2 className="flex items-center gap-2 text-xl font-bold text-blue-700">
-                    <span className="text-2xl">🏃</span>
-                    Try It Yourself
-                  </h2>
-                  <p className="text-muted-foreground mt-2 text-sm">
-                    Run these examples directly in your browser
-                  </p>
-
-                  <div className="mt-6 space-y-6">
-                    {currentExamples.map((example, idx) => (
-                      <div
+                  <ul className="mt-3 space-y-2">
+                    {currentTierContent.learningObjectives.map((obj, idx) => (
+                      <li
                         key={idx}
-                        className="rounded-lg border border-blue-200 bg-blue-50/30 p-4"
+                        className="text-body flex items-start gap-2.5 text-[15px] leading-relaxed"
                       >
-                        <div className="flex items-center justify-between">
-                          <h4 className="font-semibold text-blue-800">
-                            {example.title}
-                          </h4>
-                          <Chip
-                            size="sm"
-                            color={
-                              TIER_CONFIG[example.tierLevel]?.color as
-                                | 'warning'
-                                | 'success'
-                                | 'primary'
-                                | 'secondary'
-                            }
-                            variant="flat"
-                          >
-                            {TIER_CONFIG[example.tierLevel]?.name}
-                          </Chip>
-                        </div>
-                        {example.description && (
-                          <p className="mt-2 text-sm text-gray-600">
-                            {example.description}
-                          </p>
-                        )}
-                        <pre className="mt-3 overflow-x-auto rounded-lg bg-gray-900 p-4 text-sm text-gray-100">
-                          <code>{example.code}</code>
-                        </pre>
-                        {example.expectedOutput && (
-                          <div className="mt-3 rounded-lg border border-green-200 bg-green-50 p-3">
-                            <p className="text-xs font-medium text-green-700">
-                              Expected Output:
-                            </p>
-                            <pre className="mt-1 text-sm text-green-800">
-                              {example.expectedOutput}
-                            </pre>
-                          </div>
-                        )}
-                        {/* Kotlin Playground integration placeholder */}
-                        <Button
-                          className="mt-3"
-                          color="primary"
-                          variant="flat"
-                          size="sm"
-                          onPress={() => {
-                            // Open in Kotlin Playground
-                            const encoded = encodeURIComponent(example.code)
-                            window.open(
-                              `https://play.kotlinlang.org/#code=${encoded}`,
-                              '_blank',
-                            )
-                          }}
-                        >
-                          <svg
-                            className="mr-1 h-4 w-4"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
-                            />
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                            />
-                          </svg>
-                          Run in Kotlin Playground
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                </CardBody>
-              </Card>
-            </MotionSection>
-          )}
-
-          {/* Expense Tracker Chapters */}
-          {topic.expenseTrackerChapters &&
-            topic.expenseTrackerChapters.length > 0 && (
-              <MotionSection variant="fade-up">
-                <Card className="border-l-4 border-l-cyan-500 bg-cyan-50/50">
-                  <CardBody className="p-6">
-                    <h3 className="flex items-center gap-2 font-bold text-cyan-800">
-                      <span className="text-xl">💰</span>
-                      Used in Expense Tracker Project
-                    </h3>
-                    <p className="text-muted-foreground mt-2 text-sm">
-                      See this topic in action in the hands-on project
-                    </p>
-                    <div className="mt-4 space-y-2">
-                      {topic.expenseTrackerChapters.map((chapter, idx) => (
-                        <Link
-                          key={idx}
-                          to="/learn-kotlin/expense-tracker/$chapterNumber"
-                          params={{
-                            chapterNumber: chapter.chapterNumber.toString(),
-                          }}
-                          className="flex items-center justify-between rounded-lg border border-cyan-200 bg-white p-3 transition-colors hover:bg-cyan-100"
-                        >
-                          <div>
-                            <span className="font-medium text-cyan-700">
-                              Chapter {chapter.chapterNumber}: {chapter.title}
-                            </span>
-                            {chapter.contextDescription && (
-                              <p className="text-xs text-gray-500">
-                                {chapter.contextDescription}
-                              </p>
-                            )}
-                          </div>
-                          <Chip
-                            size="sm"
-                            variant="flat"
-                            color={
-                              chapter.usageType === 'primary'
-                                ? 'primary'
-                                : chapter.usageType === 'supporting'
-                                  ? 'secondary'
-                                  : 'default'
-                            }
-                          >
-                            {chapter.usageType}
-                          </Chip>
-                        </Link>
-                      ))}
-                    </div>
-                  </CardBody>
-                </Card>
-              </MotionSection>
-            )}
-
-          {/* Language Comparisons */}
-          {topic.codeExamples.length > 0 && (
-            <MotionSection variant="fade-up">
-              <Card>
-                <CardBody className="p-6 md:p-8">
-                  <h2 className="flex items-center gap-2 text-xl font-bold">
-                    {sourceLanguage === 'java' ? (
-                      <>
-                        <span className="text-2xl">☕</span>
-                        <span className="text-orange-700">
-                          Java Evolution Timeline
+                        <span className="text-brand-b mt-1 shrink-0">
+                          <CheckIcon size={15} />
                         </span>
-                      </>
-                    ) : (
-                      <>
-                        <span className="text-2xl">🔷</span>
-                        <span className="text-purple-700">
-                          How You Know It (C#)
-                        </span>
-                      </>
-                    )}
-                  </h2>
-
-                  <Accordion className="mt-4" variant="bordered">
-                    {topic.codeExamples.map((example, idx) => (
-                      <AccordionItem
-                        key={idx}
-                        title={
-                          <span className="font-medium">
-                            {example.versionLabel || example.language}
-                          </span>
-                        }
-                      >
-                        <div className="space-y-4 pb-4">
-                          <pre className="overflow-x-auto rounded-lg bg-gray-900 p-4 text-sm text-gray-100">
-                            <code>{example.code}</code>
-                          </pre>
-                          <div
-                            className="prose prose-sm prose-gray max-w-none"
-                            dangerouslySetInnerHTML={{
-                              __html: renderMarkdown(example.explanation),
-                            }}
-                          />
-                        </div>
-                      </AccordionItem>
-                    ))}
-                  </Accordion>
-                </CardBody>
-              </Card>
-            </MotionSection>
-          )}
-
-          {/* Personal Experiences */}
-          {topic.experiences.length > 0 && (
-            <MotionSection variant="fade-up">
-              <div className="space-y-4">
-                {topic.experiences.map((exp, idx) => (
-                  <Card
-                    key={idx}
-                    className="border-l-4 border-l-purple-500 bg-purple-50/50"
-                  >
-                    <CardBody className="p-6">
-                      <h3 className="flex items-center gap-2 font-bold text-purple-800">
-                        <span className="text-xl">
-                          {getExperienceIcon(exp.type)}
-                        </span>
-                        {exp.title || getExperienceTitle(exp.type)}
-                      </h3>
-                      <div
-                        className="prose prose-sm prose-gray mt-3 max-w-none"
-                        dangerouslySetInnerHTML={{
-                          __html: renderMarkdown(exp.content),
-                        }}
-                      />
-                    </CardBody>
-                  </Card>
-                ))}
-              </div>
-            </MotionSection>
-          )}
-
-          {/* Documentation Links */}
-          {topic.docLinks.length > 0 && (
-            <MotionSection variant="fade-up">
-              <Card>
-                <CardBody className="p-6">
-                  <h2 className="flex items-center gap-2 text-lg font-bold text-gray-900">
-                    <span className="text-xl">📚</span>
-                    Learn More
-                  </h2>
-                  <ul className="mt-4 space-y-2">
-                    {topic.docLinks.map((link, idx) => (
-                      <li key={idx}>
-                        <a
-                          href={link.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="group flex items-center gap-2 text-blue-600 hover:underline"
-                        >
-                          <span>
-                            {link.type === 'kotlin_official'
-                              ? '🟣'
-                              : link.type === 'java_official'
-                                ? '☕'
-                                : link.type === 'csharp_official'
-                                  ? '🔷'
-                                  : '📖'}
-                          </span>
-                          <span>{link.title}</span>
-                          <svg
-                            className="h-4 w-4 opacity-0 transition-opacity group-hover:opacity-100"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                            />
-                          </svg>
-                        </a>
-                        {link.description && (
-                          <p className="text-muted-foreground ml-7 text-sm">
-                            {link.description}
-                          </p>
-                        )}
+                        <span>{obj}</span>
                       </li>
                     ))}
                   </ul>
-                </CardBody>
-              </Card>
-            </MotionSection>
-          )}
+                </section>
+              )}
 
-          {/* Navigation */}
-          <MotionSection variant="fade-up">
-            <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-gray-200 bg-white/60 p-4">
+            {/* Prerequisites */}
+            {currentTierContent?.prerequisites &&
+              currentTierContent.prerequisites.length > 0 && (
+                <section className={`${card} mt-4 p-5 sm:p-6`}>
+                  <h2 className="text-heading flex items-center gap-2.5 text-[17px] font-semibold">
+                    <span className="text-brand-a">
+                      <ClipboardIcon size={18} />
+                    </span>
+                    Prerequisites
+                  </h2>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {currentTierContent.prerequisites.map((prereq, idx) => (
+                      <Link
+                        key={idx}
+                        to="/learn-kotlin/$topicId"
+                        params={{ topicId: prereq }}
+                        search={{ lang }}
+                        className="border-line-strong text-body hover:text-ink hover:bg-chip inline-flex min-h-11 items-center rounded-full border px-4 text-sm font-medium transition-colors"
+                      >
+                        {titleOf(prereq)}
+                      </Link>
+                    ))}
+                  </div>
+                </section>
+              )}
+
+            {/* Tier Content - Main Explanation */}
+            {currentTierContent && (
+              <section className="mt-10" aria-labelledby="tier-heading">
+                <h2 id="tier-heading" className={sectionHeading}>
+                  <SectionIcon>
+                    <TierIcon size={18} />
+                  </SectionIcon>
+                  {currentTierContent.title || 'The Kotlin Way'}
+                </h2>
+                <div className="mt-5">
+                  <LearnMarkdown text={currentTierContent.explanation} />
+                </div>
+
+                {/* Tier Code Examples */}
+                {currentTierContent.codeExamples &&
+                  currentTierContent.codeExamples.length > 0 && (
+                    <div className="mt-6 space-y-4">
+                      {currentTierContent.codeExamples.map((code, idx) => (
+                        <LearnCode key={idx} code={code} />
+                      ))}
+                    </div>
+                  )}
+              </section>
+            )}
+
+            {/* Runnable Examples */}
+            {currentExamples.length > 0 && (
+              <section className="mt-12" aria-labelledby="try-heading">
+                <h2 id="try-heading" className={sectionHeading}>
+                  <SectionIcon>
+                    <PlayIcon size={17} />
+                  </SectionIcon>
+                  Try It Yourself
+                </h2>
+                <p className="text-muted mt-2 text-[15px]">
+                  Run these examples directly in your browser
+                </p>
+                <div className="mt-5 space-y-5">
+                  {currentExamples.map((example, idx) => (
+                    <RunnableExampleCard key={idx} example={example} />
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* Expense Tracker Chapters */}
+            {topic.expenseTrackerChapters &&
+              topic.expenseTrackerChapters.length > 0 && (
+                <section className={`${card} bg-cover-green mt-12 p-5 sm:p-6`}>
+                  <h2 className="text-heading flex items-center gap-2.5 text-[17px] font-semibold">
+                    <span className="text-brand-b">
+                      <FolderIcon size={18} />
+                    </span>
+                    Used in Expense Tracker Project
+                  </h2>
+                  <p className="text-muted mt-1.5 text-sm">
+                    See this topic in action in the hands-on project
+                  </p>
+                  <div className="mt-4 space-y-2">
+                    {topic.expenseTrackerChapters.map((chapter, idx) => (
+                      // Plain link: the chapter route is not part of this app's route tree.
+                      <a
+                        key={idx}
+                        href={`/learn-kotlin/expense-tracker/${chapter.chapterNumber}`}
+                        className="border-line bg-card hover:border-line-strong flex items-center justify-between gap-3 rounded-xl border p-3.5 transition-colors"
+                      >
+                        <span className="min-w-0">
+                          <span className="text-ink block text-[15px] font-medium">
+                            Chapter {chapter.chapterNumber}: {chapter.title}
+                          </span>
+                          {chapter.contextDescription && (
+                            <span className="text-faint mt-0.5 block text-[13px]">
+                              {chapter.contextDescription}
+                            </span>
+                          )}
+                        </span>
+                        <span className="border-line-strong text-body shrink-0 rounded-full border px-2.5 py-1 text-[13px] leading-none">
+                          {chapter.usageType}
+                        </span>
+                      </a>
+                    ))}
+                  </div>
+                </section>
+              )}
+
+            {/* Language Comparisons */}
+            {topic.codeExamples.length > 0 && (
+              <div className="mt-12">
+                <ComparisonSection
+                  topic={topic}
+                  sourceLanguage={sourceLanguage}
+                />
+              </div>
+            )}
+
+            {/* Personal Experiences */}
+            {topic.experiences.length > 0 && (
+              <section className="mt-12" aria-labelledby="experience-heading">
+                <h2 id="experience-heading" className={sectionHeading}>
+                  <SectionIcon>
+                    <MessageIcon size={17} />
+                  </SectionIcon>
+                  From my experience
+                </h2>
+                <div className="mt-5 grid gap-4">
+                  {topic.experiences.map((exp, idx) => {
+                    const meta = EXPERIENCE[exp.type] ?? EXPERIENCE_FALLBACK
+                    const Icon = meta.Icon
+                    return (
+                      <div key={idx} className={`${card} p-5 sm:p-6`}>
+                        <p
+                          className={`${meta.accent} inline-flex items-center gap-2 text-[12px] font-semibold tracking-[0.06em]`}
+                        >
+                          <Icon size={15} />
+                          {meta.label}
+                        </p>
+                        {exp.title && (
+                          <h3 className="text-heading mt-2 text-[17px] font-semibold">
+                            {exp.title}
+                          </h3>
+                        )}
+                        <div className="mt-2">
+                          <LearnMarkdown text={exp.content} size="sm" />
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </section>
+            )}
+
+            {/* Documentation Links */}
+            {topic.docLinks.length > 0 && (
+              <section className="border-line mt-12 border-t pt-8">
+                <h2 className="text-heading flex items-center gap-2.5 text-[18px] font-semibold">
+                  <span className="text-brand-a">
+                    <BookIcon size={18} />
+                  </span>
+                  Learn More
+                </h2>
+                <ul className="mt-4 space-y-3">
+                  {topic.docLinks.map((link, idx) => (
+                    <li key={idx}>
+                      <a
+                        href={link.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-link inline-flex items-center gap-1.5 text-[15px] font-medium hover:underline"
+                      >
+                        {link.title}
+                        <ExternalLinkIcon size={14} />
+                      </a>
+                      <p className="text-faint mt-0.5 text-[14px]">
+                        {DOC_LINK_LABEL[link.type] && (
+                          <span className="text-muted">
+                            {DOC_LINK_LABEL[link.type]}
+                            {link.description && ' · '}
+                          </span>
+                        )}
+                        {link.description}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+
+            {/* Navigation */}
+            <nav
+              aria-label="Topic navigation"
+              className="mt-12 grid gap-3 sm:grid-cols-2"
+            >
               {topic.navigation?.previous ? (
-                <Button
-                  as={Link}
+                <Link
                   to="/learn-kotlin/$topicId"
                   params={{ topicId: topic.navigation.previous }}
-                  search={{ lang: sourceLanguage }}
-                  variant="bordered"
+                  search={{ lang }}
+                  className={`${card} hover:border-line-strong group block p-5 transition-colors`}
                 >
-                  <svg
-                    className="h-4 w-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
+                  <NavCard
+                    label="Previous Topic"
+                    title={titleOf(topic.navigation.previous)}
+                    align="left"
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15 19l-7-7 7-7"
-                    />
-                  </svg>
-                  Previous Topic
-                </Button>
+                    <ArrowLeftIcon size={14} />
+                  </NavCard>
+                </Link>
               ) : (
-                <div />
+                <Link
+                  to="/learn-kotlin"
+                  className={`${card} hover:border-line-strong group block p-5 transition-colors`}
+                >
+                  <NavCard label="Back" title="All Topics" align="left">
+                    <ArrowLeftIcon size={14} />
+                  </NavCard>
+                </Link>
               )}
-
-              <Button as={Link} to="/learn-kotlin" variant="light">
-                All Topics
-              </Button>
-
-              {topic.navigation?.next ? (
-                <Button
-                  as={Link}
+              {topic.navigation?.next && (
+                <Link
                   to="/learn-kotlin/$topicId"
                   params={{ topicId: topic.navigation.next }}
-                  search={{ lang: sourceLanguage }}
-                  color="primary"
+                  search={{ lang }}
+                  className={`${card} hover:border-line-strong group block p-5 transition-colors sm:col-start-2`}
                 >
-                  Next Topic
-                  <svg
-                    className="h-4 w-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
+                  <NavCard
+                    label="Next Topic"
+                    title={titleOf(topic.navigation.next)}
+                    align="right"
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 5l7 7-7 7"
-                    />
-                  </svg>
-                </Button>
-              ) : (
-                <div />
+                    <ArrowRightIcon size={14} />
+                  </NavCard>
+                </Link>
               )}
-            </div>
-          </MotionSection>
+            </nav>
+            {topic.navigation?.previous && (
+              <Link
+                to="/learn-kotlin"
+                className="text-brand-a mt-6 inline-flex min-h-11 items-center gap-1.5 text-[15px] font-medium hover:underline"
+              >
+                <ArrowLeftIcon size={15} />
+                All Topics
+              </Link>
+            )}
+
+            {/* Module siblings on small screens (the sidebar shows them on wide ones) */}
+            {siblings.length > 1 && (
+              <nav
+                aria-label={`More in ${topic.module}`}
+                className={`${card} mt-10 p-5 lg:hidden`}
+              >
+                <p className="text-faint mb-3 text-[12px] font-semibold tracking-[0.06em] uppercase">
+                  More in {topic.module}
+                </p>
+                <ModuleTopicList
+                  topics={siblings}
+                  currentId={topic.id}
+                  lang={lang}
+                />
+                <Link
+                  to="/learn-kotlin/mindmap"
+                  className="text-brand-a mt-4 inline-flex min-h-11 items-center gap-1.5 text-[14px] font-medium hover:underline"
+                >
+                  View in the learning map
+                  <ArrowRightIcon size={15} />
+                </Link>
+              </nav>
+            )}
+          </article>
         </div>
       )}
     </AppShell>

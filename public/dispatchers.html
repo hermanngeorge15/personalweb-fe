@@ -1,6 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script>
+        // Inside the site's iframe? Then use the embedded layout (see html.embedded styles).
+        try {
+            if (window.self !== window.top) document.documentElement.classList.add('embedded');
+        } catch (e) {
+            document.documentElement.classList.add('embedded');
+        }
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kotlin Coroutines Dispatcher Visualizer - Complete Guide</title>
@@ -709,6 +717,30 @@
             display: flex;
             align-items: center;
             gap: 8px;
+        }
+        /* Embedded in jirihermann.com/dispatchers (iframe): the host page supplies the
+           title and the frame, so drop the duplicate heading and the purple backdrop. */
+        html.embedded body {
+            background: #f7f8fa;
+            padding: 0;
+        }
+
+        html.embedded .container {
+            max-width: none;
+            border-radius: 0;
+            box-shadow: none;
+            padding: 24px;
+        }
+
+        html.embedded .container > h1,
+        html.embedded .container > .subtitle {
+            display: none;
+        }
+
+        @media (max-width: 640px) {
+            html.embedded .container {
+                padding: 14px;
+            }
         }
     </style>
 </head>

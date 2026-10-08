@@ -267,3 +267,109 @@ export function QuoteIcon(props: IconProps) {
     </StrokeIcon>
   )
 }
+
+export function ArrowLeftIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props}>
+      <path d="M19 12H5M11 18l-6-6 6-6" />
+    </StrokeIcon>
+  )
+}
+
+export function ArrowRightIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props}>
+      <path d="M5 12h14M13 6l6 6-6 6" />
+    </StrokeIcon>
+  )
+}
+
+export function SearchIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props}>
+      <circle cx="11" cy="11" r="7" />
+      <path d="M20 20l-3.5-3.5" />
+    </StrokeIcon>
+  )
+}
+
+export function PlayIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props}>
+      <path d="M7 4.5v15l12-7.5z" />
+    </StrokeIcon>
+  )
+}
+
+/** Learn Kotlin depth tiers: TL;DR, Beginner, Intermediate, Deep Dive. */
+
+export function SproutIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props}>
+      <path d="M12 21v-9" />
+      <path d="M12 12c0-4-3-7-8-7 0 4 3 7 8 7z" />
+      <path d="M12 14c0-3.5 2.5-6 7-6 0 3.5-2.5 6-7 6z" />
+    </StrokeIcon>
+  )
+}
+
+export function WrenchIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props}>
+      <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.8-3.8a6 6 0 0 1-7.9 7.9l-6.9 6.9a2.1 2.1 0 0 1-3-3l6.9-6.9a6 6 0 0 1 7.9-7.9z" />
+    </StrokeIcon>
+  )
+}
+
+export function TargetIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props}>
+      <circle cx="12" cy="12" r="9" />
+      <circle cx="12" cy="12" r="5" />
+      <circle cx="12" cy="12" r="1" />
+    </StrokeIcon>
+  )
+}
+
+export function ClipboardIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props}>
+      <rect x="5" y="4" width="14" height="17" rx="2" />
+      <path d="M9 4V3h6v1M9 10h6M9 14h6M9 18h3" />
+    </StrokeIcon>
+  )
+}
+
+export function BookIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props}>
+      <path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z" />
+      <path d="M4 21V5M19 19v2H6" />
+    </StrokeIcon>
+  )
+}
+
+export function LightbulbIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props}>
+      <path d="M9 18h6M10 21h4" />
+      <path d="M12 3a6 6 0 0 0-3.5 10.9c.6.4 1 1.1 1 1.8V16h5v-.3c0-.7.4-1.4 1-1.8A6 6 0 0 0 12 3z" />
+    </StrokeIcon>
+  )
+}
+
+export function MessageIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props}>
+      <path d="M4 5h16v11H9l-5 4z" />
+    </StrokeIcon>
+  )
+}
+
+export function FolderIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props}>
+      <path d="M3 6a1 1 0 0 1 1-1h5l2 2h9a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z" />
+    </StrokeIcon>
+  )
+}
