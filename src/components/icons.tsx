@@ -166,3 +166,65 @@ export function ArrowUpRightIcon(props: IconProps) {
     </StrokeIcon>
   )
 }
+
+export function DownloadIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props}>
+      <path d="M12 3v12M7 10l5 5 5-5M5 21h14" />
+    </StrokeIcon>
+  )
+}
+
+export function PrinterIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props}>
+      <path d="M6 9V3h12v6" />
+      <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+      <rect x="6" y="14" width="12" height="7" />
+    </StrokeIcon>
+  )
+}
+
+export function MapPinIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props}>
+      <path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z" />
+      <circle cx="12" cy="9.5" r="2.5" />
+    </StrokeIcon>
+  )
+}
+
+export function MailIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props}>
+      <rect x="3" y="5" width="18" height="14" rx="2" />
+      <path d="M3 7l9 6 9-6" />
+    </StrokeIcon>
+  )
+}
+
+export function ExternalLinkIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props}>
+      <path d="M14 4h6v6M20 4L10 14" />
+      <path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" />
+    </StrokeIcon>
+  )
+}
+
+export function AlertIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props}>
+      <path d="M12 9v4M12 17h.01" />
+      <path d="M10.3 3.9L2.4 17.5A2 2 0 0 0 4.1 20.5h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z" />
+    </StrokeIcon>
+  )
+}
+
+export function SpinnerIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props}>
+      <path d="M12 3a9 9 0 1 0 9 9" />
+    </StrokeIcon>
+  )
+}
