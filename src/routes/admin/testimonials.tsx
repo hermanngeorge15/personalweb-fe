@@ -1,13 +1,7 @@
-import { useState } from 'react'
 import { z } from 'zod'
 import { ensureKeycloakAuth } from '@/lib/keycloak'
-import AppShell from '@/components/AppShell'
-import {
-  AdminForm,
-  DeleteButton,
-  type AdminField,
-  type AdminFormValues,
-} from '@/components/admin/AdminForm'
+import { CrudList } from '@/components/admin/CrudList'
+import type { AdminField, AdminFormValues } from '@/components/admin/AdminForm'
 import { intText, requiredText } from '@/lib/adminFormat'
 import {
   useTestimonials,
@@ -75,103 +69,59 @@ function AdminTestimonials() {
   const createTestimonial = useCreateTestimonial()
   const updateTestimonial = useUpdateTestimonial()
   const deleteTestimonial = useDeleteTestimonial()
-  const [editing, setEditing] = useState<string | null>(null)
   return (
-    <AppShell path="Admin / Testimonials">
-      <section className="grid gap-6 md:gap-8">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">
-            Testimonials Management
-          </h1>
-          <p className="text-muted-foreground mt-2 text-sm">
-            Add testimonials from LinkedIn or other sources. Include author
-            name, role, avatar URL, and the quote.
-          </p>
-        </div>
-
-        <div className="rounded-xl border bg-white/60 p-6 shadow-sm">
-          <h2 className="mb-4 text-lg font-semibold">Add New Testimonial</h2>
-          <AdminForm
-            schema={schema}
-            fields={fields}
-            defaultValues={empty}
-            submitLabel="Add testimonial"
-            resetOnSuccess
-            onSubmit={(values) => createTestimonial.mutateAsync(values)}
-          />
-        </div>
-        <div className="rounded-xl border bg-white/60 p-6 shadow-sm">
-          <h2 className="mb-4 text-lg font-semibold">Existing Testimonials</h2>
-          {isLoading && <div>Loading…</div>}
-          {isError && (
-            <div className="text-red-600">Failed to load testimonials.</div>
+    <CrudList
+      title="Testimonials Management"
+      path="Admin / Testimonials"
+      description="Add testimonials from LinkedIn or other sources. Include author name, role, avatar URL, and the quote."
+      items={data}
+      isLoading={isLoading}
+      isError={isError}
+      errorText="Failed to load testimonials."
+      emptyText="No testimonials yet."
+      listTitle="Existing Testimonials"
+      createTitle="Add New Testimonial"
+      createLabel="Add testimonial"
+      fields={fields}
+      schema={schema}
+      emptyValues={empty}
+      toValues={toValues}
+      itemName={(t) => t.author}
+      describe={(t) => (
+        <span className="flex items-start gap-4">
+          {t.avatar_url ? (
+            <img
+              src={t.avatar_url}
+              alt={t.author}
+              className="ring-line size-12 shrink-0 rounded-full object-cover ring-2"
+            />
+          ) : (
+            <span
+              aria-hidden="true"
+              className="bg-brand-gradient text-on-brand flex size-12 shrink-0 items-center justify-center rounded-full text-lg font-semibold"
+            >
+              {t.author.charAt(0).toUpperCase()}
+            </span>
           )}
-          {data && (
-            <ul className="grid gap-3">
-              {data.map((t) => (
-                <li
-                  key={t.id}
-                  className="grid gap-3 rounded-lg border bg-white p-4"
-                >
-                  <div className="flex items-start gap-4">
-                    {t.avatar_url ? (
-                      <img
-                        src={t.avatar_url}
-                        alt={t.author}
-                        className="h-12 w-12 rounded-full object-cover ring-2 ring-indigo-100"
-                      />
-                    ) : (
-                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-fuchsia-500 text-lg font-semibold text-white">
-                        {t.author.charAt(0).toUpperCase()}
-                      </div>
-                    )}
-                    <div className="flex-1">
-                      <div className="font-semibold">{t.author}</div>
-                      {t.role && (
-                        <div className="text-muted-foreground text-sm">
-                          {t.role}
-                        </div>
-                      )}
-                      <p className="text-muted-foreground mt-2 text-sm italic">
-                        &ldquo;{t.quote}&rdquo;
-                      </p>
-                    </div>
-                    <div className="flex shrink-0 items-center gap-3">
-                      <button
-                        type="button"
-                        className="underline"
-                        onClick={() =>
-                          setEditing(editing === t.id ? null : t.id)
-                        }
-                      >
-                        {editing === t.id ? 'Close' : 'Edit'}
-                      </button>
-                      <DeleteButton
-                        onDelete={() =>
-                          deleteTestimonial.mutateAsync({ id: t.id })
-                        }
-                      />
-                    </div>
-                  </div>
-                  {editing === t.id && (
-                    <AdminForm
-                      schema={schema}
-                      fields={fields}
-                      defaultValues={toValues(t)}
-                      submitLabel="Save"
-                      onCancel={() => setEditing(null)}
-                      onSubmit={(values) =>
-                        updateTestimonial.mutateAsync({ id: t.id, ...values })
-                      }
-                    />
-                  )}
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      </section>
-    </AppShell>
+          <span className="min-w-0">
+            <span className="text-ink block font-semibold">{t.author}</span>
+            {t.role && (
+              <span className="text-muted block text-sm font-normal">
+                {t.role}
+              </span>
+            )}
+            <span className="text-body mt-2 block text-sm font-normal italic">
+              &ldquo;{t.quote}&rdquo;
+            </span>
+          </span>
+        </span>
+      )}
+      onCreate={(values) => createTestimonial.mutateAsync(values)}
+      onUpdate={(id, values) =>
+        updateTestimonial.mutateAsync({ id, ...values })
+      }
+      onDelete={(id) => deleteTestimonial.mutateAsync({ id })}
+    />
   )
 }
 

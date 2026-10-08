@@ -1,13 +1,10 @@
-import { useState } from 'react'
 import { z } from 'zod'
 import { ensureKeycloakAuth } from '@/lib/keycloak'
-import AppShell from '@/components/AppShell'
-import {
-  AdminForm,
-  DeleteButton,
-  type AdminField,
-  type AdminFormValues,
-  type AdminSchema,
+import { CrudList } from '@/components/admin/CrudList'
+import type {
+  AdminField,
+  AdminFormValues,
+  AdminSchema,
 } from '@/components/admin/AdminForm'
 import { intText, requiredText } from '@/lib/adminFormat'
 import {
@@ -78,76 +75,35 @@ function AdminProjects() {
   const createProject = useCreateProject()
   const updateProject = useUpdateProject()
   const deleteProject = useDeleteProject()
-  const [editing, setEditing] = useState<string | null>(null)
   return (
-    <AppShell path="Admin / Projects">
-      <section className="grid gap-6 md:gap-8">
-        <h1 className="text-2xl font-semibold tracking-tight">Projects</h1>
-        <details className="rounded border p-3">
-          <summary className="cursor-pointer font-medium">New project</summary>
-          <div className="mt-3">
-            <AdminForm
-              schema={schema}
-              fields={fields}
-              defaultValues={empty}
-              submitLabel="Create"
-              resetOnSuccess
-              onSubmit={(body) => createProject.mutateAsync(body)}
-            />
-          </div>
-        </details>
-        {isLoading && <div>Loading…</div>}
-        {isError && (
-          <div className="text-red-600">Failed to load projects.</div>
-        )}
-        {data && data.length === 0 && <div>No projects yet.</div>}
-        {data && (
-          <ul className="grid gap-2">
-            {data.map((project) => (
-              <li key={project.id} className="grid gap-3 rounded border p-3">
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <span>
-                    <span className="font-medium">{project.title}</span>
-                    <span className="text-muted-foreground text-sm">
-                      {' '}
-                      — {project.summary}
-                    </span>
-                  </span>
-                  <span className="flex items-center gap-3">
-                    <button
-                      type="button"
-                      className="underline"
-                      onClick={() =>
-                        setEditing(editing === project.id ? null : project.id)
-                      }
-                    >
-                      {editing === project.id ? 'Close' : 'Edit'}
-                    </button>
-                    <DeleteButton
-                      onDelete={() =>
-                        deleteProject.mutateAsync({ id: project.id })
-                      }
-                    />
-                  </span>
-                </div>
-                {editing === project.id && (
-                  <AdminForm
-                    schema={schema}
-                    fields={fields}
-                    defaultValues={toValues(project)}
-                    submitLabel="Save"
-                    onCancel={() => setEditing(null)}
-                    onSubmit={(body) =>
-                      updateProject.mutateAsync({ id: project.id, body })
-                    }
-                  />
-                )}
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-    </AppShell>
+    <CrudList
+      title="Projects"
+      path="Admin / Projects"
+      items={data}
+      isLoading={isLoading}
+      isError={isError}
+      errorText="Failed to load projects."
+      emptyText="No projects yet."
+      listTitle="All projects"
+      createTitle="New project"
+      fields={fields}
+      schema={schema}
+      emptyValues={empty}
+      toValues={toValues}
+      itemName={(project) => project.title}
+      describe={(project) => (
+        <>
+          <span className="font-medium">{project.title}</span>
+          <span className="text-muted text-sm font-normal">
+            {' '}
+            — {project.summary}
+          </span>
+        </>
+      )}
+      onCreate={(body) => createProject.mutateAsync(body)}
+      onUpdate={(id, body) => updateProject.mutateAsync({ id, body })}
+      onDelete={(id) => deleteProject.mutateAsync({ id })}
+    />
   )
 }
 
