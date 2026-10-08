@@ -23,7 +23,10 @@ import {
 const STORAGE_KEY = 'kotlin-learning-source-language'
 const TIER_STORAGE_KEY = 'kotlin-learning-selected-tier'
 
-const TIER_CONFIG: Record<number, { name: string; icon: string; color: string }> = {
+const TIER_CONFIG: Record<
+  number,
+  { name: string; icon: string; color: string }
+> = {
   1: { name: 'TL;DR', icon: '⚡', color: 'warning' },
   2: { name: 'Beginner', icon: '🌱', color: 'success' },
   3: { name: 'Intermediate', icon: '🔧', color: 'primary' },
@@ -50,6 +53,21 @@ function setStoredTier(tier: number) {
   }
 }
 
+/**
+ * The tier to show: the preferred one if this topic has it, else the deepest tier below it,
+ * else the shallowest the topic has. Topics differ in which tiers they define.
+ */
+function resolveTier(
+  available: number[] | undefined,
+  preferred: number,
+): number {
+  if (!available || available.length === 0 || available.includes(preferred)) {
+    return preferred
+  }
+  const below = available.filter((t) => t < preferred)
+  return below.length > 0 ? Math.max(...below) : Math.min(...available)
+}
+
 function KotlinTopicPage() {
   const { topicId } = useParams({ from: '/learn-kotlin/$topicId' })
   const search = useSearch({ from: '/learn-kotlin/$topicId' }) as {
@@ -57,7 +75,7 @@ function KotlinTopicPage() {
     tier?: string
   }
   const [sourceLanguage, setSourceLanguage] = useState<SourceLanguage>(null)
-  const [selectedTier, setSelectedTier] = useState<number>(2)
+  const [preferredTier, setPreferredTier] = useState<number>(2)
 
   useEffect(() => {
     const lang =
@@ -66,19 +84,26 @@ function KotlinTopicPage() {
 
     const tier = search.tier ? parseInt(search.tier, 10) : getStoredTier()
     if (tier >= 1 && tier <= 4) {
-      setSelectedTier(tier)
+      setPreferredTier(tier)
     }
   }, [search.lang, search.tier])
 
   const handleTierChange = (tier: number) => {
-    setSelectedTier(tier)
+    setPreferredTier(tier)
     setStoredTier(tier)
   }
 
-  const { data: topic, isLoading, isError } = useKotlinTopicWithTiers(
-    topicId,
-    sourceLanguage,
-    selectedTier
+  // Fetch every tier and filter here: with ?tier=N the API lists only tiers <= N in
+  // availableTiers, so the deeper tiers could never be selected.
+  const {
+    data: topic,
+    isLoading,
+    isError,
+  } = useKotlinTopicWithTiers(topicId, sourceLanguage)
+
+  const selectedTier = useMemo(
+    () => resolveTier(topic?.availableTiers, preferredTier),
+    [topic?.availableTiers, preferredTier],
   )
 
   // Get the current tier content
@@ -106,8 +131,7 @@ function KotlinTopicPage() {
       const canonicalUrl = `${SEO_DEFAULTS.siteUrl}/learn-kotlin/${topicId}`
       setHead({
         title: `${topic.title} — Learn Kotlin — ${SEO_DEFAULTS.siteName}`,
-        description:
-          topic.description || `Learn ${topic.title} in Kotlin`,
+        description: topic.description || `Learn ${topic.title} in Kotlin`,
         canonical: canonicalUrl,
         og: {
           title: `${topic.title} — Learn Kotlin`,
@@ -216,7 +240,7 @@ function KotlinTopicPage() {
           {/* Header */}
           <MotionSection variant="fade-up">
             <div className="relative overflow-hidden rounded-3xl border border-purple-200/50 bg-white/40 p-8 shadow-lg ring-1 ring-purple-500/10 backdrop-blur md:p-12">
-              <div className="pointer-events-none absolute -left-24 -top-24 h-64 w-64 rounded-full bg-gradient-to-br from-purple-400/20 via-blue-400/10 to-cyan-400/10 blur-3xl" />
+              <div className="pointer-events-none absolute -top-24 -left-24 h-64 w-64 rounded-full bg-gradient-to-br from-purple-400/20 via-blue-400/10 to-cyan-400/10 blur-3xl" />
 
               <div className="relative">
                 <div className="flex flex-wrap items-center gap-3">
@@ -291,7 +315,7 @@ function KotlinTopicPage() {
                       {topic.availableTiers.map((tier) => {
                         const config = TIER_CONFIG[tier]
                         const tierContent = topic.tiers.find(
-                          (t) => t.tierLevel === tier
+                          (t) => t.tierLevel === tier,
                         )
                         return (
                           <Tab
@@ -489,7 +513,7 @@ function KotlinTopicPage() {
                             const encoded = encodeURIComponent(example.code)
                             window.open(
                               `https://play.kotlinlang.org/#code=${encoded}`,
-                              '_blank'
+                              '_blank',
                             )
                           }}
                         >
@@ -639,7 +663,9 @@ function KotlinTopicPage() {
                   >
                     <CardBody className="p-6">
                       <h3 className="flex items-center gap-2 font-bold text-purple-800">
-                        <span className="text-xl">{getExperienceIcon(exp.type)}</span>
+                        <span className="text-xl">
+                          {getExperienceIcon(exp.type)}
+                        </span>
                         {exp.title || getExperienceTitle(exp.type)}
                       </h3>
                       <div
