@@ -23,11 +23,13 @@ import {
   CertificateList,
   EducationList,
   ExperienceTimeline,
+  FeaturedRoleCard,
   HobbyList,
   LanguageList,
   TechSummary,
 } from '@/components/resume/ResumeSections'
 import profileAvatar from '@/assets/images/profile-avatar.jpg'
+import { sortByDateDesc } from '@/components/resume/format'
 
 const section = 'relative mx-auto max-w-[1200px] px-4 sm:px-8'
 
@@ -42,91 +44,88 @@ function Hero({
   onDownload: () => void
 }) {
   return (
-    <section className={`${section} pt-12 sm:pt-[72px]`}>
-      <div className="border-line flex flex-wrap items-end justify-between gap-6 border-b pb-9">
-        <div className="flex flex-wrap items-center gap-5">
-          <img
-            src={profileAvatar}
-            alt={AUTHOR.name}
-            width={88}
-            height={88}
-            className="border-window-line size-[72px] rounded-full border object-cover sm:size-[88px]"
-          />
-          <div className="min-w-0">
-            <p className="text-brand-a text-[13px] font-semibold tracking-[0.08em] uppercase">
-              Resume
-            </p>
-            <h1 className="text-heading mt-1 text-[34px] leading-[1.05] font-semibold tracking-[-0.03em] sm:text-[44px]">
-              {AUTHOR.name}
-            </h1>
-            <p className="text-muted mt-2 text-[17px] sm:text-lg">
-              Backend Software Engineer • Kotlin &amp; Spring Boot Expert
-            </p>
-            <ul className="text-faint mt-2 flex flex-wrap items-center gap-x-5 text-sm">
-              <li className="inline-flex min-h-11 items-center gap-1.5 sm:min-h-0">
-                <MapPinIcon size={16} />
-                Prague, Czech Republic
-              </li>
-              {SOCIAL_LINKS.linkedin && (
-                <li>
-                  <a
-                    href={SOCIAL_LINKS.linkedin}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={metaLink}
-                  >
-                    <LinkedInIcon size={16} />
-                    LinkedIn
-                  </a>
-                </li>
-              )}
-              {SOCIAL_LINKS.github && (
-                <li>
-                  <a
-                    href={SOCIAL_LINKS.github}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={metaLink}
-                  >
-                    <GitHubIcon size={16} />
-                    GitHub
-                  </a>
-                </li>
-              )}
-            </ul>
-          </div>
-        </div>
-        <div className="flex flex-wrap gap-3">
-          <button
-            type="button"
-            onClick={onDownload}
-            disabled={isDownloading}
-            aria-busy={isDownloading}
-            className="bg-brand-gradient-x text-on-brand inline-flex min-h-11 items-center gap-2 rounded-[10px] px-5 text-[15px] font-medium transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {isDownloading ? (
-              <>
-                <SpinnerIcon
-                  size={16}
-                  className="animate-spin motion-reduce:animate-none"
-                />
-                Downloading...
-              </>
-            ) : (
-              <>
-                <DownloadIcon size={16} />
-                Download PDF
-              </>
-            )}
-          </button>
-          <Link
-            to="/resume/print"
-            className="border-window-line text-ink hover:bg-chip inline-flex min-h-11 items-center gap-2 rounded-[10px] border px-5 text-[15px] font-medium transition-colors"
-          >
-            <PrinterIcon size={16} />
-            Print
-          </Link>
-        </div>
+    <section
+      className={`${section} pt-16 pb-4 text-center sm:pt-[88px] sm:pb-6`}
+    >
+      <img
+        src={profileAvatar}
+        alt={AUTHOR.name}
+        width={88}
+        height={88}
+        className="border-window-line mx-auto size-[72px] rounded-full border object-cover sm:size-[88px]"
+      />
+      <span className="border-line-strong bg-chip/60 text-body mt-6 inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-[13px]">
+        <span aria-hidden="true" className="bg-brand-b size-1.5 rounded-full" />
+        Resume · {AUTHOR.name}
+      </span>
+      <h1 className="text-heading mx-auto mt-6 max-w-[860px] text-[40px] leading-[1.04] font-semibold tracking-[-0.035em] sm:text-[52px] lg:text-[64px]">
+        Backend Software Engineer{' '}
+        <span className="text-brand-gradient">
+          Kotlin &amp; Spring Boot Expert
+        </span>
+      </h1>
+      <ul className="text-faint mt-5 flex flex-wrap items-center justify-center gap-x-5 text-sm">
+        <li className="inline-flex min-h-11 items-center gap-1.5 sm:min-h-0">
+          <MapPinIcon size={16} />
+          Prague, Czech Republic
+        </li>
+        {SOCIAL_LINKS.linkedin && (
+          <li>
+            <a
+              href={SOCIAL_LINKS.linkedin}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={metaLink}
+            >
+              <LinkedInIcon size={16} />
+              LinkedIn
+            </a>
+          </li>
+        )}
+        {SOCIAL_LINKS.github && (
+          <li>
+            <a
+              href={SOCIAL_LINKS.github}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={metaLink}
+            >
+              <GitHubIcon size={16} />
+              GitHub
+            </a>
+          </li>
+        )}
+      </ul>
+      <div className="mt-7 flex flex-wrap justify-center gap-3">
+        <button
+          type="button"
+          onClick={onDownload}
+          disabled={isDownloading}
+          aria-busy={isDownloading}
+          className="bg-brand-gradient-x text-on-brand inline-flex min-h-11 items-center gap-2 rounded-[10px] px-5 text-[15px] font-medium transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {isDownloading ? (
+            <>
+              <SpinnerIcon
+                size={16}
+                className="animate-spin motion-reduce:animate-none"
+              />
+              Downloading...
+            </>
+          ) : (
+            <>
+              <DownloadIcon size={16} />
+              Download PDF
+            </>
+          )}
+        </button>
+        <Link
+          to="/resume/print"
+          className="border-window-line text-ink hover:bg-chip inline-flex min-h-11 items-center gap-2 rounded-[10px] border px-5 text-[15px] font-medium transition-colors"
+        >
+          <PrinterIcon size={16} />
+          Print
+        </Link>
       </div>
     </section>
   )
@@ -228,6 +227,14 @@ function ResumePage() {
     })
   }, [])
 
+  // The open-ended newest role is featured on its own card; the timeline lists the rest.
+  const sortedProjects = projects.data
+    ? sortByDateDesc(projects.data, (p) => p.startAt)
+    : []
+  const currentRole =
+    sortedProjects[0] && !sortedProjects[0].endAt ? sortedProjects[0] : null
+  const earlierRoles = currentRole ? sortedProjects.slice(1) : sortedProjects
+
   const queries = [projects, languages, education, certificates, hobbies]
   const isLoading = queries.some((q) => q.isLoading)
   const isError = queries.some((q) => q.isError)
@@ -248,6 +255,18 @@ function ResumePage() {
       />
       <Hero isDownloading={isDownloading} onDownload={handleDownloadPDF} />
 
+      {currentRole && (
+        <section
+          aria-labelledby="current-role-heading"
+          className={`${section} pt-10 sm:pt-12`}
+        >
+          <h2 id="current-role-heading" className="sr-only">
+            Current role
+          </h2>
+          <FeaturedRoleCard project={currentRole} />
+        </section>
+      )}
+
       <div
         className={`${section} flex flex-wrap items-start gap-12 pt-12 pb-16 sm:pt-14 sm:pb-[72px]`}
       >
@@ -259,7 +278,7 @@ function ResumePage() {
             id="experience-heading"
             className="text-heading text-[26px] font-semibold tracking-[-0.02em]"
           >
-            Professional Experience
+            {currentRole ? 'Earlier experience' : 'Professional Experience'}
           </h2>
           {isError && (
             <div className="mt-6">
@@ -274,8 +293,8 @@ function ResumePage() {
               <LoadingSkeleton />
             </div>
           )}
-          {projects.data && projects.data.length > 0 && (
-            <ExperienceTimeline projects={projects.data} />
+          {earlierRoles.length > 0 && (
+            <ExperienceTimeline projects={earlierRoles} />
           )}
         </section>
 

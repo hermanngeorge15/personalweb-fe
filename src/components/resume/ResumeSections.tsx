@@ -7,6 +7,7 @@ import type {
   ResumeProject,
 } from '@/lib/queries'
 import { ExternalLinkIcon, GitHubIcon } from '@/components/icons'
+import { PostCover } from '@/components/blog/PostCover'
 import { formatRange, formatYear, sortByDateDesc } from './format'
 
 /** Side-column card (Skills, Education, …) on /resume. */
@@ -105,28 +106,101 @@ function ExperienceItem({
             ))}
           </ul>
         )}
-        {(project.repoUrl || project.demoUrl) && (
-          <div className="mt-5 flex flex-wrap gap-3">
-            {project.repoUrl && (
-              <ProjectLink
-                href={project.repoUrl}
-                icon={<GitHubIcon size={16} />}
-              >
-                Repository
-              </ProjectLink>
-            )}
-            {project.demoUrl && (
-              <ProjectLink
-                href={project.demoUrl}
-                icon={<ExternalLinkIcon size={16} />}
-              >
-                View Demo
-              </ProjectLink>
-            )}
-          </div>
-        )}
+        <ProjectLinks project={project} />
       </article>
     </li>
+  )
+}
+
+/** "Česká spořitelna" → "ceska-sporitelna", for the cover's window path. */
+function slugify(value: string) {
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')
+}
+
+/**
+ * The current role as a large two-column card, styled like the featured post on /blog:
+ * generated window cover on one side, role details on the other.
+ */
+export function FeaturedRoleCard({ project }: { project: ResumeProject }) {
+  const dates = formatRange(project.startAt, project.endAt)
+  const slug = slugify(project.company || 'current-role')
+  const stack = project.techStack ?? []
+  return (
+    <article className="border-line bg-card flex flex-wrap overflow-hidden rounded-[20px] border">
+      <PostCover
+        post={{ slug, tags: stack.slice(0, 3) }}
+        path={`~/resume/${slug}`}
+        size="featured"
+        className="flex-[1_1_520px]"
+      />
+      <div className="flex flex-[1_1_420px] flex-col justify-center p-6 sm:p-12">
+        <div className="flex flex-wrap items-center gap-2 text-xs font-medium">
+          <span className="bg-brand-gradient-x text-on-brand rounded-full px-2.5 py-1">
+            Current role
+          </span>
+          {dates && (
+            <span className="border-line-strong text-body rounded-full border px-2.5 py-1 font-mono">
+              {dates}
+            </span>
+          )}
+        </div>
+        <h3 className="text-heading mt-5 text-[28px] leading-[1.12] font-semibold tracking-[-0.025em] sm:text-4xl">
+          {project.company || '—'}
+        </h3>
+        {project.projectName && (
+          <p className="text-brand-a mt-2 text-[17px] font-medium">
+            {project.projectName}
+          </p>
+        )}
+        {project.description && (
+          <p className="text-muted mt-3.5 text-[17px] leading-relaxed">
+            {project.description}
+          </p>
+        )}
+        {project.responsibilities && project.responsibilities.length > 0 && (
+          <ul className="text-body marker:text-faint mt-4 list-disc space-y-1.5 pl-5 text-[15px] leading-relaxed">
+            {project.responsibilities.map((item, idx) => (
+              <li key={idx}>{item}</li>
+            ))}
+          </ul>
+        )}
+        {stack.length > 0 && (
+          <ul aria-label="Tech stack" className="mt-6 flex flex-wrap gap-1.5">
+            {stack.map((tech, idx) => (
+              <Chip key={idx}>{tech}</Chip>
+            ))}
+          </ul>
+        )}
+        <ProjectLinks project={project} />
+      </div>
+    </article>
+  )
+}
+
+/** Repository and demo links of a role, when the API has them. */
+function ProjectLinks({ project }: { project: ResumeProject }) {
+  if (!project.repoUrl && !project.demoUrl) return null
+  return (
+    <div className="mt-5 flex flex-wrap gap-3">
+      {project.repoUrl && (
+        <ProjectLink href={project.repoUrl} icon={<GitHubIcon size={16} />}>
+          Repository
+        </ProjectLink>
+      )}
+      {project.demoUrl && (
+        <ProjectLink
+          href={project.demoUrl}
+          icon={<ExternalLinkIcon size={16} />}
+        >
+          View Demo
+        </ProjectLink>
+      )}
+    </div>
   )
 }
 
