@@ -1,3 +1,5 @@
+import { LEARN_KOTLIN_ENABLED } from '@/config/features'
+import NotFound from '@/components/NotFound'
 import AppShell from '@/components/AppShell'
 import { useParams, Link, useSearch, useNavigate } from '@tanstack/react-router'
 import {
@@ -919,5 +921,6 @@ function KotlinTopicPage() {
 }
 
 export const Route = createFileRoute({
-  component: KotlinTopicPage,
+  // Frozen sections answer with the site's 404 page (see config/features).
+  component: LEARN_KOTLIN_ENABLED ? KotlinTopicPage : NotFound,
 })

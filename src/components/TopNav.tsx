@@ -4,6 +4,7 @@ import { ANNOUNCEMENT, AUTHOR, SOCIAL_LINKS } from '@/config/site'
 import { LogoTile } from './Brand'
 import { CloseIcon, GitHubIcon, MenuIcon } from './icons'
 import ThemeToggle from './ThemeToggle'
+import { LEARN_KOTLIN_ENABLED } from '@/config/features'
 
 const navLinkClass =
   'text-muted hover:text-ink rounded-lg px-3 py-2 transition-colors sm:px-3.5'
@@ -95,13 +96,15 @@ function MobileMenu({ onClose }: { onClose: () => void }) {
             {link.label}
           </Link>
         ))}
-        <Link
-          to="/learn-kotlin"
-          onClick={onClose}
-          className={`${menuLinkClass} !text-muted`}
-        >
-          Learn Kotlin
-        </Link>
+        {LEARN_KOTLIN_ENABLED && (
+          <Link
+            to="/learn-kotlin"
+            onClick={onClose}
+            className={`${menuLinkClass} !text-muted`}
+          >
+            Learn Kotlin
+          </Link>
+        )}
       </nav>
       <div className="mt-auto flex flex-col gap-3 px-4 pt-4 pb-8">
         <Link

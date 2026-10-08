@@ -1,7 +1,8 @@
 /**
  * Released UnityInFlow tools, newest release first. Source of truth for the
- * Projects page and the Home "Tools" section. Versions and release months are
- * each repo's latest GitHub Release; update them here when a tool ships.
+ * Projects page and the Home "Tools" section, which show only the listed ones.
+ * Versions and release months are each repo's latest GitHub Release; update
+ * them here when a tool ships.
  */
 
 export type ProjectLanguage = 'Rust' | 'Kotlin' | 'TypeScript'
@@ -23,7 +24,7 @@ export const GITHUB_ORG_URL = 'https://github.com/UnityInFlow'
 
 export const projectUrl = (name: string) => `${GITHUB_ORG_URL}/${name}`
 
-export const PROJECTS: ReadonlyArray<ProjectEntry> = [
+const RELEASED_PROJECTS: ReadonlyArray<ProjectEntry> = [
   {
     name: 'injection-scanner',
     language: 'Rust',
@@ -123,12 +124,20 @@ export const PROJECTS: ReadonlyArray<ProjectEntry> = [
   },
 ]
 
+/**
+ * Tools the site shows for now. The focus is injection-scanner; the other
+ * released tools stay in RELEASED_PROJECTS and come back by adding their name
+ * here (secure-web joins once it is released).
+ */
+const LISTED_PROJECT_NAMES: ReadonlyArray<string> = ['injection-scanner']
+
+/** Released tools shown on the Projects page, newest release first. */
+export const PROJECTS: ReadonlyArray<ProjectEntry> = RELEASED_PROJECTS.filter(
+  (project) => LISTED_PROJECT_NAMES.includes(project.name),
+)
+
 /** Tools shown on the Home page, in this order. */
-export const FEATURED_PROJECT_NAMES = [
-  'injection-scanner',
-  'kore-runtime',
-  'mcp-hub',
-] as const
+export const FEATURED_PROJECT_NAMES = ['injection-scanner'] as const
 
 /** "2026-08" → "Aug 2026". */
 export function formatReleaseMonth(released: string): string {

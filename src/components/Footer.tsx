@@ -1,6 +1,7 @@
 import { Link } from '@tanstack/react-router'
 import { AUTHOR, RSS_URL, SOCIAL_LINKS } from '@/config/site'
 import { LogoTile } from './Brand'
+import { LEARN_KOTLIN_ENABLED } from '@/config/features'
 
 const columnTitle = 'text-ink text-[13px] font-semibold'
 const footerLink = 'text-faint hover:text-ink transition-colors'
@@ -58,9 +59,11 @@ export default function Footer() {
           </nav>
           <nav aria-label="Learn" className="flex flex-col gap-2.5">
             <span className={columnTitle}>Learn</span>
-            <Link to="/learn-kotlin" className={footerLink}>
-              Learn Kotlin
-            </Link>
+            {LEARN_KOTLIN_ENABLED && (
+              <Link to="/learn-kotlin" className={footerLink}>
+                Learn Kotlin
+              </Link>
+            )}
             <Link to="/dispatchers" className={footerLink}>
               Dispatcher Visualizer
             </Link>

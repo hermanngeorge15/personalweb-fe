@@ -1,3 +1,5 @@
+import { LEARN_KOTLIN_ENABLED } from '@/config/features'
+import NotFound from '@/components/NotFound'
 import { useEffect, useId, useState } from 'react'
 import AppShell from '@/components/AppShell'
 import { Link } from '@tanstack/react-router'
@@ -244,5 +246,6 @@ function KotlinMindMapPage() {
 }
 
 export const Route = createFileRoute({
-  component: KotlinMindMapPage,
+  // Frozen sections answer with the site's 404 page (see config/features).
+  component: LEARN_KOTLIN_ENABLED ? KotlinMindMapPage : NotFound,
 })

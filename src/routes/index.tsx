@@ -1,9 +1,9 @@
 import AppShell from '@/components/AppShell'
-import { useEffect, useMemo, type ReactNode } from 'react'
+import { useEffect, useMemo } from 'react'
 import { Link } from '@tanstack/react-router'
 import { twMerge } from 'tailwind-merge'
 import { SEO_DEFAULTS, setHead, setJsonLd } from '@/lib/seo'
-import { usePosts, useKotlinTopics, useResumeProjects } from '@/lib/queries'
+import { usePosts } from '@/lib/queries'
 import { sortByPublishedDesc } from '@/lib/blog-utils'
 import { SOCIAL_LINKS } from '@/config/site'
 import { FEATURED_PROJECT_NAMES, PROJECTS } from '@/config/projects'
@@ -29,35 +29,12 @@ import {
 } from '@/components/home/Section'
 import { ProjectCard } from '@/components/home/ProjectCard'
 import { HomePostCard } from '@/components/home/HomePostCard'
-import { useCurrentRole } from '@/components/home/resume'
+import { LEARN_KOTLIN_ENABLED } from '@/config/features'
 
 const socialButtonClass =
   'border-line-strong text-body hover:bg-chip hover:text-ink flex size-11 items-center justify-center rounded-[10px] border transition-colors'
 
-function FloatingBadge({
-  label,
-  value,
-  className,
-}: {
-  label: string
-  value: string
-  className: string
-}) {
-  return (
-    <div
-      className={`border-window-line bg-window shadow-window absolute hidden max-w-[320px] rounded-xl border px-4 py-3 backdrop-blur sm:block ${className}`}
-    >
-      <div className="text-faint text-xs">{label}</div>
-      <div className="text-ink mt-0.5 text-sm font-medium">{value}</div>
-    </div>
-  )
-}
-
 function Hero() {
-  const role = useCurrentRole()
-  const currentRole = role
-    ? [role.projectName, role.company].filter(Boolean).join(' · ')
-    : ''
   return (
     <section
       className={`${sectionClass} flex flex-wrap items-center gap-x-16 gap-y-7 pt-8 sm:pt-[88px] sm:pb-16`}
@@ -161,85 +138,7 @@ function Hero() {
             decoding="async"
             className="border-window-line relative block aspect-square w-full rounded-[20px] border object-cover object-[50%_30%] sm:aspect-[4/5] sm:rounded-3xl"
           />
-          {currentRole && (
-            <FloatingBadge
-              label="Currently"
-              value={currentRole}
-              className="bottom-14 -left-9"
-            />
-          )}
-          <FloatingBadge
-            label="Founder"
-            value="Kotlin Server Squad"
-            className="top-12 -right-7"
-          />
         </div>
-      </div>
-    </section>
-  )
-}
-
-function Stat({
-  value,
-  label,
-  gradient = false,
-}: {
-  value: ReactNode
-  label: string
-  gradient?: boolean
-}) {
-  return (
-    <div className="bg-subtle px-4 py-4 sm:px-7 sm:py-6">
-      <div
-        className={`text-[26px] font-semibold tracking-[-0.03em] sm:text-[34px] ${gradient ? 'text-brand-gradient' : 'text-heading'}`}
-      >
-        {value}
-      </div>
-      <div className="text-faint mt-1 text-[13px] sm:text-sm">{label}</div>
-    </div>
-  )
-}
-
-function StatPlaceholder() {
-  return (
-    <span
-      aria-label="Loading"
-      className="bg-chip inline-block h-8 w-16 animate-pulse rounded-lg align-middle motion-reduce:animate-none"
-    />
-  )
-}
-
-/** Numbers from real sources only: the tool list, the resume API, the Learn Kotlin API. */
-function StatsBand() {
-  const resume = useResumeProjects()
-  const topics = useKotlinTopics()
-  const sinceYear = useMemo(() => {
-    const years = (resume.data ?? [])
-      .map((item) =>
-        item.startAt ? new Date(item.startAt).getFullYear() : NaN,
-      )
-      .filter((year) => !Number.isNaN(year))
-    return years.length > 0 ? Math.min(...years) : null
-  }, [resume.data])
-  const lessonCount = topics.data?.length ?? 0
-
-  return (
-    <section className={`${sectionClass} pt-6 sm:pt-0`}>
-      <div className="bg-line border-line grid grid-cols-2 gap-px overflow-hidden rounded-[14px] border sm:grid-cols-[repeat(auto-fit,minmax(220px,1fr))] sm:rounded-2xl">
-        <Stat value={PROJECTS.length} label="open-source tools released" />
-        {!resume.isError && (
-          <Stat
-            value={sinceYear ?? <StatPlaceholder />}
-            label="building JVM backends since"
-          />
-        )}
-        {!topics.isError && (
-          <Stat
-            value={topics.data ? lessonCount : <StatPlaceholder />}
-            label="interactive Kotlin lessons"
-          />
-        )}
-        <Stat value="KSS" label="community founder" gradient />
       </div>
     </section>
   )
@@ -264,7 +163,7 @@ function Tools() {
             to="/projects"
             className={twMerge(sectionLinkClass, 'hidden sm:inline-flex')}
           >
-            All {PROJECTS.length} projects →
+            Projects →
           </Link>
         }
       />
@@ -282,7 +181,7 @@ function Tools() {
         to="/projects"
         className={twMerge(sectionLinkClass, 'mt-2 sm:hidden')}
       >
-        All {PROJECTS.length} projects →
+        Projects →
       </Link>
     </section>
   )
@@ -479,14 +378,16 @@ function Community() {
             />
           </a>
         )}
-        <Link to="/learn-kotlin" className={communityCardClass}>
-          <CommunityCard
-            badge="Interactive course"
-            title="Learn Kotlin"
-            body="Interactive Kotlin learning for experienced developers — tailored paths for Java and C# developers, with a learning mind map."
-            cta="Start learning →"
-          />
-        </Link>
+        {LEARN_KOTLIN_ENABLED && (
+          <Link to="/learn-kotlin" className={communityCardClass}>
+            <CommunityCard
+              badge="Interactive course"
+              title="Learn Kotlin"
+              body="Interactive Kotlin learning for experienced developers — tailored paths for Java and C# developers, with a learning mind map."
+              cta="Start learning →"
+            />
+          </Link>
+        )}
         <Link to="/dispatchers" className={communityCardClass}>
           <CommunityCard
             badge="Interactive tool"
@@ -567,7 +468,6 @@ function HomePage() {
     <AppShell path="Home / Overview" fullBleed>
       <PageGlow className="-top-[220px] left-[40%] h-[760px] w-[1200px]" />
       <Hero />
-      <StatsBand />
       <Tools />
       <CoreSkillset />
       <LatestPosts />

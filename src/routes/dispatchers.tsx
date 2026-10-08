@@ -3,6 +3,7 @@ import { Link } from '@tanstack/react-router'
 import AppShell from '@/components/AppShell'
 import { SEO_DEFAULTS, setHead } from '@/lib/seo'
 import { ArrowLeftIcon, ExternalLinkIcon } from '@/components/icons'
+import { LEARN_KOTLIN_ENABLED } from '@/config/features'
 
 const TITLE = 'Kotlin Coroutines Dispatcher Visualizer'
 const DESCRIPTION =
@@ -40,13 +41,15 @@ function DispatchersPage() {
 
       <section className="relative mx-auto flex max-w-[1200px] flex-wrap items-end justify-between gap-4 px-4 pt-8 sm:px-8 sm:pt-12">
         <div className="min-w-0 flex-[1_1_520px]">
-          <Link
-            to="/learn-kotlin"
-            className="text-muted hover:text-ink inline-flex min-h-11 items-center gap-1.5 text-[14px] transition-colors"
-          >
-            <ArrowLeftIcon size={15} />
-            Learn Kotlin
-          </Link>
+          {LEARN_KOTLIN_ENABLED && (
+            <Link
+              to="/learn-kotlin"
+              className="text-muted hover:text-ink inline-flex min-h-11 items-center gap-1.5 text-[14px] transition-colors"
+            >
+              <ArrowLeftIcon size={15} />
+              Learn Kotlin
+            </Link>
+          )}
           <h1 className="text-heading mt-1 text-[30px] leading-[1.1] font-semibold tracking-[-0.03em] sm:text-[40px]">
             {TITLE}
           </h1>
