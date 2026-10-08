@@ -316,7 +316,7 @@ export function SproutIcon(props: IconProps) {
 export function WrenchIcon(props: IconProps) {
   return (
     <StrokeIcon {...props}>
-      <path d="M14.7 6.3a4 4 0 0 0 5 5L21 13l-8 8a2.8 2.8 0 0 1-4-4l8-8-1.3-1.3a4 4 0 0 0-5-5l2.6 2.6-.6 2.4-2.4.6z" />
+      <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.8-3.8a6 6 0 0 1-7.9 7.9l-6.9 6.9a2.1 2.1 0 0 1-3-3l6.9-6.9a6 6 0 0 1 7.9-7.9z" />
     </StrokeIcon>
   )
 }
