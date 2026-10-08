@@ -2,6 +2,7 @@ import { Link } from '@tanstack/react-router'
 import { ensureKeycloakAuth } from '@/lib/keycloak'
 import AppShell from '@/components/AppShell'
 import { MutationStatus, clearSaved } from '@/components/admin/MutationStatus'
+import { DifficultyOptions } from '@/components/admin/AdminForm'
 import { formInt } from '@/lib/adminFormat'
 import {
   useKotlinChaptersAdmin,
@@ -80,9 +81,7 @@ function AdminKotlinChapters() {
           />
           <div className="grid gap-2 md:grid-cols-2">
             <select name="difficulty" className="rounded border p-2">
-              <option value="beginner">Beginner</option>
-              <option value="intermediate">Intermediate</option>
-              <option value="advanced">Advanced</option>
+              <DifficultyOptions />
             </select>
             <input
               name="estimatedTimeMinutes"

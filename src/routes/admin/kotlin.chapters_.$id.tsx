@@ -3,6 +3,7 @@ import { Link } from '@tanstack/react-router'
 import { ensureKeycloakAuth } from '@/lib/keycloak'
 import AppShell from '@/components/AppShell'
 import { MutationStatus, clearSaved } from '@/components/admin/MutationStatus'
+import { DifficultyOptions } from '@/components/admin/AdminForm'
 import { formInt, routeInt } from '@/lib/adminFormat'
 import { useKotlinChaptersAdmin, useUpdateKotlinChapter } from '@/lib/queries'
 
@@ -105,9 +106,7 @@ function AdminKotlinChapterEdit() {
                   className="w-full rounded border p-2"
                   defaultValue={chapter.difficulty}
                 >
-                  <option value="beginner">Beginner</option>
-                  <option value="intermediate">Intermediate</option>
-                  <option value="advanced">Advanced</option>
+                  <DifficultyOptions current={chapter.difficulty} />
                 </select>
               </label>
               <label className="grid gap-1">

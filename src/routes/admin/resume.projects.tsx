@@ -2,6 +2,7 @@ import { Link } from '@tanstack/react-router'
 import { ensureKeycloakAuth } from '@/lib/keycloak'
 import AppShell from '@/components/AppShell'
 import { MutationStatus, clearSaved } from '@/components/admin/MutationStatus'
+import { DeleteButton } from '@/components/admin/AdminForm'
 import { fromDateTimeInput } from '@/lib/adminFormat'
 import {
   useResumeProjects,
@@ -174,15 +175,9 @@ function AdminResumeProjects() {
                     >
                       Edit
                     </Link>
-                    <button
-                      className="rounded bg-red-600 px-3 py-1 text-white disabled:opacity-50"
-                      onClick={async () => {
-                        await deleteProject.mutateAsync({ id: p.id })
-                      }}
-                      disabled={deleteProject.isPending}
-                    >
-                      {deleteProject.isPending ? 'Deleting…' : 'Delete'}
-                    </button>
+                    <DeleteButton
+                      onDelete={() => deleteProject.mutateAsync({ id: p.id })}
+                    />
                   </div>
                 </li>
               )

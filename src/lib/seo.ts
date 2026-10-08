@@ -80,7 +80,8 @@ export const SEO_DEFAULTS = {
   siteUrl: 'https://jirihermann.com',
   description:
     'Backend Software Engineer specializing in Kotlin, Java, Spring Boot, and scalable systems. Founder of Kotlin Server Squad community. Building clean, reliable backend solutions.',
-  image: '/og-default.png',
+  // Open Graph requires an absolute image URL.
+  image: 'https://jirihermann.com/og-default.png',
 }
 
 export function setJsonLd(data: unknown) {
