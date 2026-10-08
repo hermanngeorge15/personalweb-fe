@@ -77,7 +77,7 @@ function Hero() {
       <h1 className="text-heading mx-auto mt-6 max-w-[900px] text-[40px] leading-[1.04] font-semibold tracking-[-0.035em] sm:text-[52px] lg:text-[64px]">
         Hi, I&apos;m Jiří.{' '}
         <span className="text-brand-gradient">
-          Backend engineer and community builder.
+          Software engineer and community builder.
         </span>
       </h1>
     </section>
@@ -106,8 +106,7 @@ function Intro() {
         <div className="text-body max-w-[720px] space-y-5 text-[17px] leading-[1.75] sm:text-lg">
           <p>
             My name is <strong className={strong}>Jiří Hermann</strong>, and
-            I&apos;m a{' '}
-            <strong className={strong}>Backend Software Engineer</strong> and{' '}
+            I&apos;m a <strong className={strong}>Software Engineer</strong> and{' '}
             <strong className={strong}>Community Builder</strong> passionate
             about designing clean, reliable, and scalable systems.
           </p>
@@ -119,6 +118,17 @@ function Intro() {
             <strong className={strong}>Java</strong>. My work revolves around
             Spring Boot, Micronaut, PostgreSQL, Redis, Kafka, and Docker, always
             with a focus on clean architecture and automation.
+          </p>
+          <p>
+            I also build with <strong className={strong}>AI</strong> every day.{' '}
+            <strong className={strong}>Claude Code</strong>,{' '}
+            <strong className={strong}>Codex</strong>,{' '}
+            <strong className={strong}>GitHub Copilot</strong> and local models
+            through <strong className={strong}>Ollama</strong> are part of my
+            toolkit, and I&apos;m building an agentic development workflow
+            around them: agents plan, implement and review the work, and I
+            approve every change before it ships. It&apos;s how I build my own
+            projects.
           </p>
           <p>
             Beyond engineering, I&apos;m the founder of{' '}
@@ -211,6 +221,19 @@ function Now() {
             />
           </Link>
         )}
+        {/* Not a link, so no hover border. */}
+        <div className={twMerge(nowCardClass, 'hover:border-line')}>
+          <NowCard
+            label="AI engineering"
+            title="Agentic dev workflow"
+            body="Claude Code, Codex, Copilot and Ollama working as a team: one agent implements, another reviews, and I approve every change."
+            cover={{
+              slug: 'agentic-workflow',
+              path: '~/now/agentic-workflow',
+              lines: ['claude-code', 'codex', 'copilot', 'ollama'],
+            }}
+          />
+        </div>
         {SOCIAL_LINKS.kotlinServerSquad && (
           <a
             href={SOCIAL_LINKS.kotlinServerSquad}

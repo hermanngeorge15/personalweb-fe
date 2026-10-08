@@ -15,8 +15,8 @@ import {
   DatabaseIcon,
   GitHubIcon,
   InstagramIcon,
+  LightbulbIcon,
   LinkedInIcon,
-  LockIcon,
   PlugIcon,
 } from '@/components/icons'
 import {
@@ -48,7 +48,7 @@ function Hero() {
           Available for selected projects · Prague, CZ
         </span>
         <h1 className="text-heading mt-[18px] text-[38px] leading-[1.06] font-semibold tracking-[-0.03em] sm:mt-6 sm:text-[52px] sm:leading-[1.04] sm:tracking-[-0.035em] lg:text-[62px]">
-          Backend engineer. <br className="hidden sm:block" />
+          Software engineer. <br className="hidden sm:block" />
           Building secure tooling{' '}
           <span className="text-brand-gradient">for AI agents.</span>
         </h1>
@@ -189,14 +189,20 @@ function Tools() {
 
 const SKILLS = [
   {
+    title: 'AI-Assisted Engineering',
+    body: 'Building agentic development workflows with Claude Code, Codex, GitHub Copilot and Ollama, where agents plan, implement and review code',
+    Icon: LightbulbIcon,
+    tone: 'text-brand-b',
+  },
+  {
     title: 'Kotlin & Spring Boot',
     body: 'Expert in building scalable backend services with Kotlin, Spring Boot, Coroutines, and reactive programming',
     Icon: CodeIcon,
     tone: 'text-brand-a',
   },
   {
-    title: 'System Integration & APIs',
-    body: 'Building seamless integrations with banking systems, payment gateways, and third-party services via REST and messaging',
+    title: 'APIs & System Integration',
+    body: 'Building robust REST APIs and PSD2 integrations, and connecting banking systems, payment gateways and third-party services via REST and messaging',
     Icon: PlugIcon,
     tone: 'text-brand-a',
   },
@@ -205,12 +211,6 @@ const SKILLS = [
     body: 'Working with PostgreSQL, MongoDB, Cassandra, Oracle, Redis, and Elasticsearch for diverse data needs',
     Icon: DatabaseIcon,
     tone: 'text-brand-a',
-  },
-  {
-    title: 'API Development',
-    body: 'Building robust REST APIs, PSD2 integrations, and banking-grade applications with high reliability',
-    Icon: LockIcon,
-    tone: 'text-brand-b',
   },
   {
     title: 'Observability & Monitoring',
