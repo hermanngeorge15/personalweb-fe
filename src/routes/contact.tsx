@@ -1,8 +1,53 @@
+import type { ReactNode } from 'react'
 import AppShell from '@/components/AppShell'
 import { ContactForm } from '@/components/ContactForm'
 import { useEffect } from 'react'
 import { SEO_DEFAULTS, setHead } from '@/lib/seo'
 import { SOCIAL_LINKS } from '@/config/site'
+import { GitHubIcon, LinkedInIcon, MailIcon } from '@/components/icons'
+
+const section = 'relative mx-auto px-4 sm:px-8'
+
+function ContactCard({
+  href,
+  external = false,
+  label,
+  title,
+  tone,
+  icon,
+}: {
+  href: string
+  external?: boolean
+  label: string
+  title: string
+  tone: 'a' | 'b'
+  icon: ReactNode
+}) {
+  return (
+    <a
+      href={href}
+      {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+      className="border-line bg-card hover:border-line-strong group flex items-center gap-4 rounded-2xl border p-5 transition-colors"
+    >
+      <span
+        aria-hidden="true"
+        className={`flex size-11 shrink-0 items-center justify-center rounded-[10px] ${
+          tone === 'a'
+            ? 'bg-brand-a/10 text-brand-a'
+            : 'bg-brand-b/10 text-brand-b'
+        }`}
+      >
+        {icon}
+      </span>
+      <span className="min-w-0">
+        <span className="text-faint block text-[13px]">{label}</span>
+        <span className="text-ink mt-0.5 block text-base font-medium break-words group-hover:underline group-hover:decoration-1 group-hover:underline-offset-4">
+          {title}
+        </span>
+      </span>
+    </a>
+  )
+}
 
 function ContactPage() {
   useEffect(() => {
@@ -29,139 +74,85 @@ function ContactPage() {
   }, [])
 
   return (
-    <AppShell path="Contact">
-      {/* Hero Header */}
-      <div className="mb-12 text-center">
-        <h1 className="bg-gradient-to-r from-blue-600 via-cyan-500 to-green-500 bg-clip-text text-4xl font-bold tracking-tight text-transparent md:text-5xl">
-          Get in Touch
+    <AppShell path="Contact" fullBleed>
+      <div
+        aria-hidden="true"
+        className="bg-glow-hero pointer-events-none absolute -top-[260px] left-1/2 h-[640px] w-[1100px] -translate-x-1/2"
+      />
+
+      {/* Hero */}
+      <section
+        className={`${section} max-w-[1200px] pt-16 pb-8 text-center sm:pt-[88px] sm:pb-10`}
+      >
+        <span className="border-line-strong bg-chip/60 text-body inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-[13px]">
+          <span
+            aria-hidden="true"
+            className="bg-brand-b size-1.5 rounded-full"
+          />
+          I typically respond within 24–48 hours
+        </span>
+        <h1 className="text-heading mx-auto mt-6 max-w-[760px] text-[40px] leading-[1.05] font-semibold tracking-[-0.035em] sm:text-[52px] lg:text-[58px]">
+          Get in <span className="text-brand-gradient">Touch</span>
         </h1>
-        <p className="text-muted-foreground mt-4 text-lg">
+        <p className="text-muted mx-auto mt-5 max-w-[560px] text-[17px] leading-[1.55] sm:text-[19px]">
           Have a project in mind? Let&apos;s build something great together.
         </p>
-      </div>
+      </section>
 
-      {/* Two Column Layout */}
-      <div className="grid gap-8 lg:grid-cols-5 lg:gap-12">
-        {/* Left Column - Contact Info */}
-        <div className="space-y-8 lg:col-span-2">
-          {/* Quick Contact Cards */}
-          <div className="space-y-4">
-            {/* Email Card */}
-            <a
-              href="mailto:me@jirihermann.com"
-              className="group block rounded-2xl border border-gray-200 bg-white/60 p-6 backdrop-blur transition-all hover:-translate-y-1 hover:border-blue-300 hover:shadow-lg"
-            >
-              <div className="flex items-start gap-4">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 text-white shadow-lg">
-                  <svg
-                    className="h-6 w-6"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                    />
-                  </svg>
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold text-gray-900">Email</h3>
-                  <p className="mt-1 text-sm text-blue-600 group-hover:underline">
-                    me@jirihermann.com
-                  </p>
-                  <p className="text-muted-foreground mt-2 text-sm">
-                    Best for detailed inquiries
-                  </p>
-                </div>
-              </div>
-            </a>
-
-            {/* LinkedIn Card */}
-            <a
+      {/* Contact options + form */}
+      <section
+        className={`${section} flex max-w-[1080px] flex-wrap items-start gap-6 pt-4 pb-24 sm:pb-[104px]`}
+      >
+        <div className="flex min-w-0 flex-[1_1_320px] flex-col gap-3">
+          <ContactCard
+            href="mailto:me@jirihermann.com"
+            label="Email · best for detailed inquiries"
+            title="me@jirihermann.com"
+            tone="a"
+            icon={<MailIcon size={20} />}
+          />
+          {SOCIAL_LINKS.linkedin && (
+            <ContactCard
               href={SOCIAL_LINKS.linkedin}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group block rounded-2xl border border-gray-200 bg-white/60 p-6 backdrop-blur transition-all hover:-translate-y-1 hover:border-blue-300 hover:shadow-lg"
-            >
-              <div className="flex items-start gap-4">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-700 to-blue-500 text-white shadow-lg">
-                  <svg
-                    className="h-6 w-6"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M4.98 3.5C4.98 4.88 3.86 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zM.5 8h4V23h-4V8zM8 8h3.8v2.05h.05c.53-1 1.84-2.05 3.79-2.05 4.05 0 4.8 2.67 4.8 6.15V23h-4v-7.5c0-1.79-.03-4.1-2.5-4.1-2.5 0-2.88 1.95-2.88 3.98V23h-4V8z" />
-                  </svg>
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold text-gray-900">LinkedIn</h3>
-                  <p className="mt-1 text-sm text-blue-600 group-hover:underline">
-                    Connect with me
-                  </p>
-                  <p className="text-muted-foreground mt-2 text-sm">
-                    Professional networking
-                  </p>
-                </div>
-              </div>
-            </a>
-
-            {/* GitHub Card */}
-            <a
+              external
+              label="LinkedIn · professional networking"
+              title="Connect with me"
+              tone="a"
+              icon={<LinkedInIcon size={20} />}
+            />
+          )}
+          {SOCIAL_LINKS.github && (
+            <ContactCard
               href={SOCIAL_LINKS.github}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group block rounded-2xl border border-gray-200 bg-white/60 p-6 backdrop-blur transition-all hover:-translate-y-1 hover:border-blue-300 hover:shadow-lg"
-            >
-              <div className="flex items-start gap-4">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-gray-800 to-gray-600 text-white shadow-lg">
-                  <svg
-                    className="h-6 w-6"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      clipRule="evenodd"
-                      d="M12 2C6.48 2 2 6.58 2 12.26c0 4.52 2.87 8.35 6.84 9.71.5.09.68-.22.68-.49 0-.24-.01-.87-.01-1.71-2.78.62-3.37-1.37-3.37-1.37-.45-1.17-1.11-1.48-1.11-1.48-.91-.64.07-.63.07-.63 1 .07 1.53 1.05 1.53 1.05.9 1.57 2.36 1.12 2.94.86.09-.67.35-1.12.63-1.38-2.22-.26-4.55-1.13-4.55-5 0-1.11.39-2.02 1.03-2.73-.1-.26-.45-1.3.1-2.71 0 0 .84-.27 2.75 1.04A9.27 9.27 0 0 1 12 7.49c.85 0 1.7.12 2.5.35 1.9-1.31 2.74-1.04 2.74-1.04.55 1.41.2 2.45.1 2.71.64.71 1.02 1.62 1.02 2.73 0 3.88-2.34 4.73-4.57 4.99.36.32.68.95.68 1.92 0 1.39-.01 2.51-.01 2.85 0 .27.18.58.69.48A10.01 10.01 0 0 0 22 12.26C22 6.58 17.52 2 12 2z"
-                    />
-                  </svg>
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold text-gray-900">GitHub</h3>
-                  <p className="mt-1 text-sm text-blue-600 group-hover:underline">
-                    View my projects
-                  </p>
-                  <p className="text-muted-foreground mt-2 text-sm">
-                    Code & contributions
-                  </p>
-                </div>
-              </div>
-            </a>
-          </div>
-
-          {/* Additional Info */}
-          <div className="rounded-2xl border border-gray-200 bg-gradient-to-br from-blue-50/50 to-cyan-50/50 p-6 backdrop-blur">
-            <h3 className="font-semibold text-gray-900">Response Time</h3>
-            <p className="text-muted-foreground mt-2 text-sm">
-              I typically respond within 24-48 hours. For urgent matters, please
-              mention it in your message.
-            </p>
-          </div>
+              external
+              label="GitHub · code & contributions"
+              title="View my projects"
+              tone="b"
+              icon={<GitHubIcon size={20} />}
+            />
+          )}
+          {SOCIAL_LINKS.kotlinServerSquad && (
+            <ContactCard
+              href={SOCIAL_LINKS.kotlinServerSquad}
+              external
+              label="Community"
+              title="Kotlin Server Squad"
+              tone="b"
+              icon={<span className="text-[13px] font-bold">KSS</span>}
+            />
+          )}
+          <p className="text-faint mt-2 px-1 text-sm leading-relaxed">
+            For urgent matters, please mention it in your message.
+          </p>
         </div>
 
-        {/* Right Column - Contact Form */}
-        <div className="lg:col-span-3">
-          <div className="rounded-2xl border border-gray-200 bg-white/60 p-8 shadow-sm backdrop-blur">
-            <h2 className="mb-6 text-2xl font-semibold text-gray-900">
-              Send a Message
-            </h2>
-            <ContactForm />
-          </div>
+        <div className="border-line bg-cta-glow min-w-0 flex-[999_1_460px] rounded-[20px] border p-5 sm:p-8">
+          <h2 className="text-heading mb-5 text-[22px] font-semibold tracking-[-0.015em]">
+            Send a Message
+          </h2>
+          <ContactForm />
         </div>
-      </div>
+      </section>
     </AppShell>
   )
 }
