@@ -1,8 +1,22 @@
 import { Link } from '@tanstack/react-router'
 import { ensureKeycloakAuth } from '@/lib/keycloak'
-import AppShell from '@/components/AppShell'
+import AdminShell from '@/components/admin/AdminShell'
 import { MutationStatus, clearSaved } from '@/components/admin/MutationStatus'
-import { DifficultyOptions } from '@/components/admin/AdminForm'
+import {
+  DeleteButton,
+  DifficultyOptions,
+  FormActions,
+} from '@/components/admin/AdminForm'
+import {
+  AdminCard,
+  AdminPageHeader,
+  CardTitle,
+  Field,
+  Notice,
+  inputClass,
+  primaryButton,
+  rowButton,
+} from '@/components/admin/ui'
 import { formInt } from '@/lib/adminFormat'
 import {
   useKotlinChaptersAdmin,
@@ -16,150 +30,167 @@ function AdminKotlinChapters() {
   const deleteChapter = useDeleteKotlinChapter()
 
   return (
-    <AppShell path="Admin / Kotlin Chapters">
-      <section className="grid gap-6 md:gap-8">
-        <h1 className="text-2xl font-semibold tracking-tight">
-          Expense Tracker Chapters
-        </h1>
-
-        <form
-          onChange={() => clearSaved(createChapter)}
-          className="grid gap-2 rounded border p-3"
-          onSubmit={async (e) => {
-            e.preventDefault()
-            // currentTarget is null after an await, so keep the form for reset().
-            const form = e.currentTarget as HTMLFormElement
-            const fd = new FormData(form)
-            const chapterNumber = formInt(fd, 'chapterNumber')
-            const title = String(fd.get('title') ?? '')
-            const description = String(fd.get('description') ?? '')
-            const difficulty = String(fd.get('difficulty') ?? 'beginner')
-            const estimatedTimeMinutes = formInt(fd, 'estimatedTimeMinutes')
-
-            if (
-              !title ||
-              chapterNumber === null ||
-              estimatedTimeMinutes === null
-            )
-              return
-
-            try {
-              await createChapter.mutateAsync({
-                chapterNumber,
-                title,
-                description: description || undefined,
-                difficulty,
-                estimatedTimeMinutes,
-              })
-              form.reset()
-            } catch {
-              // shown by MutationStatus
-            }
-          }}
-        >
-          <div className="grid gap-2 md:grid-cols-2">
-            <input
-              name="chapterNumber"
-              type="number"
-              placeholder="Chapter Number"
-              min={1}
-              defaultValue={1}
-              className="rounded border p-2"
-              required
-            />
-            <input
-              name="title"
-              placeholder="Title"
-              className="rounded border p-2"
-              required
-            />
+    <AdminShell
+      crumbs={[
+        { label: 'Admin', to: '/admin' },
+        { label: 'Learn Kotlin' },
+        { label: 'Chapters' },
+      ]}
+      viewHref="/learn-kotlin"
+    >
+      <AdminPageHeader title="Expense Tracker Chapters" />
+      <div className="mt-6 flex flex-wrap items-start gap-5">
+        <AdminCard className="min-w-0 flex-[999_1_480px] overflow-visible p-0 sm:p-0">
+          <div className="border-line flex items-center justify-between gap-3 border-b px-5 py-3.5">
+            <h2 className="text-heading text-base font-semibold">
+              All chapters
+            </h2>
+            {data && (
+              <span className="text-faint text-[13px]">
+                {data.length} {data.length === 1 ? 'chapter' : 'chapters'}
+              </span>
+            )}
           </div>
-          <input
-            name="description"
-            placeholder="Description (optional)"
-            className="rounded border p-2"
-          />
-          <div className="grid gap-2 md:grid-cols-2">
-            <select name="difficulty" className="rounded border p-2">
-              <DifficultyOptions />
-            </select>
-            <input
-              name="estimatedTimeMinutes"
-              type="number"
-              placeholder="Estimated time (min)"
-              defaultValue={30}
-              min={1}
-              step={1}
-              className="rounded border p-2"
-              required
-            />
-          </div>
-          <div>
-            <button
-              type="submit"
-              className="rounded bg-blue-600 px-3 py-2 text-white disabled:opacity-50"
-              disabled={createChapter.isPending}
-            >
-              {createChapter.isPending ? 'Creating…' : 'Create Chapter'}
-            </button>{' '}
-            <MutationStatus
-              isSuccess={createChapter.isSuccess}
-              error={createChapter.error}
-            />
-          </div>
-        </form>
-
-        {isLoading && <div>Loading…</div>}
-        {isError && <div>Failed to load chapters.</div>}
-
-        {data && (
-          <ul className="grid gap-2">
-            {data
-              .sort((a, b) => a.chapterNumber - b.chapterNumber)
-              .map((chapter) => (
-                <li
-                  key={chapter.id}
-                  className="flex items-center justify-between rounded border p-3"
-                >
-                  <div>
-                    <div className="font-medium">
-                      Chapter {chapter.chapterNumber}: {chapter.title}
+          {(isLoading || isError) && (
+            <div className="px-5 py-4">
+              {isLoading && <Notice>Loading…</Notice>}
+              {isError && (
+                <Notice tone="danger">Failed to load chapters.</Notice>
+              )}
+            </div>
+          )}
+          {data && (
+            <ul className="divide-line divide-y">
+              {data
+                .sort((a, b) => a.chapterNumber - b.chapterNumber)
+                .map((chapter) => (
+                  <li
+                    key={chapter.id}
+                    className="flex flex-wrap items-center justify-between gap-3 px-5 py-3.5"
+                  >
+                    <div className="min-w-0">
+                      <div className="text-ink text-[15px] font-medium">
+                        Chapter {chapter.chapterNumber}: {chapter.title}
+                      </div>
+                      <div className="text-muted text-sm">
+                        {chapter.difficulty} • {chapter.estimatedTimeMinutes}{' '}
+                        min
+                        {chapter.description && ` • ${chapter.description}`}
+                      </div>
                     </div>
-                    <div className="text-muted-foreground text-sm">
-                      {chapter.difficulty} • {chapter.estimatedTimeMinutes} min
-                      {chapter.description && ` • ${chapter.description}`}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Link
-                      to="/admin/kotlin/chapters/$id"
-                      params={{ id: String(chapter.id) }}
-                      className="underline"
-                    >
-                      Edit
-                    </Link>
-                    <button
-                      className="rounded bg-red-600 px-3 py-1 text-white disabled:opacity-50"
-                      onClick={async () => {
-                        if (
-                          confirm(
-                            `Delete chapter ${chapter.chapterNumber}? This cannot be undone.`,
-                          )
-                        ) {
-                          await deleteChapter.mutateAsync({ id: chapter.id })
+                    <div className="flex items-center gap-2">
+                      <Link
+                        to="/admin/kotlin/chapters/$id"
+                        params={{ id: String(chapter.id) }}
+                        className={rowButton}
+                      >
+                        Edit
+                        <span className="sr-only">
+                          {' '}
+                          chapter {chapter.chapterNumber}
+                        </span>
+                      </Link>
+                      <DeleteButton
+                        itemName={`Chapter ${chapter.chapterNumber}: ${chapter.title}`}
+                        onDelete={() =>
+                          deleteChapter.mutateAsync({ id: chapter.id })
                         }
-                      }}
-                      disabled={deleteChapter.isPending}
-                    >
-                      {deleteChapter.isPending ? 'Deleting…' : 'Delete'}
-                    </button>
-                  </div>
-                </li>
-              ))}
-          </ul>
-        )}
-      </section>
-    </AppShell>
+                      />
+                    </div>
+                  </li>
+                ))}
+            </ul>
+          )}
+        </AdminCard>
+
+        <AdminCard className="min-w-0 flex-[1_1_380px]">
+          <CardTitle>New chapter</CardTitle>
+          <form
+            onChange={() => clearSaved(createChapter)}
+            className="@container grid gap-4"
+            onSubmit={async (e) => {
+              e.preventDefault()
+              // currentTarget is null after an await, so keep the form for reset().
+              const form = e.currentTarget as HTMLFormElement
+              const fd = new FormData(form)
+              const chapterNumber = formInt(fd, 'chapterNumber')
+              const title = String(fd.get('title') ?? '')
+              const description = String(fd.get('description') ?? '')
+              const difficulty = String(fd.get('difficulty') ?? 'beginner')
+              const estimatedTimeMinutes = formInt(fd, 'estimatedTimeMinutes')
+
+              if (
+                !title ||
+                chapterNumber === null ||
+                estimatedTimeMinutes === null
+              )
+                return
+
+              try {
+                await createChapter.mutateAsync({
+                  chapterNumber,
+                  title,
+                  description: description || undefined,
+                  difficulty,
+                  estimatedTimeMinutes,
+                })
+                form.reset()
+              } catch {
+                // shown by MutationStatus
+              }
+            }}
+          >
+            <div className="grid gap-4 @sm:grid-cols-2">
+              <Field label="Chapter number">
+                <input
+                  name="chapterNumber"
+                  type="number"
+                  min={1}
+                  defaultValue={1}
+                  className={inputClass}
+                  required
+                />
+              </Field>
+              <Field label="Estimated time (min)">
+                <input
+                  name="estimatedTimeMinutes"
+                  type="number"
+                  defaultValue={30}
+                  min={1}
+                  step={1}
+                  className={inputClass}
+                  required
+                />
+              </Field>
+            </div>
+            <Field label="Title">
+              <input name="title" className={inputClass} required />
+            </Field>
+            <Field label="Description" hint="Optional">
+              <input name="description" className={inputClass} />
+            </Field>
+            <Field label="Difficulty">
+              <select name="difficulty" className={inputClass}>
+                <DifficultyOptions />
+              </select>
+            </Field>
+            <FormActions>
+              <button
+                type="submit"
+                className={primaryButton}
+                disabled={createChapter.isPending}
+              >
+                {createChapter.isPending ? 'Creating…' : 'Create Chapter'}
+              </button>
+              <MutationStatus
+                isSuccess={createChapter.isSuccess}
+                error={createChapter.error}
+              />
+            </FormActions>
+          </form>
+        </AdminCard>
+      </div>
+    </AdminShell>
   )
 }
 

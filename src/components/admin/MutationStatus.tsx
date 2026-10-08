@@ -1,3 +1,5 @@
+import { CheckIcon } from '@/components/icons'
+
 interface MutationStatusProps {
   isSuccess: boolean
   error: unknown
@@ -22,11 +24,20 @@ export function clearSaved(mutation: {
 export function MutationStatus({ isSuccess, error }: MutationStatusProps) {
   if (error) {
     return (
-      <span role="alert" className="text-sm text-red-600">
+      <span role="alert" className="text-danger text-sm">
         Not saved: {error instanceof Error ? error.message : String(error)}
       </span>
     )
   }
-  if (isSuccess) return <span className="text-sm text-green-700">Saved.</span>
+  if (isSuccess)
+    return (
+      <span
+        role="status"
+        className="text-brand-b inline-flex items-center gap-1.5 text-sm font-medium"
+      >
+        <CheckIcon size={16} />
+        Saved.
+      </span>
+    )
   return null
 }
