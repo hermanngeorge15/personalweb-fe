@@ -25,7 +25,7 @@ const LANGUAGE_ORDER: ReadonlyArray<ProjectLanguage> = [
 ]
 
 const DESCRIPTION =
-  'UnityInFlow: open-source tooling for the AI agent stack — prompt-injection scanning, spec validation, token cost control, a Kotlin agent runtime and MCP tooling.'
+  'UnityInFlow: open-source tooling for the AI agent stack, starting with injection-scanner — a fast, static scanner for prompt injection in the text you feed an LLM.'
 
 function Hero() {
   return (
@@ -41,9 +41,9 @@ function Hero() {
         <span className="text-brand-gradient">AI agent stack</span>
       </h1>
       <p className="text-muted mx-auto mt-5 max-w-[640px] text-[17px] leading-[1.55] sm:text-[19px]">
-        Spec validation, prompt-injection scanning, token cost control, a Kotlin
-        agent runtime and MCP tooling — JVM-native, observability-first, each
-        tool usable on its own.
+        Starting with injection-scanner: a fast, static scanner for the text you
+        feed an LLM — spec files, skills and RAG content — that catches prompt
+        injection before it reaches your model.
       </p>
       <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row sm:flex-wrap">
         <a
@@ -54,8 +54,12 @@ function Hero() {
         >
           github.com/UnityInFlow ↗
         </a>
-        <Link to="/blog" className={secondaryButtonClass}>
-          Read how they&apos;re built
+        <Link
+          to="/blog/$slug"
+          params={{ slug: 'injection-scanner' }}
+          className={secondaryButtonClass}
+        >
+          Read how it&apos;s built
         </Link>
       </div>
     </section>
@@ -123,38 +127,42 @@ function ToolGrid() {
       <h2 id="tools-title" className="sr-only">
         Released tools
       </h2>
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div
-          role="group"
-          aria-label="Filter by language"
-          className="flex flex-wrap gap-2"
-        >
-          <FilterChip
-            label="All"
-            count={PROJECTS.length}
-            pressed={filter === 'All'}
-            onPress={() => setFilter('All')}
-          />
-          {LANGUAGE_ORDER.filter((language) => counts.has(language)).map(
-            (language) => (
-              <FilterChip
-                key={language}
-                label={language}
-                language={language}
-                count={counts.get(language) ?? 0}
-                pressed={filter === language}
-                onPress={() => setFilter(language)}
-              />
-            ),
-          )}
+      {counts.size > 1 && (
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div
+            role="group"
+            aria-label="Filter by language"
+            className="flex flex-wrap gap-2"
+          >
+            <FilterChip
+              label="All"
+              count={PROJECTS.length}
+              pressed={filter === 'All'}
+              onPress={() => setFilter('All')}
+            />
+            {LANGUAGE_ORDER.filter((language) => counts.has(language)).map(
+              (language) => (
+                <FilterChip
+                  key={language}
+                  label={language}
+                  language={language}
+                  count={counts.get(language) ?? 0}
+                  pressed={filter === language}
+                  onPress={() => setFilter(language)}
+                />
+              ),
+            )}
+          </div>
+          <span className="text-faint text-sm">Newest release first</span>
         </div>
-        <span className="text-faint text-sm">Newest release first</span>
-      </div>
-      <p aria-live="polite" className="sr-only">
-        {filter === 'All'
-          ? `Showing all ${visible.length} tools`
-          : `Showing ${visible.length} ${filter} tools`}
-      </p>
+      )}
+      {counts.size > 1 && (
+        <p aria-live="polite" className="sr-only">
+          {filter === 'All'
+            ? `Showing all ${visible.length} tools`
+            : `Showing ${visible.length} ${filter} tools`}
+        </p>
+      )}
 
       <ul className="mt-6 grid grid-cols-[repeat(auto-fill,minmax(min(100%,340px),1fr))] gap-4 sm:gap-5">
         {visible.map((project) => (
@@ -173,7 +181,7 @@ function ContributeCta() {
       <div className="border-line bg-cta-glow flex flex-wrap items-center justify-between gap-6 overflow-hidden rounded-[20px] border p-6 sm:rounded-3xl sm:p-12">
         <div className="flex-[1_1_420px]">
           <h2 className="text-heading text-[24px] leading-[1.2] font-semibold tracking-[-0.02em] sm:text-[30px]">
-            Using one of these tools?
+            Using injection-scanner?
           </h2>
           <p className="text-muted mt-2.5 max-w-[560px] text-base leading-[1.6]">
             Open an issue, send a pattern the scanner misses, or tell me what

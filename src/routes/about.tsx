@@ -9,7 +9,6 @@ import {
   useResumeProjects,
 } from '@/lib/queries'
 import { SOCIAL_LINKS } from '@/config/site'
-import { PROJECTS } from '@/config/projects'
 import profilePhoto from '@/assets/images/profile.jpg'
 import { PostCover } from '@/components/blog/PostCover'
 import {
@@ -235,11 +234,11 @@ function Now() {
           <NowCard
             label="Open source"
             title="UnityInFlow"
-            body={`${PROJECTS.length} tools released for the AI agent stack, from injection-scanner to kore-runtime.`}
+            body="injection-scanner: a static scanner that catches prompt injection before it reaches your model."
             cover={{
               slug: 'unityinflow',
               path: '~/projects/unityinflow',
-              lines: ['injection-scanner', 'kore-runtime'],
+              lines: ['injection-scanner'],
             }}
           />
         </Link>

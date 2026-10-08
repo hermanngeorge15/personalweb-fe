@@ -1,3 +1,5 @@
+import { LEARN_KOTLIN_ENABLED } from '@/config/features'
+import NotFound from '@/components/NotFound'
 import { useEffect, useState } from 'react'
 import { Link } from '@tanstack/react-router'
 import AppShell from '@/components/AppShell'
@@ -20,7 +22,8 @@ import {
 } from '@/components/learn/language'
 
 export const Route = createFileRoute({
-  component: LearnKotlinIndex,
+  // Frozen sections answer with the site's 404 page (see config/features).
+  component: LEARN_KOTLIN_ENABLED ? LearnKotlinIndex : NotFound,
 })
 
 const section = 'relative mx-auto max-w-[1200px] px-4 sm:px-8'
