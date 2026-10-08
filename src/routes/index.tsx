@@ -29,21 +29,10 @@ import {
 } from '@/components/home/Section'
 import { ProjectCard } from '@/components/home/ProjectCard'
 import { HomePostCard } from '@/components/home/HomePostCard'
+import { useCurrentRole } from '@/components/home/resume'
 
 const socialButtonClass =
   'border-line-strong text-body hover:bg-chip hover:text-ink flex size-11 items-center justify-center rounded-[10px] border transition-colors'
-
-/** The role in the resume with no end date (latest start wins). */
-function useCurrentRole() {
-  const { data } = useResumeProjects()
-  return useMemo(() => {
-    const current = (data ?? [])
-      .filter((item) => !item.endAt && item.startAt)
-      .sort((a, b) => (b.startAt ?? '').localeCompare(a.startAt ?? ''))[0]
-    if (!current) return null
-    return [current.projectName, current.company].filter(Boolean).join(' · ')
-  }, [data])
-}
 
 function FloatingBadge({
   label,
@@ -65,7 +54,10 @@ function FloatingBadge({
 }
 
 function Hero() {
-  const currentRole = useCurrentRole()
+  const role = useCurrentRole()
+  const currentRole = role
+    ? [role.projectName, role.company].filter(Boolean).join(' · ')
+    : ''
   return (
     <section
       className={`${sectionClass} flex flex-wrap items-center gap-x-16 gap-y-7 pt-8 sm:pt-[88px] sm:pb-16`}

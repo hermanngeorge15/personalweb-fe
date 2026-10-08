@@ -1,6 +1,314 @@
 import AppShell from '@/components/AppShell'
-import { useEffect } from 'react'
+import { useEffect, useMemo, type ReactNode } from 'react'
+import { Link } from '@tanstack/react-router'
+import { twMerge } from 'tailwind-merge'
 import { SEO_DEFAULTS, setHead, setJsonLd } from '@/lib/seo'
+import {
+  useResumeEducation,
+  useResumeLanguages,
+  useResumeProjects,
+} from '@/lib/queries'
+import { SOCIAL_LINKS } from '@/config/site'
+import { PROJECTS } from '@/config/projects'
+import profilePhoto from '@/assets/images/profile.jpg'
+import {
+  Eyebrow,
+  PageGlow,
+  SectionHeading,
+  primaryButtonClass,
+  secondaryButtonClass,
+  sectionClass,
+} from '@/components/home/Section'
+import {
+  buildPath,
+  monthYearOf,
+  useCurrentRole,
+} from '@/components/home/resume'
+
+function FactCard({ label, value }: { label: string; value: ReactNode }) {
+  return (
+    <div className="border-line bg-subtle rounded-xl border p-4">
+      <div className="text-faint text-[13px]">{label}</div>
+      <div className="text-ink mt-1 text-[15px] font-medium">{value}</div>
+    </div>
+  )
+}
+
+function Languages() {
+  const { data, isLoading, isError } = useResumeLanguages()
+  if (isError) return null
+  const text = (data ?? [])
+    .filter((language) => language.name)
+    .map((language) =>
+      language.level
+        ? `${language.name} (${language.level.toLowerCase()})`
+        : language.name,
+    )
+    .join(' · ')
+  if (!isLoading && !text) return null
+  return (
+    <FactCard
+      label="Speaks"
+      value={
+        isLoading ? (
+          <span
+            aria-label="Loading"
+            className="bg-chip inline-block h-5 w-32 animate-pulse rounded motion-reduce:animate-none"
+          />
+        ) : (
+          text
+        )
+      }
+    />
+  )
+}
+
+const strong = 'text-heading font-semibold'
+
+function Intro() {
+  return (
+    <section
+      className={`${sectionClass} grid gap-10 pt-12 sm:pt-[88px] lg:grid-cols-[minmax(0,400px)_minmax(0,1fr)] lg:gap-16`}
+    >
+      <div className="order-2 lg:order-none">
+        <img
+          src={profilePhoto}
+          alt="Jiří Hermann with his wire-haired dachshund"
+          decoding="async"
+          className="border-window-line block aspect-square w-full rounded-[20px] border object-cover object-[50%_30%] sm:aspect-[4/5] sm:max-w-[400px] sm:rounded-3xl"
+        />
+        <div className="mt-5 grid grid-cols-1 gap-3 sm:max-w-[400px] sm:grid-cols-2">
+          <FactCard label="Based in" value="Prague, Czech Republic" />
+          <Languages />
+        </div>
+      </div>
+
+      <div className="order-1 min-w-0 lg:order-none">
+        <Eyebrow>About</Eyebrow>
+        <h1 className="text-heading mt-3 text-[40px] leading-[1.05] font-semibold tracking-[-0.03em] sm:text-[56px] sm:tracking-[-0.035em]">
+          Hi, I&apos;m Jiří.
+        </h1>
+        <div className="text-body mt-6 max-w-[720px] space-y-5 text-[17px] leading-[1.75] sm:mt-7 sm:text-lg">
+          <p>
+            My name is <strong className={strong}>Jiří Hermann</strong>, and
+            I&apos;m a{' '}
+            <strong className={strong}>Backend Software Engineer</strong> and{' '}
+            <strong className={strong}>Community Builder</strong> passionate
+            about designing clean, reliable, and scalable systems.
+          </p>
+          <p>
+            I&apos;m based in{' '}
+            <strong className={strong}>Prague, Czech Republic</strong>, and I
+            love turning complex ideas into well-structured backend solutions
+            using <strong className={strong}>Kotlin</strong> and{' '}
+            <strong className={strong}>Java</strong>. My work revolves around
+            Spring Boot, Micronaut, PostgreSQL, Redis, Kafka, and Docker, always
+            with a focus on clean architecture and automation.
+          </p>
+          <p>
+            Beyond engineering, I&apos;m the founder of{' '}
+            <a
+              href={SOCIAL_LINKS.kotlinServerSquad}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-link hover:text-ink font-medium underline decoration-1 underline-offset-[3px]"
+            >
+              Kotlin Server Squad
+            </a>{' '}
+            — a community for developers who share a passion for building,
+            learning, and helping each other grow. It&apos;s not just about
+            Kotlin; it&apos;s about connecting people across the JVM world and
+            creating a space where ideas come to life.
+          </p>
+          <p>
+            Recently, I&apos;ve been exploring{' '}
+            <strong className={strong}>frontend development</strong> with React
+            and TypeScript to better understand full-stack workflows and bridge
+            the gap between backend and user experience.
+          </p>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+const nowCardClass =
+  'border-line bg-card hover:border-line-strong group flex flex-col rounded-2xl border p-6 transition-colors'
+
+function NowCard({
+  label,
+  title,
+  body,
+}: {
+  label: string
+  title: string
+  body: string
+}) {
+  return (
+    <>
+      <div className="text-faint text-[13px]">{label}</div>
+      <h3 className="text-heading mt-2 text-[17px] font-semibold group-hover:underline group-hover:decoration-1 group-hover:underline-offset-4">
+        {title}
+      </h3>
+      <p className="text-muted mt-2 text-sm leading-[1.6]">{body}</p>
+    </>
+  )
+}
+
+function Now() {
+  const role = useCurrentRole()
+  const since = monthYearOf(role?.startAt)
+  return (
+    <section
+      aria-labelledby="now-title"
+      className={`${sectionClass} pt-16 sm:pt-24`}
+    >
+      <SectionHeading
+        eyebrow="Now"
+        title="What I’m working on"
+        titleId="now-title"
+      />
+      <div className="mt-6 grid grid-cols-[repeat(auto-fill,minmax(min(100%,260px),1fr))] gap-4 sm:mt-7">
+        {role && (
+          <Link to="/resume" className={nowCardClass}>
+            <NowCard
+              label={since ? `Day job · since ${since}` : 'Day job'}
+              title={[role.projectName, role.company]
+                .filter(Boolean)
+                .join(' at ')}
+              body={role.description ?? ''}
+            />
+          </Link>
+        )}
+        {SOCIAL_LINKS.kotlinServerSquad && (
+          <a
+            href={SOCIAL_LINKS.kotlinServerSquad}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={nowCardClass}
+          >
+            <NowCard
+              label="Community"
+              title="Founder, Kotlin Server Squad"
+              body="A community for developers who share a passion for building, learning, and helping each other grow."
+            />
+          </a>
+        )}
+        <Link to="/projects" className={nowCardClass}>
+          <NowCard
+            label="Open source"
+            title="UnityInFlow"
+            body={`${PROJECTS.length} tools released for the AI agent stack, from injection-scanner to kore-runtime.`}
+          />
+        </Link>
+        <Link to="/blog" className={nowCardClass}>
+          <NowCard
+            label="Writing"
+            title="Securing AI agents"
+            body="A weekly series on prompt injection, SSRF and agent tooling."
+          />
+        </Link>
+      </div>
+    </section>
+  )
+}
+
+function Path() {
+  const projects = useResumeProjects()
+  const education = useResumeEducation()
+  const entries = useMemo(
+    () => buildPath(projects.data ?? [], education.data ?? []),
+    [projects.data, education.data],
+  )
+  const loading = projects.isLoading || education.isLoading
+  if (!loading && entries.length === 0) return null
+
+  return (
+    <section
+      aria-labelledby="path-title"
+      className={`${sectionClass} pt-16 sm:pt-24`}
+    >
+      <SectionHeading
+        eyebrow="Path"
+        title="From banking backends to agent tooling"
+        titleId="path-title"
+        action={
+          <Link
+            to="/resume"
+            className="text-brand-a inline-flex min-h-11 items-center text-[15px] font-medium hover:underline hover:underline-offset-4"
+          >
+            Full resume →
+          </Link>
+        }
+      />
+      {loading ? (
+        <div
+          aria-busy="true"
+          aria-label="Loading"
+          className="border-line-strong mt-8 max-w-[760px] space-y-7 border-l pl-7"
+        >
+          {[0, 1, 2].map((key) => (
+            <div
+              key={key}
+              className="bg-chip h-11 w-3/4 animate-pulse rounded-lg motion-reduce:animate-none"
+            />
+          ))}
+        </div>
+      ) : (
+        <ol className="border-line-strong mt-8 max-w-[760px] space-y-7 border-l pl-7">
+          {entries.map((entry) => (
+            <li key={entry.key} className="relative">
+              <span
+                aria-hidden="true"
+                className={twMerge(
+                  'absolute top-[7px] -left-[33px] size-[9px] rounded-full',
+                  entry.current
+                    ? 'bg-brand-gradient top-1.5 -left-[34px] size-[11px]'
+                    : 'bg-window-dot',
+                )}
+              />
+              <div className="text-faint text-[13px]">{entry.years}</div>
+              <div className="text-heading mt-1 text-[17px] font-semibold">
+                {entry.title}
+              </div>
+              {entry.detail && (
+                <div className="text-muted mt-1 text-[15px] leading-[1.55]">
+                  {entry.detail}
+                </div>
+              )}
+            </li>
+          ))}
+        </ol>
+      )}
+    </section>
+  )
+}
+
+function AboutCta() {
+  return (
+    <section className={`${sectionClass} pt-16 pb-16 sm:pt-24 sm:pb-[104px]`}>
+      <div className="border-line bg-cta-glow flex flex-wrap items-center justify-between gap-6 overflow-hidden rounded-[20px] border p-6 sm:rounded-3xl sm:p-12">
+        <div className="flex-[1_1_420px]">
+          <h2 className="text-heading text-[24px] leading-[1.2] font-semibold tracking-[-0.02em] sm:text-[30px]">
+            Looking for a dedicated engineer who builds with purpose and fosters
+            community?
+          </h2>
+          <p className="text-muted mt-2.5 text-base leading-[1.6]">
+            I&apos;d love to connect and see how we can collaborate.
+          </p>
+        </div>
+        <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:flex-wrap">
+          <Link to="/contact" className={primaryButtonClass}>
+            Get in touch
+          </Link>
+          <Link to="/resume" className={secondaryButtonClass}>
+            Resume
+          </Link>
+        </div>
+      </div>
+    </section>
+  )
+}
 
 function AboutPage() {
   useEffect(() => {
@@ -29,79 +337,14 @@ function AboutPage() {
       url: location.href,
     })
   }, [])
+
   return (
-    <AppShell path="About">
-      <section className="relative overflow-hidden rounded-3xl border border-blue-200/50 bg-white/60 p-6 shadow-xl shadow-blue-500/5 ring-1 ring-blue-100/50 backdrop-blur md:p-10">
-        <div className="pointer-events-none absolute -left-24 -top-24 h-64 w-64 rounded-full bg-gradient-to-br from-blue-400/30 via-cyan-400/20 to-teal-400/20 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-24 -right-24 h-64 w-64 rounded-full bg-gradient-to-tr from-green-400/20 via-emerald-400/20 to-cyan-400/20 blur-3xl" />
-        <div className="prose prose-lg relative max-w-none">
-          <h1 className="bg-gradient-to-r from-blue-600 via-cyan-600 to-teal-600 bg-clip-text text-transparent">
-            About
-          </h1>
-          <p className="text-lg leading-relaxed text-gray-700">
-            Hi there! My name is{' '}
-            <strong className="text-gray-900">Jiří Hermann</strong>, and I'm a{' '}
-            <strong className="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
-              Backend Software Engineer
-            </strong>{' '}
-            and{' '}
-            <strong className="bg-gradient-to-r from-cyan-600 to-green-600 bg-clip-text text-transparent">
-              Community Builder
-            </strong>{' '}
-            passionate about designing clean, reliable, and scalable systems.
-          </p>
-          <p className="leading-relaxed text-gray-700">
-            I'm based in{' '}
-            <strong className="text-gray-900">Prague, Czech Republic</strong>,
-            and I love turning complex ideas into well-structured backend
-            solutions using{' '}
-            <span className="font-semibold text-blue-700">Kotlin</span> and{' '}
-            <span className="font-semibold text-blue-700">Java</span>. My work
-            revolves around{' '}
-            <span className="font-medium text-gray-800">Spring Boot</span>,{' '}
-            <span className="font-medium text-gray-800">Micronaut</span>,{' '}
-            <span className="font-medium text-gray-800">PostgreSQL</span>,{' '}
-            <span className="font-medium text-gray-800">Redis</span>,{' '}
-            <span className="font-medium text-gray-800">Kafka</span>, and{' '}
-            <span className="font-medium text-gray-800">Docker</span>, always
-            with a focus on clean architecture and automation.
-          </p>
-          <p className="leading-relaxed text-gray-700">
-            Beyond engineering, I'm the founder of{' '}
-            <a
-              href="https://kotlinserversquad.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block bg-gradient-to-r from-blue-600 via-cyan-600 to-green-600 bg-clip-text font-bold text-transparent transition-all hover:from-blue-700 hover:via-cyan-700 hover:to-green-700 hover:underline"
-            >
-              Kotlin Server Squad
-            </a>{' '}
-            — a community for developers who share a passion for building,
-            learning, and helping each other grow. It's not just about Kotlin;
-            it's about connecting people across the JVM world and creating a
-            space where ideas come to life.
-          </p>
-          <p className="leading-relaxed text-gray-700">
-            Recently, I've been exploring{' '}
-            <span className="font-semibold text-cyan-700">
-              frontend development
-            </span>{' '}
-            with <span className="font-medium text-gray-800">React</span> and{' '}
-            <span className="font-medium text-gray-800">TypeScript</span> to
-            better understand full-stack workflows and bridge the gap between
-            backend and user experience.
-          </p>
-          <div className="mt-8 rounded-2xl border border-blue-200/70 bg-gradient-to-br from-blue-50/80 via-cyan-50/60 to-green-50/80 p-6 shadow-lg shadow-blue-500/5">
-            <p className="mb-0 text-base leading-relaxed text-gray-800">
-              <strong className="bg-gradient-to-r from-blue-700 to-cyan-700 bg-clip-text text-lg text-transparent">
-                If you're looking for a dedicated engineer who builds with
-                purpose and fosters community,
-              </strong>{' '}
-              I'd love to connect and see how we can collaborate.
-            </p>
-          </div>
-        </div>
-      </section>
+    <AppShell path="About" fullBleed>
+      <PageGlow className="left-[30%] h-[700px]" />
+      <Intro />
+      <Now />
+      <Path />
+      <AboutCta />
     </AppShell>
   )
 }
