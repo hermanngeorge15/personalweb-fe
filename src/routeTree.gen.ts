@@ -14,6 +14,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as TestimonialsRouteImport } from './routes/testimonials'
 import { Route as ServicesRouteImport } from './routes/services'
 import { Route as ResumeRouteImport } from './routes/resume'
+import { Route as ProjectsRouteImport } from './routes/projects'
 import { Route as DispatchersRouteImport } from './routes/dispatchers'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as AboutRouteImport } from './routes/about'
@@ -53,6 +54,11 @@ const ServicesRoute = ServicesRouteImport.update({
 const ResumeRoute = ResumeRouteImport.update({
   id: '/resume',
   path: '/resume',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProjectsRoute = ProjectsRouteImport.update({
+  id: '/projects',
+  path: '/projects',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DispatchersRoute = DispatchersRouteImport.update({
@@ -186,6 +192,7 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
   '/dispatchers': typeof DispatchersRoute
+  '/projects': typeof ProjectsRoute
   '/resume': typeof ResumeRouteWithChildren
   '/services': typeof ServicesRoute
   '/testimonials': typeof TestimonialsRoute
@@ -216,6 +223,7 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
   '/dispatchers': typeof DispatchersRoute
+  '/projects': typeof ProjectsRoute
   '/resume': typeof ResumeRouteWithChildren
   '/services': typeof ServicesRoute
   '/testimonials': typeof TestimonialsRoute
@@ -247,6 +255,7 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
   '/dispatchers': typeof DispatchersRoute
+  '/projects': typeof ProjectsRoute
   '/resume': typeof ResumeRouteWithChildren
   '/services': typeof ServicesRoute
   '/testimonials': typeof TestimonialsRoute
@@ -279,6 +288,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/contact'
     | '/dispatchers'
+    | '/projects'
     | '/resume'
     | '/services'
     | '/testimonials'
@@ -309,6 +319,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/contact'
     | '/dispatchers'
+    | '/projects'
     | '/resume'
     | '/services'
     | '/testimonials'
@@ -339,6 +350,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/contact'
     | '/dispatchers'
+    | '/projects'
     | '/resume'
     | '/services'
     | '/testimonials'
@@ -370,6 +382,7 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   ContactRoute: typeof ContactRoute
   DispatchersRoute: typeof DispatchersRoute
+  ProjectsRoute: typeof ProjectsRoute
   ResumeRoute: typeof ResumeRouteWithChildren
   ServicesRoute: typeof ServicesRoute
   TestimonialsRoute: typeof TestimonialsRoute
@@ -423,6 +436,13 @@ declare module '@tanstack/react-router' {
       path: '/dispatchers'
       fullPath: '/dispatchers'
       preLoaderRoute: typeof DispatchersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/projects': {
+      id: '/projects'
+      path: '/projects'
+      fullPath: '/projects'
+      preLoaderRoute: typeof ProjectsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/resume': {
@@ -630,6 +650,15 @@ declare module './routes/dispatchers' {
     FileRoutesByPath['/dispatchers']['id'],
     FileRoutesByPath['/dispatchers']['path'],
     FileRoutesByPath['/dispatchers']['fullPath']
+  >
+}
+declare module './routes/projects' {
+  const createFileRoute: CreateFileRoute<
+    '/projects',
+    FileRoutesByPath['/projects']['parentRoute'],
+    FileRoutesByPath['/projects']['id'],
+    FileRoutesByPath['/projects']['path'],
+    FileRoutesByPath['/projects']['fullPath']
   >
 }
 declare module './routes/resume' {
@@ -865,6 +894,7 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   ContactRoute: ContactRoute,
   DispatchersRoute: DispatchersRoute,
+  ProjectsRoute: ProjectsRoute,
   ResumeRoute: ResumeRouteWithChildren,
   ServicesRoute: ServicesRoute,
   TestimonialsRoute: TestimonialsRoute,
