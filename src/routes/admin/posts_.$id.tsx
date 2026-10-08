@@ -1,9 +1,15 @@
 import { Link, useNavigate } from '@tanstack/react-router'
 import { ensureKeycloakAuth } from '@/lib/keycloak'
-import AppShell from '@/components/AppShell'
-import { AdminForm } from '@/components/admin/AdminForm'
+import AdminShell from '@/components/admin/AdminShell'
+import { PostEditor } from '@/components/admin/PostEditor'
+import {
+  AdminCard,
+  ArrowLeftIcon,
+  Notice,
+  secondaryButton,
+} from '@/components/admin/ui'
 import { useAdminPost, useUpdatePost } from '@/lib/queries'
-import { postFields, postSchema, postToFormValues } from './-postForm'
+import { postToFormValues } from './-postForm'
 
 // The route param is the post's slug; the id needed to save comes from the admin endpoint.
 function AdminPostEdit() {
@@ -12,55 +18,51 @@ function AdminPostEdit() {
   const { data: post, isLoading, isError } = useAdminPost(slug)
   const updatePost = useUpdatePost()
   return (
-    <AppShell path="Admin / Posts / Edit">
-      <section className="grid gap-6 md:gap-8">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h1 className="text-2xl font-semibold tracking-tight">Edit post</h1>
-          <div className="flex gap-4">
-            <Link to="/admin/posts" className="underline">
-              All posts
-            </Link>
-            {post && (
-              <Link
-                to="/blog/$slug"
-                params={{ slug: post.slug }}
-                className="underline"
-              >
-                View on site
-              </Link>
-            )}
-          </div>
-        </div>
-        {isLoading && <div>Loading…</div>}
-        {isError && (
-          <div className="text-red-600">
+    <AdminShell
+      crumbs={[
+        { label: 'Admin', to: '/admin' },
+        { label: 'Posts', to: '/admin/posts' },
+        { label: slug },
+      ]}
+      viewHref={`/blog/${encodeURIComponent(post?.slug ?? slug)}`}
+    >
+      {isLoading && <Notice>Loading…</Notice>}
+      {isError && (
+        <AdminCard className="grid justify-items-start gap-4">
+          <h1 className="text-heading text-[24px] font-semibold tracking-[-0.02em]">
+            Edit post
+          </h1>
+          <Notice tone="danger">
             Could not load the post “{slug}”. It may have been deleted or
             renamed.
-          </div>
-        )}
-        {post && (
-          <AdminForm
-            // Re-mount with fresh values when a different post loads; after a save the form
-            // already holds what was saved, so it stays mounted and keeps its "Saved." note.
-            key={post.id}
-            schema={postSchema}
-            fields={postFields}
-            defaultValues={postToFormValues(post)}
-            submitLabel="Save"
-            onSubmit={async (body) => {
-              await updatePost.mutateAsync({ id: post.id, body })
-              // A changed slug changes this page's address.
-              if (body.slug !== slug) {
-                await navigate({
-                  to: '/admin/posts/$id',
-                  params: { id: body.slug },
-                })
-              }
-            }}
-          />
-        )}
-      </section>
-    </AppShell>
+          </Notice>
+          <Link to="/admin/posts" className={secondaryButton}>
+            <ArrowLeftIcon />
+            All posts
+          </Link>
+        </AdminCard>
+      )}
+      {post && (
+        <PostEditor
+          // Re-mount with fresh values when a different post loads; after a save the form
+          // already holds what was saved, so it stays mounted and keeps its "Saved." note.
+          key={post.id}
+          heading={post.title}
+          defaultValues={postToFormValues(post)}
+          submitLabel="Save"
+          onSubmit={async (body) => {
+            await updatePost.mutateAsync({ id: post.id, body })
+            // A changed slug changes this page's address.
+            if (body.slug !== slug) {
+              await navigate({
+                to: '/admin/posts/$id',
+                params: { id: body.slug },
+              })
+            }
+          }}
+        />
+      )}
+    </AdminShell>
   )
 }
 
