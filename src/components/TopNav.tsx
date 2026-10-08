@@ -6,7 +6,7 @@ import LayoutWidth from './LayoutWidth'
 export default function TopNav() {
   const [open, setOpen] = useState(false)
   return (
-    <header className="sticky top-0 z-50 border-b bg-background/70 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="bg-background/70 supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 border-b backdrop-blur">
       <LayoutWidth>
         <nav
           className="flex h-16 items-center justify-between gap-4"
@@ -27,9 +27,12 @@ export default function TopNav() {
           </div>
           <ul className="hidden items-center gap-6 text-sm md:flex">
             <li>
-              <a href="/#about-me" className="hover:underline">
+              <Link
+                to="/about"
+                activeProps={{ className: 'font-semibold underline' }}
+              >
                 About
-              </a>
+              </Link>
             </li>
             <li>
               <Link
@@ -64,13 +67,13 @@ export default function TopNav() {
           <div id="mobile-menu" className="md:hidden">
             <ul className="grid gap-2 py-2 text-sm">
               <li>
-                <a
-                  href="/#about-me"
+                <Link
+                  to="/about"
                   onClick={() => setOpen(false)}
-                  className="hover:underline"
+                  activeProps={{ className: 'font-semibold underline' }}
                 >
                   About
-                </a>
+                </Link>
               </li>
               <li>
                 <Link

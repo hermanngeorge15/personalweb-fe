@@ -7,7 +7,10 @@ export const Route = createFileRoute({
   component: LearnKotlinIndex,
 })
 
-const difficultyColors: Record<string, 'primary' | 'success' | 'warning' | 'danger'> = {
+const difficultyColors: Record<
+  string,
+  'primary' | 'success' | 'warning' | 'danger'
+> = {
   beginner: 'success',
   intermediate: 'warning',
   advanced: 'danger',
@@ -27,7 +30,9 @@ function LearnKotlinIndex() {
             Interactive Kotlin learning for experienced developers
           </p>
 
-          <h2 className="mb-6 text-2xl font-semibold">What's your background?</h2>
+          <h2 className="mb-6 text-2xl font-semibold">
+            What&apos;s your background?
+          </h2>
           <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
             <Button
               size="lg"
@@ -107,14 +112,16 @@ function LearnKotlinIndex() {
       <div className="space-y-8">
         {modules?.map((module) => (
           <div key={module.name}>
-            <h2 className="mb-4 text-xl font-semibold text-gray-800">{module.name}</h2>
+            <h2 className="mb-4 text-xl font-semibold text-gray-800">
+              {module.name}
+            </h2>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {module.topics.map((topic) => (
                 <Link
                   key={topic.id}
                   to="/learn-kotlin/$topicId"
                   params={{ topicId: topic.id }}
-                  search={{ source: sourceLanguage || undefined }}
+                  search={{ lang: sourceLanguage || undefined }}
                 >
                   <Card
                     isPressable
@@ -122,10 +129,14 @@ function LearnKotlinIndex() {
                   >
                     <CardBody className="p-4">
                       <div className="mb-2 flex items-start justify-between">
-                        <h3 className="font-semibold text-gray-900">{topic.title}</h3>
+                        <h3 className="font-semibold text-gray-900">
+                          {topic.title}
+                        </h3>
                         <Chip
                           size="sm"
-                          color={difficultyColors[topic.difficulty] || 'default'}
+                          color={
+                            difficultyColors[topic.difficulty] || 'default'
+                          }
                           variant="flat"
                         >
                           {topic.difficulty}

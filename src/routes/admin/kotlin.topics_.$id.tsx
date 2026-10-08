@@ -3,6 +3,7 @@ import { Link } from '@tanstack/react-router'
 import { ensureKeycloakAuth } from '@/lib/keycloak'
 import AppShell from '@/components/AppShell'
 import { MutationStatus, clearSaved } from '@/components/admin/MutationStatus'
+import { DifficultyOptions } from '@/components/admin/AdminForm'
 import { formInt } from '@/lib/adminFormat'
 import { useKotlinTopicsAdmin, useUpdateKotlinTopic } from '@/lib/queries'
 
@@ -113,9 +114,7 @@ function AdminKotlinTopicEdit() {
                   className="w-full rounded border p-2"
                   defaultValue={topic.difficulty}
                 >
-                  <option value="beginner">Beginner</option>
-                  <option value="intermediate">Intermediate</option>
-                  <option value="advanced">Advanced</option>
+                  <DifficultyOptions current={topic.difficulty} />
                 </select>
               </label>
               <label className="grid gap-1">

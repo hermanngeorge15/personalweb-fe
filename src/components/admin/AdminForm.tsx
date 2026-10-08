@@ -222,3 +222,26 @@ export function DeleteButton({
     </span>
   )
 }
+
+/** The kotlin_topic CHECK constraint allows exactly these; chapters store any string. */
+const DIFFICULTIES = ['beginner', 'intermediate', 'advanced', 'expert'] as const
+
+/**
+ * `<option>`s for a difficulty `<select>`. A stored value outside the list is kept as an extra
+ * option, so opening and saving a record never silently changes its difficulty.
+ */
+export function DifficultyOptions({ current }: { current?: string }) {
+  const values: readonly string[] =
+    current && !DIFFICULTIES.some((d) => d === current)
+      ? [...DIFFICULTIES, current]
+      : DIFFICULTIES
+  return (
+    <>
+      {values.map((value) => (
+        <option key={value} value={value}>
+          {value.charAt(0).toUpperCase() + value.slice(1)}
+        </option>
+      ))}
+    </>
+  )
+}
