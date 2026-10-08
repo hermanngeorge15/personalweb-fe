@@ -1,7 +1,18 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useId, useRef, useState, type ReactNode } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import type { z } from 'zod'
+import {
+  cx,
+  Field,
+  dangerButton,
+  dangerSolidButton,
+  inputClass as baseInputClass,
+  primaryButton,
+  secondaryButton,
+  textareaClass,
+} from './ui'
+import { MutationStatus } from './MutationStatus'
 
 /** Every admin form field is edited as a string; the zod schema converts it for the API. */
 export type AdminFormValues = Record<string, string>
@@ -87,31 +98,31 @@ export function AdminForm<Out>({
 
   return (
     <form
-      className="grid gap-3"
+      className="@container grid gap-5"
       onSubmit={submit}
       // "Saved." describes the last submit; once a field changes it no longer holds.
       onChange={() => setSaved(false)}
       noValidate
     >
-      <div className="grid gap-3 md:grid-cols-2">
+      <div className="grid gap-4 @lg:grid-cols-2">
         {fields.map((field) => {
           const error = errors[field.name]?.message
           const wide = field.type === 'textarea'
-          const inputClass = 'w-full rounded border p-2'
+          const inputClass = baseInputClass
           return (
-            <label
+            <Field
               key={field.name}
-              className={`grid gap-1 ${wide ? 'md:col-span-2' : ''}`}
+              label={field.label}
+              hint={field.hint}
+              error={typeof error === 'string' ? error : undefined}
+              className={wide ? '@lg:col-span-2' : undefined}
             >
-              <span className="text-muted-foreground text-sm">
-                {field.label}
-              </span>
               {field.type === 'textarea' ? (
                 <textarea
                   {...register(field.name)}
                   rows={field.rows ?? 4}
                   placeholder={field.placeholder}
-                  className={inputClass}
+                  className={textareaClass}
                 />
               ) : field.type === 'select' ? (
                 <select {...register(field.name)} className={inputClass}>
@@ -129,93 +140,139 @@ export function AdminForm<Out>({
                   className={inputClass}
                 />
               )}
-              {field.hint && (
-                <span className="text-muted-foreground text-xs">
-                  {field.hint}
-                </span>
-              )}
-              {typeof error === 'string' && (
-                <span className="text-sm text-red-600">{error}</span>
-              )}
-            </label>
+            </Field>
           )
         })}
       </div>
-      <div className="flex flex-wrap items-center gap-3">
-        <button
-          type="submit"
-          className="rounded bg-blue-600 px-4 py-2 text-white disabled:opacity-50"
-          disabled={isSubmitting}
-        >
+      <FormActions>
+        <button type="submit" className={primaryButton} disabled={isSubmitting}>
           {isSubmitting ? 'Saving…' : submitLabel}
         </button>
         {onCancel && (
-          <button
-            type="button"
-            className="rounded border px-4 py-2"
-            onClick={onCancel}
-          >
+          <button type="button" className={secondaryButton} onClick={onCancel}>
             Cancel
           </button>
         )}
-        {saved && !serverError && (
-          <span className="text-sm text-green-700">Saved.</span>
-        )}
-        {serverError && (
-          <span role="alert" className="text-sm text-red-600">
-            Not saved: {serverError}
-          </span>
-        )}
-      </div>
+        <MutationStatus
+          isSuccess={saved && !serverError}
+          error={serverError ? new Error(serverError) : null}
+        />
+      </FormActions>
     </form>
   )
 }
 
-/** A delete button that asks for a second click instead of a blocking browser dialog. */
+/** The row of buttons and the save status under every admin form. */
+export function FormActions({ children }: { children: ReactNode }) {
+  return (
+    <div className="border-line flex flex-wrap items-center gap-3 border-t pt-4">
+      {children}
+    </div>
+  )
+}
+
+/**
+ * The one delete control of the admin area: the first click opens a small confirmation
+ * ("Delete …? This can't be undone." with Keep / Delete), the second click deletes. No blocking
+ * browser dialog. A failed delete shows the server's error next to the button.
+ */
 export function DeleteButton({
   onDelete,
+  itemName,
+  label = 'Delete',
 }: {
   onDelete: () => Promise<unknown>
+  /** What is being deleted, for the confirmation heading ("Delete “Czech”?"). */
+  itemName?: string
+  label?: string
 }) {
   const [armed, setArmed] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const boxRef = useRef<HTMLSpanElement>(null)
+  const keepRef = useRef<HTMLButtonElement>(null)
+  const headingId = useId()
+
+  // Open: focus Keep (the safe choice); Escape or a click outside closes it.
+  useEffect(() => {
+    if (!armed) return
+    keepRef.current?.focus()
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setArmed(false)
+    }
+    const onPointer = (event: PointerEvent) => {
+      if (!boxRef.current?.contains(event.target as Node)) setArmed(false)
+    }
+    window.addEventListener('keydown', onKey)
+    window.addEventListener('pointerdown', onPointer)
+    return () => {
+      window.removeEventListener('keydown', onKey)
+      window.removeEventListener('pointerdown', onPointer)
+    }
+  }, [armed])
+
+  const confirm = async () => {
+    setBusy(true)
+    setError(null)
+    try {
+      await onDelete()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err))
+    } finally {
+      setBusy(false)
+      setArmed(false)
+    }
+  }
+
   return (
-    <span className="flex items-center gap-2">
+    <span ref={boxRef} className="relative inline-flex items-center gap-2">
       <button
         type="button"
-        className="rounded bg-red-600 px-3 py-1 text-white disabled:opacity-50"
+        className={cx(dangerButton, 'px-3 sm:min-h-9')}
         disabled={busy}
-        onClick={async () => {
-          if (!armed) {
-            setArmed(true)
-            return
-          }
-          setBusy(true)
-          setError(null)
-          try {
-            await onDelete()
-          } catch (err) {
-            setError(err instanceof Error ? err.message : String(err))
-            setArmed(false)
-          } finally {
-            setBusy(false)
-          }
-        }}
+        aria-expanded={armed}
+        onClick={() => setArmed((value) => !value)}
       >
-        {busy ? 'Deleting…' : armed ? 'Confirm delete' : 'Delete'}
+        {busy ? 'Deleting…' : label}
+        {itemName && <span className="sr-only"> {itemName}</span>}
       </button>
-      {armed && !busy && (
-        <button
-          type="button"
-          className="text-sm underline"
-          onClick={() => setArmed(false)}
+      {armed && (
+        <span
+          role="alertdialog"
+          aria-labelledby={headingId}
+          className="border-line bg-card shadow-window absolute top-full right-0 z-30 mt-2 grid w-[min(320px,calc(100vw-32px))] gap-1.5 rounded-2xl border p-4 text-left whitespace-normal"
         >
-          Keep
-        </button>
+          <span
+            id={headingId}
+            className="text-heading text-[15px] font-semibold"
+          >
+            {itemName ? `Delete “${itemName}”?` : 'Delete this item?'}
+          </span>
+          <span className="text-muted text-sm leading-normal">
+            This can’t be undone.
+          </span>
+          <span className="mt-2 flex justify-end gap-2">
+            <button
+              ref={keepRef}
+              type="button"
+              className={cx(secondaryButton, 'px-3 sm:min-h-9')}
+              onClick={() => setArmed(false)}
+            >
+              Keep
+            </button>
+            <button
+              type="button"
+              className={cx(dangerSolidButton, 'px-3 sm:min-h-9')}
+              disabled={busy}
+              onClick={confirm}
+            >
+              {busy ? 'Deleting…' : 'Confirm delete'}
+            </button>
+          </span>
+        </span>
       )}
       {error && (
-        <span role="alert" className="text-sm text-red-600">
+        <span role="alert" className="text-danger text-sm">
           Not deleted: {error}
         </span>
       )}
