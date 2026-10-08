@@ -1,35 +1,53 @@
 import { Link } from '@tanstack/react-router'
-import { Button } from '@heroui/react'
-import { useState } from 'react'
-import LayoutWidth from './LayoutWidth'
+import { ANNOUNCEMENT, AUTHOR, SOCIAL_LINKS } from '@/config/site'
+import { LogoTile } from './Brand'
+import { GitHubIcon } from './icons'
+import ThemeToggle from './ThemeToggle'
+
+const navLinkClass =
+  'text-muted hover:text-ink rounded-lg px-3 py-2 transition-colors sm:px-3.5'
+const navLinkActive = { className: 'bg-chip !text-ink' }
+
+function AnnouncementBar() {
+  if (!ANNOUNCEMENT) return null
+  return (
+    <a
+      href={ANNOUNCEMENT.href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="border-line bg-subtle text-body hover:text-ink block border-b px-4 py-2.5 text-center text-[13px] transition-colors"
+    >
+      <span className="bg-brand-gradient text-on-brand mr-2 inline-block rounded-full px-2 py-0.5 text-[11px] font-semibold">
+        NEW
+      </span>
+      {ANNOUNCEMENT.text}
+    </a>
+  )
+}
 
 export default function TopNav() {
-  const [open, setOpen] = useState(false)
   return (
-    <header className="bg-background/70 supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 border-b backdrop-blur">
-      <LayoutWidth>
+    <>
+      <AnnouncementBar />
+      <header className="border-line bg-header top-0 z-50 border-b backdrop-blur-md md:sticky">
         <nav
-          className="flex h-16 items-center justify-between gap-4"
           aria-label="Main"
+          className="mx-auto flex max-w-[1200px] flex-wrap items-center justify-between gap-x-4 gap-y-1 px-4 py-3 sm:px-8 md:py-4"
         >
-          <Link to="/" className="font-semibold tracking-tight">
-            Jiri Hermann
+          <Link
+            to="/"
+            className="text-ink order-1 flex items-center gap-2.5 text-base font-semibold"
+          >
+            <LogoTile />
+            {AUTHOR.name}
           </Link>
-          <div className="flex items-center gap-2 md:hidden">
-            <Button
-              aria-controls="mobile-menu"
-              aria-expanded={open}
-              onPress={() => setOpen((v) => !v)}
-              size="sm"
-            >
-              {open ? 'Close' : 'Menu'}
-            </Button>
-          </div>
-          <ul className="hidden items-center gap-6 text-sm md:flex">
+
+          <ul className="order-3 -ml-3 flex w-full flex-wrap items-center gap-1 text-sm md:order-2 md:ml-0 md:w-auto">
             <li>
               <Link
                 to="/about"
-                activeProps={{ className: 'font-semibold underline' }}
+                className={navLinkClass}
+                activeProps={navLinkActive}
               >
                 About
               </Link>
@@ -37,7 +55,8 @@ export default function TopNav() {
             <li>
               <Link
                 to="/resume"
-                activeProps={{ className: 'font-semibold underline' }}
+                className={navLinkClass}
+                activeProps={navLinkActive}
               >
                 Resume
               </Link>
@@ -45,70 +64,36 @@ export default function TopNav() {
             <li>
               <Link
                 to="/blog"
-                activeProps={{ className: 'font-semibold underline' }}
+                className={navLinkClass}
+                activeProps={navLinkActive}
               >
                 Blog
               </Link>
             </li>
-            <li>
-              <Button
-                as={Link}
-                to="/contact"
-                color="primary"
-                size="sm"
-                className="font-medium"
-              >
-                Contact me
-              </Button>
-            </li>
           </ul>
-        </nav>
-        {open && (
-          <div id="mobile-menu" className="md:hidden">
-            <ul className="grid gap-2 py-2 text-sm">
-              <li>
-                <Link
-                  to="/about"
-                  onClick={() => setOpen(false)}
-                  activeProps={{ className: 'font-semibold underline' }}
-                >
-                  About
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/resume"
-                  onClick={() => setOpen(false)}
-                  activeProps={{ className: 'font-semibold underline' }}
-                >
-                  Resume
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/blog"
-                  onClick={() => setOpen(false)}
-                  activeProps={{ className: 'font-semibold underline' }}
-                >
-                  Blog
-                </Link>
-              </li>
-              <li>
-                <Button
-                  as={Link}
-                  to="/contact"
-                  color="primary"
-                  size="sm"
-                  className="font-medium"
-                  onPress={() => setOpen(false)}
-                >
-                  Contact me
-                </Button>
-              </li>
-            </ul>
+
+          <div className="order-2 flex items-center gap-1 sm:gap-2 md:order-3">
+            {SOCIAL_LINKS.github && (
+              <a
+                href={SOCIAL_LINKS.github}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="GitHub"
+                className="text-muted hover:bg-chip hover:text-ink hidden size-10 items-center justify-center rounded-lg transition-colors sm:flex"
+              >
+                <GitHubIcon />
+              </a>
+            )}
+            <ThemeToggle />
+            <Link
+              to="/contact"
+              className="bg-invert text-on-invert ml-1 rounded-lg px-4 py-2.5 text-sm font-medium transition-opacity hover:opacity-90"
+            >
+              Contact me
+            </Link>
           </div>
-        )}
-      </LayoutWidth>
-    </header>
+        </nav>
+      </header>
+    </>
   )
 }

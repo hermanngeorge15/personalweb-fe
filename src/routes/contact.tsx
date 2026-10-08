@@ -2,23 +2,27 @@ import AppShell from '@/components/AppShell'
 import { ContactForm } from '@/components/ContactForm'
 import { useEffect } from 'react'
 import { SEO_DEFAULTS, setHead } from '@/lib/seo'
+import { SOCIAL_LINKS } from '@/config/site'
 
 function ContactPage() {
   useEffect(() => {
     setHead({
       title: `Contact — ${SEO_DEFAULTS.siteName}`,
-      description: 'Get in touch with me for collaborations, questions, or just to say hi.',
+      description:
+        'Get in touch with me for collaborations, questions, or just to say hi.',
       canonical: `${SEO_DEFAULTS.siteUrl}/contact`,
       og: {
         title: `Contact — ${SEO_DEFAULTS.siteName}`,
         url: `${SEO_DEFAULTS.siteUrl}/contact`,
         image: SEO_DEFAULTS.image,
-        description: 'Get in touch with me for collaborations, questions, or just to say hi.',
+        description:
+          'Get in touch with me for collaborations, questions, or just to say hi.',
       },
       twitter: {
         card: 'summary',
         title: `Contact — ${SEO_DEFAULTS.siteName}`,
-        description: 'Get in touch with me for collaborations, questions, or just to say hi.',
+        description:
+          'Get in touch with me for collaborations, questions, or just to say hi.',
         image: SEO_DEFAULTS.image,
       },
     })
@@ -31,7 +35,7 @@ function ContactPage() {
         <h1 className="bg-gradient-to-r from-blue-600 via-cyan-500 to-green-500 bg-clip-text text-4xl font-bold tracking-tight text-transparent md:text-5xl">
           Get in Touch
         </h1>
-        <p className="mt-4 text-lg text-muted-foreground">
+        <p className="text-muted-foreground mt-4 text-lg">
           Have a project in mind? Let&apos;s build something great together.
         </p>
       </div>
@@ -68,7 +72,7 @@ function ContactPage() {
                   <p className="mt-1 text-sm text-blue-600 group-hover:underline">
                     me@jirihermann.com
                   </p>
-                  <p className="mt-2 text-sm text-muted-foreground">
+                  <p className="text-muted-foreground mt-2 text-sm">
                     Best for detailed inquiries
                   </p>
                 </div>
@@ -77,7 +81,7 @@ function ContactPage() {
 
             {/* LinkedIn Card */}
             <a
-              href="https://www.linkedin.com/in/ji%C5%99%C3%AD-hermann-8926a173/"
+              href={SOCIAL_LINKS.linkedin}
               target="_blank"
               rel="noopener noreferrer"
               className="group block rounded-2xl border border-gray-200 bg-white/60 p-6 backdrop-blur transition-all hover:-translate-y-1 hover:border-blue-300 hover:shadow-lg"
@@ -97,7 +101,7 @@ function ContactPage() {
                   <p className="mt-1 text-sm text-blue-600 group-hover:underline">
                     Connect with me
                   </p>
-                  <p className="mt-2 text-sm text-muted-foreground">
+                  <p className="text-muted-foreground mt-2 text-sm">
                     Professional networking
                   </p>
                 </div>
@@ -106,7 +110,7 @@ function ContactPage() {
 
             {/* GitHub Card */}
             <a
-              href="https://github.com/hermanngeorge15"
+              href={SOCIAL_LINKS.github}
               target="_blank"
               rel="noopener noreferrer"
               className="group block rounded-2xl border border-gray-200 bg-white/60 p-6 backdrop-blur transition-all hover:-translate-y-1 hover:border-blue-300 hover:shadow-lg"
@@ -130,7 +134,7 @@ function ContactPage() {
                   <p className="mt-1 text-sm text-blue-600 group-hover:underline">
                     View my projects
                   </p>
-                  <p className="mt-2 text-sm text-muted-foreground">
+                  <p className="text-muted-foreground mt-2 text-sm">
                     Code & contributions
                   </p>
                 </div>
@@ -141,9 +145,9 @@ function ContactPage() {
           {/* Additional Info */}
           <div className="rounded-2xl border border-gray-200 bg-gradient-to-br from-blue-50/50 to-cyan-50/50 p-6 backdrop-blur">
             <h3 className="font-semibold text-gray-900">Response Time</h3>
-            <p className="mt-2 text-sm text-muted-foreground">
-              I typically respond within 24-48 hours. For urgent matters, please mention it in
-              your message.
+            <p className="text-muted-foreground mt-2 text-sm">
+              I typically respond within 24-48 hours. For urgent matters, please
+              mention it in your message.
             </p>
           </div>
         </div>
@@ -151,7 +155,9 @@ function ContactPage() {
         {/* Right Column - Contact Form */}
         <div className="lg:col-span-3">
           <div className="rounded-2xl border border-gray-200 bg-white/60 p-8 shadow-sm backdrop-blur">
-            <h2 className="mb-6 text-2xl font-semibold text-gray-900">Send a Message</h2>
+            <h2 className="mb-6 text-2xl font-semibold text-gray-900">
+              Send a Message
+            </h2>
             <ContactForm />
           </div>
         </div>

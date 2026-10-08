@@ -4,34 +4,185 @@
 /* Note: You may need to change the path to fit your project structure */
 @source '../../node_modules/@heroui/theme/dist/**/*.{js,ts,jsx,tsx}';
 
-@custom-variant dark (&:is(.dark *));
+/* One dark-mode switch for the whole site: the `dark` class on <html> (set before paint by the
+   inline script in index.html, kept in sync by src/lib/theme.ts). HeroUI keys off it too. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ------------------------------------------------------------------------------------------
+   Design tokens (from the approved blog mockups). Light is the default; .dark overrides.
+   ------------------------------------------------------------------------------------------ */
+:root {
+  --jh-bg: #ffffff;
+  --jh-subtle: #f7f8fa;
+  --jh-card: #ffffff;
+  --jh-cover: #f3f6f9;
+  --jh-chip: #f1f3f5;
+  --jh-footer: #fafafb;
+  --jh-header: rgb(255 255 255 / 0.8);
+  --jh-border: #e6e8ec;
+  --jh-border-strong: #dadde3;
+  --jh-window-border: #d5d9e0;
+  --jh-window: rgb(255 255 255 / 0.92);
+  --jh-window-dot: #d0d4da;
+  --jh-window-shadow: 0 20px 50px rgb(15 23 42 / 0.12);
+  --jh-text: #0b0d12;
+  --jh-heading: #0b0d12;
+  --jh-body: #3f4652;
+  --jh-muted: #5b6270;
+  --jh-faint: #5f6673;
+  --jh-fainter: #6b7280;
+  --jh-brand-a: #0369a1;
+  --jh-brand-b: #047857;
+  --jh-on-brand: #ffffff;
+  --jh-invert: #0b0d12;
+  --jh-on-invert: #ffffff;
+  --jh-link: #0369a1;
+  --jh-link-hover: #075985;
+  --jh-callout-text: #0c4a6e;
+  --jh-danger: #dc2626;
+
+  /* Kept for older components that still read them. */
+  --wv-color-layout-navigation-background: var(--jh-header);
+  --wv-color-layout-navigation-border: var(--jh-border);
+  --wv-color-layout-content-background: var(--jh-bg);
+  --wv-color-primary: var(--jh-brand-a);
+  --wv-color-muted: var(--jh-faint);
+  --wv-color-card: var(--jh-card);
+}
+
+/* Screen only: printing always uses the light tokens (dark text on white paper). */
+@media not print {
+  .dark {
+    --jh-bg: #07080b;
+    --jh-subtle: #0b0d11;
+    --jh-card: #0e1015;
+    --jh-cover: #0a0c10;
+    --jh-chip: #14171d;
+    --jh-footer: #0a0b0e;
+    --jh-header: rgb(7 8 11 / 0.7);
+    --jh-border: #1c2028;
+    --jh-border-strong: #262b34;
+    --jh-window-border: #2a303a;
+    --jh-window: rgb(7 8 11 / 0.85);
+    --jh-window-dot: #3a404b;
+    --jh-window-shadow: 0 30px 60px rgb(0 0 0 / 0.5);
+    --jh-text: #edeef0;
+    --jh-heading: #ffffff;
+    --jh-body: #c9cdd4;
+    --jh-muted: #a1a7b0;
+    --jh-faint: #8e95a1;
+    --jh-fainter: #6f7682;
+    --jh-brand-a: #38bdf8;
+    --jh-brand-b: #34d399;
+    --jh-on-brand: #07080b;
+    --jh-invert: #edeef0;
+    --jh-on-invert: #07080b;
+    --jh-link: #7dd3fc;
+    --jh-link-hover: #bae6fd;
+    --jh-callout-text: #d6eefb;
+    --jh-danger: #ff6b6b;
+  }
+}
+
+/* Tokens as Tailwind colours: bg-page, text-ink, border-line, … They resolve at runtime, so
+   every utility follows the theme without a dark: variant. */
+@theme inline {
+  --color-page: var(--jh-bg);
+  --color-subtle: var(--jh-subtle);
+  --color-card: var(--jh-card);
+  --color-canvas: var(--jh-cover);
+  --color-chip: var(--jh-chip);
+  --color-footer: var(--jh-footer);
+  --color-header: var(--jh-header);
+  --color-line: var(--jh-border);
+  --color-line-strong: var(--jh-border-strong);
+  --color-window-line: var(--jh-window-border);
+  --color-window: var(--jh-window);
+  --color-window-dot: var(--jh-window-dot);
+  --color-ink: var(--jh-text);
+  --color-heading: var(--jh-heading);
+  --color-body: var(--jh-body);
+  --color-muted: var(--jh-muted);
+  --color-faint: var(--jh-faint);
+  --color-fainter: var(--jh-fainter);
+  --color-brand-a: var(--jh-brand-a);
+  --color-brand-b: var(--jh-brand-b);
+  --color-on-brand: var(--jh-on-brand);
+  --color-invert: var(--jh-invert);
+  --color-on-invert: var(--jh-on-invert);
+  --color-link: var(--jh-link);
+  --color-danger: var(--jh-danger);
+  /* Used across the older pages; previously undefined, so it rendered as plain text colour. */
+  --color-muted-foreground: var(--jh-faint);
+  --shadow-window: var(--jh-window-shadow);
+}
 
 @theme {
-  --color-wv-layout-navigation-background: var(--wv-color-layout-navigation-background);
-  --color-wv-layout-navigation-border: var(--wv-color-layout-navigation-border);
-  --color-wv-layout-content-background: var(--wv-color-layout-content-background);
+  --font-sans: 'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI',
+    sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
-:root {
-  --wv-color-layout-navigation-background: rgb(255 255 255 / 0.8);
-  --wv-color-layout-navigation-border: rgb(0 0 0 / 0.08);
-  --wv-color-layout-content-background: #ffffff;
-  --wv-color-primary: #2563eb; /* blue-600 */
-  --wv-color-muted: #6b7280; /* gray-500 */
-  --wv-color-card: #ffffff;
+@utility bg-brand-gradient {
+  background-image: linear-gradient(135deg, var(--jh-brand-a), var(--jh-brand-b));
 }
 
-.dark {
-  --wv-color-layout-navigation-background: rgb(0 0 0 / 0.6);
-  --wv-color-layout-navigation-border: rgb(255 255 255 / 0.12);
-  --wv-color-layout-content-background: #0a0a0a;
-  --wv-color-primary: #60a5fa; /* blue-400 */
-  --wv-color-muted: #9ca3af; /* gray-400 */
-  --wv-color-card: #111827;
+@utility bg-brand-gradient-x {
+  background-image: linear-gradient(90deg, var(--jh-brand-a), var(--jh-brand-b));
+}
+
+@utility text-brand-gradient {
+  background-image: linear-gradient(90deg, var(--jh-brand-a), var(--jh-brand-b));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Soft brand glow behind page heroes. */
+@utility bg-glow-hero {
+  background: radial-gradient(
+    closest-side,
+    rgb(56 189 248 / 0.22),
+    rgb(52 211 153 / 0.1) 55%,
+    transparent 100%
+  );
+}
+
+/* Branded covers (used when a post has no cover image): glows on the subtle background. */
+@utility bg-cover-both {
+  background:
+    radial-gradient(circle at 25% 15%, rgb(56 189 248 / 0.32), transparent 52%),
+    radial-gradient(circle at 82% 92%, rgb(52 211 153 / 0.28), transparent 48%),
+    var(--jh-cover);
+}
+
+@utility bg-cover-green {
+  background:
+    radial-gradient(circle at 80% 10%, rgb(52 211 153 / 0.28), transparent 55%),
+    var(--jh-cover);
+}
+
+@utility bg-cover-blue {
+  background:
+    radial-gradient(circle at 20% 90%, rgb(56 189 248 / 0.26), transparent 55%),
+    var(--jh-cover);
+}
+
+@utility bg-cta-glow {
+  background:
+    radial-gradient(circle at 100% 0%, rgb(56 189 248 / 0.18), transparent 45%),
+    radial-gradient(circle at 0% 100%, rgb(52 211 153 / 0.14), transparent 45%),
+    var(--jh-card);
 }
 
 html {
   scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
 }
 
 html,
@@ -41,10 +192,480 @@ body,
 }
 
 body {
-  background-color: var(--wv-color-layout-content-background);
+  background-color: var(--jh-bg);
+  color: var(--jh-text);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
 }
 
 /* Hide reCAPTCHA badge (only when showing required text notice) */
 .grecaptcha-badge {
   visibility: hidden;
+}
+
+/* ------------------------------------------------------------------------------------------
+   Dark-mode compatibility for pages that are not redesigned yet (home, about, resume, contact,
+   learn-kotlin, admin). They hard-code light Tailwind colours (bg-white/60, text-gray-700,
+   bg-blue-50, …). Inside .legacy-dark (set by AppShell on those pages only) dark mode remaps
+   those palettes to dark equivalents so text stays readable. A stopgap until each page gets
+   tokens of its own; new code uses the tokens above instead.
+   ------------------------------------------------------------------------------------------ */
+@media not print {
+  .dark .legacy-dark {
+    --color-gray-50: #12151b;
+    --color-gray-100: #171a21;
+    --color-gray-200: #262b34;
+    --color-gray-300: #323844;
+    --color-gray-400: #6f7682;
+    --color-gray-500: #8e95a1;
+    --color-gray-600: #a1a7b0;
+    --color-gray-700: #c9cdd4;
+    --color-gray-800: #dfe2e6;
+    --color-gray-900: #edeef0;
+
+    --color-blue-50: #0f1a26;
+    --color-blue-100: #13233a;
+    --color-blue-200: #1d3654;
+    --color-blue-300: #2c4d75;
+    --color-blue-600: #60a5fa;
+    --color-blue-700: #93c5fd;
+    --color-blue-800: #bfdbfe;
+    --color-blue-900: #dbeafe;
+
+    --color-cyan-50: #0d1c22;
+    --color-cyan-100: #11262e;
+    --color-cyan-200: #18404b;
+    --color-cyan-600: #22d3ee;
+    --color-cyan-700: #67e8f9;
+    --color-cyan-800: #a5f3fc;
+
+    --color-green-50: #0f1d16;
+    --color-green-100: #13281d;
+    --color-green-200: #1d4030;
+    --color-green-600: #4ade80;
+    --color-green-700: #86efac;
+    --color-green-800: #bbf7d0;
+    --color-green-900: #dcfce7;
+
+    --color-red-50: #241214;
+    --color-red-100: #301619;
+    --color-red-200: #4a1f24;
+    --color-red-300: #6b2a30;
+    --color-red-600: #f87171;
+    --color-red-700: #fca5a5;
+    --color-red-900: #fee2e2;
+
+    --color-amber-50: #231b0d;
+    --color-amber-100: #2e2410;
+    --color-amber-700: #fcd34d;
+    --color-amber-800: #fde68a;
+
+    --color-purple-50: #1b1426;
+    --color-purple-100: #241a33;
+    --color-purple-200: #3a2a52;
+    --color-purple-700: #d8b4fe;
+    --color-purple-800: #e9d5ff;
+
+    --color-orange-50: #24170d;
+    --color-orange-100: #2f1d10;
+    --color-orange-200: #4a2d17;
+    --color-orange-700: #fdba74;
+
+    --color-yellow-100: #2b250d;
+    --color-yellow-700: #fde047;
+
+    --color-indigo-100: #1a1d3a;
+    --color-indigo-600: #a5b4fc;
+  }
+}
+
+/* Bare `border` utilities default to currentColor in Tailwind v4, which turns into a bright
+   outline on dark backgrounds. In the base layer, so explicit border-* colours still win. */
+@layer base {
+  .dark .legacy-dark *,
+  .dark .legacy-dark ::before,
+  .dark .legacy-dark ::after {
+    border-color: var(--jh-border-strong);
+  }
+}
+
+/* White surfaces become the dark card colour; white gradient stops follow. Unlayered on
+   purpose so these beat the bg-white* utilities, and scoped so nothing else is affected. */
+.dark .legacy-dark [class*='bg-white'] {
+  background-color: rgb(14 16 21 / 0.72);
+}
+
+.dark .legacy-dark [class*='to-white'] {
+  --tw-gradient-to: var(--jh-card);
+}
+
+.dark .legacy-dark [class*='via-white'] {
+  --tw-gradient-via: var(--jh-card);
+}
+
+.dark .legacy-dark [class*='ring-black'] {
+  --tw-ring-color: rgb(255 255 255 / 0.06);
+}
+
+/* ------------------------------------------------------------------------------------------
+   Article typography — the only place blog-post body styles are defined (MDXContent renders
+   one `.article-body` container). ~18px / 1.75, 720px column, both themes via tokens.
+   ------------------------------------------------------------------------------------------ */
+@layer components {
+  .article-body {
+    max-width: 720px;
+    min-width: 0;
+    font-size: 18px;
+    line-height: 1.75;
+    color: var(--jh-body);
+    overflow-wrap: break-word;
+  }
+
+  .article-body > :first-child {
+    margin-top: 0;
+  }
+
+  .article-body p {
+    margin: 0 0 22px;
+  }
+
+  .article-body h1,
+  .article-body h2,
+  .article-body h3,
+  .article-body h4 {
+    color: var(--jh-heading);
+    font-weight: 600;
+    scroll-margin-top: 104px;
+  }
+
+  .article-body h1 {
+    margin: 56px 0 18px;
+    font-size: 32px;
+    line-height: 1.2;
+    letter-spacing: -0.025em;
+  }
+
+  .article-body h2 {
+    margin: 52px 0 16px;
+    font-size: 28px;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+  }
+
+  .article-body h3 {
+    margin: 36px 0 12px;
+    font-size: 22px;
+    line-height: 1.3;
+    letter-spacing: -0.015em;
+  }
+
+  .article-body h4 {
+    margin: 28px 0 10px;
+    font-size: 18px;
+    line-height: 1.4;
+  }
+
+  @media (max-width: 640px) {
+    .article-body h1 {
+      font-size: 28px;
+    }
+
+    .article-body h2 {
+      font-size: 24px;
+    }
+
+    .article-body h3 {
+      font-size: 20px;
+    }
+
+    .article-body .code-block pre {
+      padding: 14px;
+      font-size: 13px;
+    }
+  }
+
+  .article-body a {
+    color: var(--jh-link);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+  }
+
+  .article-body a:hover {
+    color: var(--jh-link-hover);
+  }
+
+  .article-body strong {
+    color: var(--jh-heading);
+    font-weight: 600;
+  }
+
+  .article-body ul,
+  .article-body ol {
+    margin: 0 0 22px;
+    padding-left: 1.5em;
+  }
+
+  .article-body ul {
+    list-style: disc;
+  }
+
+  .article-body ol {
+    list-style: decimal;
+  }
+
+  .article-body li {
+    margin: 6px 0;
+    padding-left: 0.25em;
+  }
+
+  .article-body li::marker {
+    color: var(--jh-faint);
+  }
+
+  .article-body li > p {
+    margin: 0 0 8px;
+  }
+
+  .article-body li > ul,
+  .article-body li > ol {
+    margin: 6px 0 0;
+  }
+
+  .article-body blockquote {
+    margin: 0 0 22px;
+    padding: 18px 20px;
+    border: 1px solid rgb(56 189 248 / 0.35);
+    border-radius: 12px;
+    background: rgb(56 189 248 / 0.07);
+    color: var(--jh-callout-text);
+    font-size: 16px;
+    line-height: 1.6;
+  }
+
+  .article-body blockquote strong {
+    color: var(--jh-link);
+  }
+
+  .article-body blockquote > :last-child {
+    margin-bottom: 0;
+  }
+
+  .article-body :not(pre) > code {
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: var(--jh-chip);
+    color: var(--jh-text);
+    font-family: var(--font-mono);
+    font-size: 0.8em;
+  }
+
+  .article-body img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 0 auto;
+    border: 1px solid var(--jh-border);
+    border-radius: 12px;
+  }
+
+  .article-body p > img {
+    margin: 4px auto;
+  }
+
+  .article-body hr {
+    margin: 44px 0;
+    border: 0;
+    border-top: 1px solid var(--jh-border);
+  }
+
+  .article-body .table-wrap {
+    margin: 0 0 22px;
+    overflow-x: auto;
+    border: 1px solid var(--jh-border);
+    border-radius: 12px;
+    background: var(--jh-subtle);
+  }
+
+  .article-body table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  .article-body th,
+  .article-body td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--jh-border);
+    text-align: left;
+    vertical-align: top;
+  }
+
+  .article-body th {
+    color: var(--jh-heading);
+    font-weight: 600;
+  }
+
+  .article-body tbody tr:last-child td {
+    border-bottom: 0;
+  }
+
+  /* Code blocks: bordered figure, header bar with language + Copy, wrapped lines. */
+  .article-body .code-block {
+    margin: 0 0 22px;
+    overflow: hidden;
+    border: 1px solid var(--jh-border);
+    border-radius: 12px;
+    background: var(--jh-subtle);
+  }
+
+  .article-body .code-block-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 6px 8px 6px 16px;
+    border-bottom: 1px solid var(--jh-border);
+    color: var(--jh-faint);
+    font-size: 13px;
+    line-height: 1.4;
+  }
+
+  .article-body .code-block-lang {
+    font-family: var(--font-mono);
+  }
+
+  .article-body .code-block-copy {
+    min-height: 32px;
+    padding: 6px 12px;
+    border: 1px solid var(--jh-border-strong);
+    border-radius: 8px;
+    background: var(--jh-chip);
+    color: var(--jh-body);
+    font: inherit;
+    cursor: pointer;
+  }
+
+  .article-body .code-block-copy:hover {
+    color: var(--jh-text);
+  }
+
+  .article-body .code-block-copy:focus-visible {
+    outline: 2px solid var(--jh-brand-a);
+    outline-offset: 2px;
+  }
+
+  .article-body .code-block pre {
+    margin: 0;
+    padding: 18px;
+    overflow-x: auto;
+    background: transparent;
+    color: var(--jh-text);
+    font-family: var(--font-mono);
+    font-size: 14px;
+    line-height: 1.8;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .article-body .code-block pre code {
+    padding: 0;
+    background: transparent;
+    font: inherit;
+  }
+}
+
+/* Syntax colours for rehype-highlight (highlight.js class names), both themes. */
+.article-body .hljs-comment,
+.article-body .hljs-quote {
+  color: var(--jh-fainter);
+  font-style: italic;
+}
+
+.article-body .hljs-keyword,
+.article-body .hljs-selector-tag,
+.article-body .hljs-meta .hljs-keyword {
+  color: #0369a1;
+}
+
+.article-body .hljs-string,
+.article-body .hljs-regexp,
+.article-body .hljs-addition {
+  color: #047857;
+}
+
+.article-body .hljs-number,
+.article-body .hljs-literal,
+.article-body .hljs-symbol {
+  color: #b45309;
+}
+
+.article-body .hljs-title,
+.article-body .hljs-section {
+  color: #6d28d9;
+}
+
+.article-body .hljs-built_in,
+.article-body .hljs-type,
+.article-body .hljs-class .hljs-title {
+  color: #0e7490;
+}
+
+.article-body .hljs-attr,
+.article-body .hljs-attribute,
+.article-body .hljs-property,
+.article-body .hljs-variable,
+.article-body .hljs-template-variable {
+  color: #1d4ed8;
+}
+
+.article-body .hljs-meta,
+.article-body .hljs-punctuation {
+  color: var(--jh-muted);
+}
+
+.article-body .hljs-deletion {
+  color: #b91c1c;
+}
+
+.dark .article-body .hljs-keyword,
+.dark .article-body .hljs-selector-tag,
+.dark .article-body .hljs-meta .hljs-keyword {
+  color: #7dd3fc;
+}
+
+.dark .article-body .hljs-string,
+.dark .article-body .hljs-regexp,
+.dark .article-body .hljs-addition {
+  color: #6ee7b7;
+}
+
+.dark .article-body .hljs-number,
+.dark .article-body .hljs-literal,
+.dark .article-body .hljs-symbol {
+  color: #fcd34d;
+}
+
+.dark .article-body .hljs-title,
+.dark .article-body .hljs-section {
+  color: #c4b5fd;
+}
+
+.dark .article-body .hljs-built_in,
+.dark .article-body .hljs-type,
+.dark .article-body .hljs-class .hljs-title {
+  color: #67e8f9;
+}
+
+.dark .article-body .hljs-attr,
+.dark .article-body .hljs-attribute,
+.dark .article-body .hljs-property,
+.dark .article-body .hljs-variable,
+.dark .article-body .hljs-template-variable {
+  color: #93c5fd;
+}
+
+.dark .article-body .hljs-deletion {
+  color: #fca5a5;
 }
