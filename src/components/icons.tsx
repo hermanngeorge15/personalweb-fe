@@ -228,3 +228,42 @@ export function SpinnerIcon(props: IconProps) {
     </StrokeIcon>
   )
 }
+
+export function LayersIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props}>
+      <path d="M12 3l9 5-9 5-9-5 9-5z" />
+      <path d="M3 13l9 5 9-5" />
+    </StrokeIcon>
+  )
+}
+
+export function LayoutIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props}>
+      <rect x="3" y="4" width="18" height="16" rx="2" />
+      <path d="M3 9h18M9 9v11" />
+    </StrokeIcon>
+  )
+}
+
+export function ComponentsIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props}>
+      <rect x="3" y="3" width="7" height="7" rx="1.5" />
+      <rect x="14" y="3" width="7" height="7" rx="1.5" />
+      <rect x="3" y="14" width="7" height="7" rx="1.5" />
+      <circle cx="17.5" cy="17.5" r="3.5" />
+    </StrokeIcon>
+  )
+}
+
+/** Solid quotation mark (fill, no stroke) for testimonial cards. */
+
+export function QuoteIcon(props: IconProps) {
+  return (
+    <StrokeIcon fill="currentColor" stroke="none" {...props}>
+      <path d="M7 7h4v4c0 3-1.5 5-4 6l-1-1.5c1.5-.8 2.3-2 2.4-3.5H7V7zm8 0h4v4c0 3-1.5 5-4 6l-1-1.5c1.5-.8 2.3-2 2.4-3.5H15V7z" />
+    </StrokeIcon>
+  )
+}
