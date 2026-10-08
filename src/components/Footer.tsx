@@ -20,8 +20,8 @@ export default function Footer() {
   return (
     <footer className="relative mt-20 overflow-hidden border-t bg-gradient-to-br from-white/60 via-blue-50/30 to-cyan-50/20 backdrop-blur">
       {/* Decorative gradient blobs */}
-      <div className="pointer-events-none absolute -left-32 -top-32 h-64 w-64 rounded-full bg-gradient-to-br from-blue-400/10 via-cyan-400/5 to-teal-400/5 blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-32 -right-32 h-64 w-64 rounded-full bg-gradient-to-tr from-green-400/10 via-emerald-400/5 to-teal-400/5 blur-3xl" />
+      <div className="pointer-events-none absolute -top-32 -left-32 h-64 w-64 rounded-full bg-gradient-to-br from-blue-400/10 via-cyan-400/5 to-teal-400/5 blur-3xl" />
+      <div className="pointer-events-none absolute -right-32 -bottom-32 h-64 w-64 rounded-full bg-gradient-to-tr from-green-400/10 via-emerald-400/5 to-teal-400/5 blur-3xl" />
 
       <LayoutWidth>
         <div className="relative py-12 md:py-16">
@@ -36,10 +36,10 @@ export default function Footer() {
                   Jiri Hermann
                 </span>
               </Link>
-              <p className="mt-4 max-w-md text-sm leading-relaxed text-muted-foreground">
-                Backend Software Engineer specializing in Kotlin, Java, Spring Boot, and
-                scalable systems. Founder of Kotlin Server Squad community. Building clean,
-                reliable backend solutions.
+              <p className="text-muted-foreground mt-4 max-w-md text-sm leading-relaxed">
+                Backend Software Engineer specializing in Kotlin, Java, Spring
+                Boot, and scalable systems. Founder of Kotlin Server Squad
+                community. Building clean, reliable backend solutions.
               </p>
               <div className="mt-6 flex items-center gap-3">
                 <a
@@ -127,17 +127,17 @@ export default function Footer() {
 
             {/* Quick Links */}
             <div>
-              <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-900">
+              <h3 className="text-sm font-semibold tracking-wider text-gray-900 uppercase">
                 Navigation
               </h3>
               <ul className="mt-4 space-y-3 text-sm">
                 <li>
-                  <a
-                    href="/#about-me"
+                  <Link
+                    to="/about"
                     className="text-muted-foreground transition-colors hover:text-blue-600"
                   >
                     About
-                  </a>
+                  </Link>
                 </li>
                 <li>
                   <Link
@@ -160,7 +160,7 @@ export default function Footer() {
 
             {/* Contact Links */}
             <div>
-              <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-900">
+              <h3 className="text-sm font-semibold tracking-wider text-gray-900 uppercase">
                 Get in Touch
               </h3>
               <ul className="mt-4 space-y-3 text-sm">
