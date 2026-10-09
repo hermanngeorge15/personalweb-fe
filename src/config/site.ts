@@ -9,9 +9,9 @@ export const AUTHOR = {
   name: 'Jiří Hermann',
   initials: 'JH',
   footerBio:
-    'Backend engineer (Kotlin, Java, Spring Boot). Founder of Kotlin Server Squad. Building UnityInFlow — open-source tooling for AI agents.',
+    'Software engineer (Kotlin, Java, Spring Boot) working with agentic AI workflows. Founder of Kotlin Server Squad. Building UnityInFlow — open-source tooling for AI agents.',
   postBio:
-    'Backend engineer, founder of Kotlin Server Squad. Building open-source security tooling for AI agents.',
+    'Software engineer, founder of Kotlin Server Squad. Building open-source security tooling for AI agents.',
 } as const
 
 export const SOCIAL_LINKS = {
